@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ssb_hello_ssb_hello,ssb_hello.ssb_hello,model_ssb_hello_ssb_hello,base.group_user,1,1,1,1
