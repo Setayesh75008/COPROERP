@@ -197,6 +197,11 @@ class TestAppelEdition(TransactionCase):
         self.assertIn("BUDGET COURANT", html)
         self.assertIn("FONDS OBLIGATOIRE TRAVAUX", html)
         self.assertIn("1er trimestre 2026", html)
+        # Lots présentés en simple texte : numéro, désignation, étage
+        self.assertIn("Lot 1", html)
+        self.assertIn("Appartement 1", html)
+        self.assertIn("Étage 2", html)
+        self.assertNotIn("Tantièmes généraux", html)
 
     def test_publication_extranet(self):
         self.budget.action_generer_appel_budget_suivant()

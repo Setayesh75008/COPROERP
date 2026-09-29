@@ -48,25 +48,23 @@
                     </div>
                 </div>
 
-                <!-- Lots concernés -->
-                <table class="table table-sm mt-3 mb-2" style="font-size: 9pt;">
-                    <thead>
-                        <tr>
-                            <th>N° lot</th><th>Bât.</th><th>Esc.</th><th>Étage</th>
-                            <th>Désignation</th><th class="text-end">Tantièmes généraux</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr t-foreach="avis['lots']" t-as="lot">
-                            <td t-out="lot.numero"/>
-                            <td t-out="lot.batiment_id.name"/>
-                            <td t-out="lot.escalier"/>
-                            <td t-out="lot.etage"/>
-                            <td t-out="lot.designation"/>
-                            <td class="text-end" t-out="lot.tantiemes"/>
-                        </tr>
-                    </tbody>
-                </table>
+                <!-- Lots concernés : simple information, sans cases ni traits
+                     (présentation des avis habituels). -->
+                <div class="mt-3 mb-2" style="font-size: 9pt;">
+                    <t t-foreach="avis['lots']" t-as="lot">
+                        <t t-set="details" t-value="[
+                            lot.batiment_id.name and ('Bât. ' + lot.batiment_id.name) or '',
+                            lot.escalier and ('Esc. ' + lot.escalier) or '',
+                            lot.etage and ('Étage ' + lot.etage) or '',
+                        ]"/>
+                        <div>
+                            <b>Lot <t t-out="lot.numero or ''"/></b>
+                            <t t-if="lot.designation"> — <t t-out="lot.designation"/></t>
+                            <t t-set="suite" t-value="', '.join([d for d in details if d])"/>
+                            <span t-if="suite" class="text-muted"> (<t t-out="suite"/>)</span>
+                        </div>
+                    </t>
+                </div>
 
                 <div class="mb-1"><b>Échéance du <t t-out="avis['date_echeance'].strftime('%d/%m/%Y')"/></b></div>
 
@@ -93,15 +91,15 @@
                                     </td>
                                 </tr>
                                 <tr t-foreach="groupe.poste_ids" t-as="poste">
-                                    <td class="ps-3" t-out="poste.designation"/>
-                                    <td class="text-end" t-out="poste.total_a_repartir" t-options="montant"/>
-                                    <td class="text-end" t-out="poste.nombre_total_parts"/>
-                                    <td class="text-end" t-out="poste.nombre_parts_lot"/>
-                                    <td class="text-end" t-out="poste.montant_appel" t-options="montant"/>
+                                    <td class="ps-3"><t t-out="poste.designation or ''"/></td>
+                                    <td class="text-end"><t t-out="poste.total_a_repartir" t-options="montant"/></td>
+                                    <td class="text-end"><t t-out="poste.nombre_total_parts"/></td>
+                                    <td class="text-end"><t t-out="poste.nombre_parts_lot"/></td>
+                                    <td class="text-end"><t t-out="poste.montant_appel" t-options="montant"/></td>
                                 </tr>
                                 <tr t-if="len(appel.groupe_ids) &gt; 1">
                                     <td colspan="4" class="text-end fst-italic">Total lot <t t-out="groupe.lot_numero"/></td>
-                                    <td class="text-end" t-out="groupe.total_groupe" t-options="montant"/>
+                                    <td class="text-end"><t t-out="groupe.total_groupe" t-options="montant"/></td>
                                 </tr>
                             </t>
                             <tr>
