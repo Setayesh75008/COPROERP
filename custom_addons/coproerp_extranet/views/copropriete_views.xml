@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_copropriete_form_extranet" model="ir.ui.view">
+        <field name="name">coproerp.copropriete.form.extranet</field>
+        <field name="model">coproerp.copropriete</field>
+        <field name="inherit_id" ref="coproerp_copropriete.view_copropriete_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+
+                <page string="Conseil syndical" name="conseil_syndical">
+                    <field name="mandat_cs_ids" context="{'default_copropriete_id': id, 'active_test': False}">
+                        <list editable="bottom" decoration-muted="not en_cours">
+                            <field name="personne_id"/>
+                            <field name="fonction"/>
+                            <field name="date_ag_designation" optional="show"/>
+                            <field name="date_debut"/>
+                            <field name="date_fin"/>
+                            <field name="en_cours" widget="boolean"/>
+                            <field name="active" column_invisible="True"/>
+                        </list>
+                    </field>
+                    <div class="text-muted">
+                        Les membres dont le mandat est en cours accèdent, sur l'extranet,
+                        aux comptes de tous les copropriétaires de l'immeuble et aux
+                        documents réservés au conseil syndical.
+                    </div>
+                </page>
+
+                <page string="Extranet" name="extranet">
+                    <group>
+                        <group string="Accès">
+                            <field name="extranet_actif"/>
+                            <field name="extranet_email_contact" widget="email"/>
+                            <field name="extranet_depenses_visibilite"/>
+                        </group>
+                        <group string="Votre équipe">
+                            <field name="gestionnaire_id"/>
+                            <field name="comptable_id"/>
+                            <field name="assistant_id"/>
+                        </group>
+                    </group>
+                    <group string="Règlement par virement (compte bancaire séparé)">
+                        <group>
+                            <field name="banque_titulaire"/>
+                            <field name="banque_nom"/>
+                        </group>
+                        <group>
+                            <field name="banque_iban"/>
+                            <field name="banque_bic"/>
+                        </group>
+                    </group>
+                    <separator string="Message d'accueil affiché sur le tableau de bord"/>
+                    <field name="extranet_message" nolabel="1"/>
+                </page>
+
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

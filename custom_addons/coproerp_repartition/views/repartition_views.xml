@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- ===================== -->
+    <!-- Liste des clés        -->
+    <!-- ===================== -->
+
+    <record id="view_repartition_tree"
+            model="ir.ui.view">
+
+        <field name="name">coproerp.repartition.list</field>
+        <field name="model">coproerp.repartition</field>
+
+        <field name="arch" type="xml">
+
+            <list>
+
+                <field name="reference"/>
+
+                <field name="name"/>
+
+                <field name="type_repartition"
+                       string="Type de répartition"/>
+
+                <field name="copropriete_id"/>
+
+                <field name="total_tantiemes"
+                       string="Total théorique"/>
+
+                <field name="total_attribue"
+                       string="Tantièmes attribués"/>
+
+                <field name="ecart_tantiemes"
+                       string="Écart"/>
+
+                <field name="etat_repartition"
+                       string="État"/>
+
+                <field name="active"/>
+
+            </list>
+
+        </field>
+
+    </record>
+
+
+    <!-- ===================== -->
+    <!-- Formulaire clé        -->
+    <!-- ===================== -->
+
+    <record id="view_repartition_form"
+            model="ir.ui.view">
+
+        <field name="name">coproerp.repartition.form</field>
+        <field name="model">coproerp.repartition</field>
+
+        <field name="arch" type="xml">
+
+            <form>
+
+                <sheet>
+
+                    <!-- ===================== -->
+                    <!-- Informations générales -->
+                    <!-- ===================== -->
+
+                    <group string="Informations générales">
+
+                        <group>
+
+                            <field name="name"/>
+
+                            <field name="reference"
+                                   readonly="1"/>
+
+                            <field name="type_repartition"/>
+
+                            <field name="copropriete_id"/>
+
+                        </group>
+
+
+                        <group>
+
+                            <field name="total_tantiemes"/>
+
+                            <field name="active"/>
+
+                            <field name="total_attribue"
+                                   readonly="1"/>
+
+                            <field name="ecart_tantiemes"
+                                   readonly="1"/>
+
+                            <field name="etat_repartition"
+                                   readonly="1"/>
+
+                        </group>
+
+                    </group>
+
+
+                    <!-- ===================== -->
+                    <!-- Répartition par lot   -->
+                    <!-- ===================== -->
+
+                    <notebook>
+
+                        <page string="Répartition des tantièmes par lot">
+
+                            <field name="line_ids">
+
+                                <list editable="bottom">
+
+                                    <field name="lot_id"
+                                           string="Lot"
+                                           required="1"/>
+
+                                    <field name="lot_numero"
+                                           string="N° de lot"
+                                           readonly="1"/>
+
+                                    <field name="lot_designation"
+                                           string="Désignation"
+                                           readonly="1"/>
+
+                                    <field name="tantiemes"
+                                           string="Tantièmes"
+                                           required="1"/>
+
+                                    <field name="pourcentage"
+                                           string="Quote-part (%)"
+                                           readonly="1"/>
+
+                                </list>
+
+                            </field>
+
+                        </page>
+
+
+                        <!-- ===================== -->
+                        <!-- Observations           -->
+                        <!-- ===================== -->
+
+                        <page string="Observations">
+
+                            <field name="note"
+                                   placeholder="Observations concernant cette clé de répartition..."/>
+
+                        </page>
+
+                    </notebook>
+
+                </sheet>
+
+            </form>
+
+        </field>
+
+    </record>
+
+
+    <!-- ===================== -->
+    <!-- Action                -->
+    <!-- ===================== -->
+
+    <record id="action_repartitions"
+            model="ir.actions.act_window">
+
+        <field name="name">Clés de répartition</field>
+
+        <field name="res_model">coproerp.repartition</field>
+
+        <field name="view_mode">list,form</field>
+
+    </record>
+
+
+</odoo>

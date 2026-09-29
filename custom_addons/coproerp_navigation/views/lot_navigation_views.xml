@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_lot_form_navigation"
+            model="ir.ui.view">
+
+        <field name="name">coproerp.lot.form.navigation</field>
+        <field name="model">coproerp.lot</field>
+
+        <field name="inherit_id"
+               ref="coproerp_lot.view_lot_form"/>
+
+        <field name="arch" type="xml">
+
+            <xpath expr="//notebook" position="inside">
+
+                <page string="Navigation">
+
+                    <!-- ============================== -->
+                    <!-- Emplacement du lot             -->
+                    <!-- ============================== -->
+
+                    <group string="Emplacement">
+
+                        <field name="copropriete_id"
+                               readonly="1"/>
+
+                        <field name="batiment_id"
+                               readonly="1"/>
+
+                    </group>
+
+
+                    <!-- ============================== -->
+                    <!-- Répartitions des tantièmes     -->
+                    <!-- ============================== -->
+
+                    <group string="Répartitions des tantièmes">
+
+                        <field name="repartition_line_ids"
+                               readonly="1">
+
+                            <list>
+
+                                <field name="repartition_id"
+                                       string="Clé de répartition"/>
+
+                                <field name="lot_numero"
+                                       string="N° de lot"/>
+
+                                <field name="lot_designation"
+                                       string="Désignation"/>
+
+                                <field name="tantiemes"
+                                       string="Tantièmes"/>
+
+                                <field name="pourcentage"
+                                       string="Quote-part (%)"/>
+
+                            </list>
+
+                        </field>
+
+                    </group>
+
+                </page>
+
+            </xpath>
+
+        </field>
+
+    </record>
+
+</odoo>

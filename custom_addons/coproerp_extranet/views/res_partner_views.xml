@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_partner_form_extranet" model="ir.ui.view">
+        <field name="name">res.partner.form.coproerp.extranet</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Extranet" name="coproerp_extranet">
+                    <div class="mb-3">
+                        <button name="%(portal.partner_wizard_action_create_and_open)d" type="action"
+                                string="Donner / retirer l'accès à l'extranet" class="btn-secondary"
+                                icon="fa-key"/>
+                        <div class="text-muted mt-1">
+                            L'accès n'est effectif que si la personne a une fiche Droit en cours
+                            (propriétaire, usufruitier, nu-propriétaire ou indivisaire)
+                            ou un mandat de conseiller syndical en cours.
+                        </div>
+                    </div>
+                    <group>
+                        <field name="extranet_notif_documents"/>
+                    </group>
+                    <separator string="Mandats au conseil syndical"/>
+                    <field name="mandat_cs_ids" context="{'default_personne_id': id, 'active_test': False}">
+                        <list editable="bottom" decoration-muted="not en_cours">
+                            <field name="copropriete_id"/>
+                            <field name="fonction"/>
+                            <field name="date_debut"/>
+                            <field name="date_fin"/>
+                            <field name="en_cours"/>
+                        </list>
+                    </field>
+                    <separator string="Accords de dématérialisation (journal)"/>
+                    <field name="demat_consentement_ids" readonly="1">
+                        <list>
+                            <field name="date"/>
+                            <field name="type_envoi"/>
+                            <field name="accord" widget="boolean"/>
+                            <field name="origine"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <menuitem
+        id="menu_repartitions"
+        name="Clés de répartition"
+        parent="coproerp_copropriete.menu_coproerp_root"
+        action="action_repartitions"
+        sequence="50"/>
+
+</odoo>

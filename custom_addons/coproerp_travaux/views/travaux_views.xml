@@ -1,0 +1,135 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+
+    <!-- Liste des travaux -->
+    <record id="view_coproerp_travaux_list" model="ir.ui.view">
+        <field name="name">coproerp.travaux.list</field>
+        <field name="model">coproerp.travaux</field>
+        <field name="arch" type="xml">
+            <list string="Travaux">
+                <field name="reference"/>
+                <field name="name"/>
+                <field name="copropriete_id"/>
+                <field name="date_vote"/>
+                <field name="montant_vote"/>
+                <field name="etat"/>
+            </list>
+        </field>
+    </record>
+
+
+    <!-- Formulaire des travaux -->
+    <record id="view_coproerp_travaux_form" model="ir.ui.view">
+        <field name="name">coproerp.travaux.form</field>
+        <field name="model">coproerp.travaux</field>
+        <field name="arch" type="xml">
+
+            <form string="Travaux">
+
+                <sheet>
+
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+
+                    <group>
+
+                        <group>
+                            <field name="reference" readonly="1"/>
+                            <field name="copropriete_id"/>
+                            <field name="date_vote"/>
+                            <field name="resolution_ag"/>
+                        </group>
+
+                        <group>
+                            <field name="montant_vote"/>
+                            <field name="etat"/>
+                            <field name="date_debut_prevue"/>
+                            <field name="date_fin_prevue"/>
+                        </group>
+
+                    </group>
+
+
+                    <notebook>
+
+                        <!-- Description -->
+                        <page string="Description">
+
+                            <field name="description"
+                                   placeholder="Description des travaux..."/>
+
+                        </page>
+
+
+                        <!-- Financement -->
+                        <page string="Financement">
+
+                            <field name="financement_ids">
+                                   
+                                <list editable="bottom">
+
+                                    <field name="type_financement"/>
+                                    <field name="name"/>
+                                    <field name="montant_prevu"/>
+                                    <field name="nombre_appels"/>
+                                    <field name="montant_par_appel"
+                                           readonly="1"/>
+                                    <field name="repartition_id"/>
+
+                                </list>
+
+                            </field>
+
+                        </page>
+
+
+                        <!-- Planning -->
+                        <page string="Planning">
+
+                            <group>
+
+                                <group>
+                                    <field name="date_debut_prevue"/>
+                                    <field name="date_fin_prevue"/>
+                                </group>
+
+                            </group>
+
+                        </page>
+
+
+                        <!-- Observations -->
+                        <page string="Observations">
+
+                            <field name="note"
+                                   placeholder="Observations..."/>
+
+                        </page>
+
+                    </notebook>
+
+                </sheet>
+
+            </form>
+
+        </field>
+    </record>
+
+
+    <!-- Action -->
+    <record id="action_coproerp_travaux" model="ir.actions.act_window">
+        <field name="name">Travaux</field>
+        <field name="res_model">coproerp.travaux</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créez votre premier projet de travaux.
+            </p>
+        </field>
+    </record>
+
+</odoo>

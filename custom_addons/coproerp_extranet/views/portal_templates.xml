@@ -1,0 +1,642 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- ================================================================== -->
+    <!-- Mise en page commune : menu latéral + contenu                      -->
+    <!-- ================================================================== -->
+    <template id="extranet_layout" name="Extranet copropriétaires : mise en page">
+        <t t-call="portal.portal_layout">
+            <t t-set="no_breadcrumbs" t-value="True"/>
+            <div class="o_coproerp_extranet row g-0">
+
+                <!-- Menu latéral -->
+                <aside class="col-12 col-lg-3 o_ext_sidebar">
+                    <div class="o_ext_identite">
+                        <div class="o_ext_nom" t-out="partner.name"/>
+                        <t t-if="copro">
+                            <div class="o_ext_immeuble">
+                                <t t-out="copro.name"/>
+                            </div>
+                            <div class="o_ext_adresse">
+                                <t t-out="copro_sudo.street"/>
+                                <t t-if="copro_sudo.zip or copro_sudo.city">
+                                    <br/><t t-out="copro_sudo.zip"/> <t t-out="copro_sudo.city"/>
+                                </t>
+                            </div>
+                            <div class="o_ext_qualite" t-if="qualites">
+                                (<t t-out="', '.join(qualites)"/>)
+                            </div>
+                        </t>
+                    </div>
+
+                    <div t-if="len(coproprietes) &gt; 1" class="o_ext_selecteur">
+                        <label class="form-label small mb-1">Immeuble affiché</label>
+                        <t t-foreach="coproprietes" t-as="c">
+                            <a t-attf-href="/extranet/copropriete/#{c.id}?redirect=#{request.httprequest.path}"
+                               t-attf-class="d-block o_ext_copro_choix #{'active' if c == copro else ''}">
+                                <i t-attf-class="fa #{'fa-check-circle' if c == copro else 'fa-building-o'} me-1"/>
+                                <t t-out="c.name"/>
+                            </a>
+                        </t>
+                    </div>
+
+                    <nav class="o_ext_menu">
+                        <a href="/extranet" t-attf-class="#{'active' if ext_page == 'tableau' else ''}">
+                            <i class="fa fa-home fa-fw"/> Tableau de bord</a>
+                        <a href="/extranet/lots" t-attf-class="#{'active' if ext_page == 'lots' else ''}">
+                            <i class="fa fa-key fa-fw"/> Mes lots</a>
+
+                        <div class="o_ext_menu_titre"><i class="fa fa-bar-chart fa-fw"/> Situation comptable</div>
+                        <a href="/extranet/situation" t-attf-class="o_ext_sous #{'active' if ext_page == 'situation' else ''}">
+                            Ma situation</a>
+                        <a t-if="est_cs" href="/extranet/situation/coproprietaires"
+                           t-attf-class="o_ext_sous #{'active' if ext_page == 'coproprietaires' else ''}">
+                            Copropriétaires <span class="badge o_ext_badge_cs">CS</span></a>
+                        <a t-if="depenses_visibles" href="/extranet/situation/depenses"
+                           t-attf-class="o_ext_sous #{'active' if ext_page == 'depenses' else ''}">
+                            Dépenses <span t-if="est_cs and copro_sudo.extranet_depenses_visibilite != 'tous'" class="badge o_ext_badge_cs">CS</span></a>
+
+                        <a href="/extranet/documents" t-attf-class="#{'active' if ext_page == 'documents' else ''}">
+                            <i class="fa fa-folder-open fa-fw"/> Documents
+                            <span t-if="nb_docs_non_lus" class="badge rounded-pill text-bg-danger ms-1" t-out="nb_docs_non_lus"/></a>
+                        <a href="/extranet/dematerialisation" t-attf-class="#{'active' if ext_page == 'demat' else ''}">
+                            <i class="fa fa-envelope-o fa-fw"/> Dématérialisation</a>
+                        <a href="/extranet/actualites" t-attf-class="#{'active' if ext_page == 'actualites' else ''}">
+                            <i class="fa fa-newspaper-o fa-fw"/> Actualités</a>
+                        <a href="/extranet/reglement" t-attf-class="#{'active' if ext_page == 'reglement' else ''}">
+                            <i class="fa fa-credit-card fa-fw"/> Modes de règlement</a>
+                        <a href="/extranet/compte" t-attf-class="#{'active' if ext_page == 'compte' else ''}">
+                            <i class="fa fa-cog fa-fw"/> Mon compte</a>
+                        <a href="/web/session/logout?redirect=/web/login">
+                            <i class="fa fa-sign-out fa-fw"/> Déconnexion</a>
+                    </nav>
+                </aside>
+
+                <!-- Contenu -->
+                <main class="col-12 col-lg-9 o_ext_contenu">
+                    <t t-if="message">
+                        <div t-attf-class="alert alert-#{message[0]}" role="alert" t-out="message[1]"/>
+                    </t>
+                    <t t-out="0"/>
+                </main>
+            </div>
+        </t>
+    </template>
+
+    <!-- ================================================================== -->
+    <!-- Aucun accès                                                         -->
+    <!-- ================================================================== -->
+    <template id="page_sans_acces" name="Extranet : aucun accès">
+        <t t-call="portal.portal_layout">
+            <t t-set="no_breadcrumbs" t-value="True"/>
+            <div class="o_coproerp_extranet p-4">
+                <h2>Espace copropriétaire</h2>
+                <div class="alert alert-warning mt-3">
+                    Aucun immeuble n'est rattaché à votre compte pour le moment.
+                    Si vous êtes propriétaire, usufruitier ou nu-propriétaire d'un lot,
+                    contactez votre syndic afin qu'il vérifie votre dossier.
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- ================================================================== -->
+    <!-- Tableau de bord                                                     -->
+    <!-- ================================================================== -->
+    <template id="page_tableau_de_bord" name="Extranet : tableau de bord">
+        <t t-call="coproerp_extranet.extranet_layout">
+            <h2 class="o_ext_titre">Tableau de bord</h2>
+
+            <div t-if="nb_docs_non_lus" class="o_ext_carte o_ext_alerte d-flex align-items-center justify-content-between">
+                <span>
+                    <i class="fa fa-bell me-2"/>
+                    <t t-if="nb_docs_non_lus == 1">Un nouveau document est à votre disposition.</t>
+                    <t t-else=""><t t-out="nb_docs_non_lus"/> nouveaux documents sont à votre disposition.</t>
+                </span>
+                <a href="/extranet/documents" class="btn btn-primary btn-sm">Consulter</a>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <a href="/extranet/situation" class="o_ext_solde d-block text-decoration-none">
+                        <div class="o_ext_solde_label">
+                            Votre solde au <t t-out="fmt_date(today)"/>
+                        </div>
+                        <div class="o_ext_solde_montant" t-out="fmt_eur(abs(solde))"/>
+                        <div class="o_ext_solde_sens">
+                            <t t-if="solde &gt; 0.005">à régler</t>
+                            <t t-elif="solde &lt; -0.005">en votre faveur</t>
+                            <t t-else="">à jour</t>
+                        </div>
+                        <div class="o_ext_solde_lien">Voir le détail de votre compte <i class="fa fa-arrow-circle-right"/></div>
+                    </a>
+                    <div t-if="prochain_appel" class="o_ext_carte mt-3">
+                        <div class="text-muted small">Prochaine échéance</div>
+                        <div>
+                            <b t-out="fmt_eur(prochain_appel.total_appel)"/>
+                            le <t t-out="fmt_date(prochain_appel.date_echeance)"/>
+                            (<a t-attf-href="/extranet/appels/#{prochain_appel.id}" t-out="prochain_appel.reference"/>)
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="o_ext_carte h-100">
+                        <t t-if="copro_sudo.extranet_message">
+                            <div t-out="copro_sudo.extranet_message"/>
+                        </t>
+                        <t t-else="">
+                            <p>Bienvenue sur votre espace copropriétaire.</p>
+                            <p>Retrouvez ici votre situation comptable, les documents de votre immeuble
+                               et les informations de votre syndic. Pour être prévenu par e-mail de l'ajout
+                               d'un document, vérifiez vos préférences dans « Mon compte ».</p>
+                        </t>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center my-3">
+                <a href="/extranet/reglement" class="btn btn-outline-primary">Modes de règlement</a>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="o_ext_carte h-100">
+                        <h5 class="o_ext_carte_titre">Votre équipe</h5>
+                        <t t-set="equipe" t-value="[('Gestionnaire', copro_sudo.gestionnaire_id), ('Comptable', copro_sudo.comptable_id), ('Assistant(e)', copro_sudo.assistant_id)]"/>
+                        <t t-set="equipe_vide" t-value="True"/>
+                        <t t-foreach="equipe" t-as="membre">
+                            <div t-if="membre[1]" class="o_ext_personne">
+                                <t t-set="equipe_vide" t-value="False"/>
+                                <i class="fa fa-user-circle fa-2x me-2 text-primary"/>
+                                <div>
+                                    <div><b t-out="membre[1].name"/> <span class="text-muted small">— <t t-out="membre[0]"/></span></div>
+                                    <div class="small">
+                                        <a t-if="membre[1].email" t-attf-href="mailto:#{membre[1].email}" t-out="membre[1].email"/>
+                                        <t t-if="membre[1].phone"> · <t t-out="membre[1].phone"/></t>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                        <p t-if="equipe_vide" class="text-muted">Votre équipe de gestion sera bientôt indiquée ici.</p>
+                        <p t-if="copro_sudo.extranet_email_contact" class="small mt-2 mb-0">
+                            Besoin d'aide ? <a t-attf-href="mailto:#{copro_sudo.extranet_email_contact}" t-out="copro_sudo.extranet_email_contact"/>
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="o_ext_carte h-100">
+                        <h5 class="o_ext_carte_titre">Votre immeuble</h5>
+                        <div><b t-out="copro.name"/></div>
+                        <div t-out="copro_sudo.street"/>
+                        <div><t t-out="copro_sudo.zip"/> <t t-out="copro_sudo.city"/></div>
+                        <div t-if="copro_sudo.numero_rnc" class="small text-muted mt-1">Immatriculation : <t t-out="copro_sudo.numero_rnc"/></div>
+                        <div t-if="copro_sudo.date_prochaine_ag" class="mt-2">
+                            <i class="fa fa-calendar me-1"/> Prochaine assemblée générale : <b t-out="fmt_date(copro_sudo.date_prochaine_ag)"/>
+                        </div>
+                        <t t-if="membres_cs">
+                            <h6 class="mt-3 mb-1">Conseil syndical</h6>
+                            <ul class="list-unstyled small mb-0">
+                                <li t-foreach="membres_cs" t-as="m">
+                                    <t t-out="m.personne_id.name"/>
+                                    <span t-if="m.fonction == 'president'" class="text-muted">(président)</span>
+                                    <span t-elif="m.fonction == 'suppleant'" class="text-muted">(suppléant)</span>
+                                </li>
+                            </ul>
+                        </t>
+                    </div>
+                </div>
+            </div>
+
+            <div t-if="actualites" class="o_ext_carte mt-3">
+                <h5 class="o_ext_carte_titre">Actualités</h5>
+                <div t-foreach="actualites" t-as="a" t-attf-class="mb-2 #{'text-danger' if a.importance == 'alerte' else ''}">
+                    <span class="text-muted small" t-out="fmt_date(a.date_publication)"/> —
+                    <a href="/extranet/actualites" t-out="a.name"/>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- ================================================================== -->
+    <!-- Mes lots                                                            -->
+    <!-- ================================================================== -->
+    <template id="page_lots" name="Extranet : mes lots">
+        <t t-call="coproerp_extranet.extranet_layout">
+            <h2 class="o_ext_titre">Mes lots</h2>
+            <p class="text-muted">Lots pour lesquels vous disposez d'un droit ouvrant l'accès à l'extranet.</p>
+            <t t-call="portal.portal_table">
+                <thead>
+                    <tr>
+                        <th>Immeuble</th>
+                        <th>Lot</th>
+                        <th>Désignation</th>
+                        <th>Qualité</th>
+                        <th class="text-end">Quote-part</th>
+                        <th/>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr t-foreach="droits" t-as="d">
+                        <td t-out="d.copropriete_id.name"/>
+                        <td t-out="d.lot_numero"/>
+                        <td t-out="d.lot_designation"/>
+                        <td t-out="label(d, 'type_droit')"/>
+                        <td class="text-end"><t t-out="'%g' % d.quotite"/> %</td>
+                        <td class="text-end">
+                            <span t-if="d.copropriete_id == copro" class="badge text-bg-primary">Immeuble affiché</span>
+                            <a t-else="" t-attf-href="/extranet/copropriete/#{d.copropriete_id.id}?redirect=/extranet"
+                               class="btn btn-sm btn-outline-primary">Afficher</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </t>
+        </t>
+    </template>
+
+    <!-- ================================================================== -->
+    <!-- Situation comptable : un copropriétaire                            -->
+    <!-- ================================================================== -->
+    <template id="page_situation" name="Extranet : situation comptable">
+        <t t-call="coproerp_extranet.extranet_layout">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h2 class="o_ext_titre mb-0">
+                    <t t-if="retour">Situation de <t t-out="personne_nom"/></t>
+                    <t t-else="">Ma situation</t>
+                </h2>
+                <div>
+                    <a t-if="retour" t-att-href="retour" class="btn btn-sm btn-outline-secondary me-1">
+                        <i class="fa fa-arrow-left"/> Retour</a>
+                    <a t-att-href="export_url" class="btn btn-sm btn-outline-success">
+                        <i class="fa fa-file-excel-o"/> Export Excel</a>
+                </div>
+            </div>
+            <div class="o_ext_carte my-3 d-flex flex-wrap gap-4">
+                <div><div class="text-muted small">Total débit</div><b t-out="fmt_eur(total_debit)"/></div>
+                <div><div class="text-muted small">Total crédit</div><b t-out="fmt_eur(total_credit)"/></div>
+                <div>
+                    <div class="text-muted small">Solde au <t t-out="fmt_date(today)"/></div>
+                    <b t-attf-class="#{'text-danger' if solde &gt; 0.005 else 'text-success'}" t-out="fmt_eur(abs(solde))"/>
+                    <span class="small text-muted">
+                        <t t-if="solde &gt; 0.005">débiteur</t>
+                        <t t-elif="solde &lt; -0.005">créditeur</t>
+                    </span>
+                </div>
+            </div>
+            <div t-if="not total_credit" class="small text-muted mb-2">
+                Les règlements seront affichés au crédit dès leur enregistrement par le syndic.
+            </div>
+            <t t-call="portal.portal_table">
+                <thead>
+                    <tr>
+                        <th>Date comptable</th>
+                        <th>Libellé écriture</th>
+                        <th class="text-end">Débit</th>
+                        <th class="text-end">Crédit</th>
+                        <th class="text-end">Solde</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr t-if="not ecritures"><td colspan="5" class="text-muted">Aucune écriture.</td></tr>
+                    <tr t-foreach="ecritures" t-as="e">
+                        <td t-out="fmt_date(e['date'])"/>
+                        <td>
+                            <a t-if="e.get('appel_id')" t-attf-href="/extranet/appels/#{e['appel_id']}" t-out="e['libelle']"/>
+                            <t t-else="" t-out="e['libelle']"/>
+                        </td>
+                        <td class="text-end"><t t-if="e['debit']" t-out="fmt_eur(e['debit'])"/></td>
+                        <td class="text-end"><t t-if="e['credit']" t-out="fmt_eur(e['credit'])"/></td>
+                        <td class="text-end" t-out="fmt_eur(e['solde'])"/>
+                    </tr>
+                </tbody>
+            </t>
+        </t>
+    </template>
+
+    <!-- Détail d'un appel de fonds -->
+    <template id="page_appel_detail" name="Extranet : détail d'un appel de fonds">
+        <t t-call="coproerp_extranet.extranet_layout">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h2 class="o_ext_titre mb-0">Appel de fonds <t t-out="appel.reference"/></h2>
+                <a href="/extranet/situation" class="btn btn-sm btn-outline-secondary"><i class="fa fa-arrow-left"/> Retour</a>
+            </div>
+            <div class="o_ext_carte my-3">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div><span class="text-muted">Copropriétaire :</span> <t t-out="personne_nom"/></div>
+                        <div><span class="text-muted">Type :</span> <t t-out="label(appel, 'type_appel')"/></div>
+                        <div t-if="appel.date_debut_periode"><span class="text-muted">Période :</span>
+                            du <t t-out="fmt_date(appel.date_debut_periode)"/> au <t t-out="fmt_date(appel.date_fin_periode)"/></div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div><span class="text-muted">Date de l'appel :</span> <t t-out="fmt_date(appel.date_appel)"/></div>
+                        <div><span class="text-muted">Échéance :</span> <b t-out="fmt_date(appel.date_echeance)"/></div>
+                        <div><span class="text-muted">Montant :</span> <b t-out="fmt_eur(appel.total_appel)"/></div>
+                    </div>
+                </div>
+            </div>
+            <t t-foreach="appel.groupe_ids" t-as="g">
+                <h5 class="mt-3">Lot <t t-out="g.lot_numero"/> — <t t-out="g.lot_designation"/></h5>
+                <t t-call="portal.portal_table">
+                    <thead>
+                        <tr>
+                            <th>Poste</th>
+                            <th class="text-end">Total à répartir</th>
+                            <th class="text-end">Tantièmes du lot</th>
+                            <th class="text-end">Quote-part</th>
+                            <th class="text-end">Montant</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="g.poste_ids" t-as="p">
+                            <td><t t-out="p.designation"/> <span class="text-muted small">(<t t-out="label(p, 'type_poste')"/>)</span></td>
+                            <td class="text-end" t-out="fmt_eur(p.total_a_repartir)"/>
+                            <td class="text-end"><t t-out="p.nombre_parts_lot"/> / <t t-out="p.nombre_total_parts"/></td>
+                            <td class="text-end"><t t-out="'%.4f' % p.pourcentage"/> %</td>
+                            <td class="text-end" t-out="fmt_eur(p.montant_appel)"/>
+                        </tr>
+                        <tr class="fw-bold">
+                            <td colspan="4">Total du lot</td>
+                            <td class="text-end" t-out="fmt_eur(g.total_groupe)"/>
+                        </tr>
+                    </tbody>
+                </t>
+            </t>
+            <div t-if="documents" class="o_ext_carte mt-3">
+                <h6>Documents</h6>
+                <div t-foreach="documents" t-as="doc">
+                    <a t-attf-href="/extranet/documents/#{doc.id}/telecharger"><i class="fa fa-file-pdf-o me-1"/><t t-out="doc.name"/></a>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- ================================================================== -->
+    <!-- Solde par copropriétaire (conseil syndical)                        -->
+    <!-- ================================================================== -->
+    <template id="page_coproprietaires" name="Extranet : solde par copropriétaire">
+        <t t-call="coproerp_extranet.extranet_layout">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h2 class="o_ext_titre mb-0">Solde par copropriétaire</h2>
+                <a t-att-href="export_url" class="btn btn-sm btn-outline-success"><i class="fa fa-file-excel-o"/> Export Excel</a>
+            </div>
+            <div class="alert alert-info my-3 small">
+                <i class="fa fa-lock me-1"/>
+                Page réservée aux membres du conseil syndical pendant la durée de leur mandat.
+                Ces informations sont confidentielles.
+            </div>
+            <t t-call="portal.portal_table">
+                <thead>
+                    <tr>
+                        <th>N° d'immeuble</th>
+                        <th>N° de copropriétaire</th>
+                        <th>Copropriétaire</th>
+                        <th>Lots</th>
+                        <th class="text-end">Solde</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr t-foreach="lignes" t-as="l">
+                        <td t-out="copro_sudo.reference"/>
+                        <td t-out="l['numero']"/>
+                        <td><a t-attf-href="/extranet/situation/coproprietaire/#{l['id']}" t-out="l['nom']"/></td>
+                        <td t-out="l['lots']"/>
+                        <td t-attf-class="text-end #{'text-danger' if l['solde'] &gt; 0.005 else ''}" t-out="fmt_eur(l['solde'])"/>
+                    </tr>
+                    <tr class="fw-bold">
+                        <td colspan="4">Total</td>
+                        <td class="text-end" t-out="fmt_eur(total_soldes)"/>
+                    </tr>
+                </tbody>
+            </t>
+            <p class="small text-muted mt-2">Solde positif : somme restant due par le copropriétaire.</p>
+        </t>
+    </template>
+
+    <!-- ================================================================== -->
+    <!-- Relevé général des dépenses                                        -->
+    <!-- ================================================================== -->
+    <template id="page_depenses" name="Extranet : dépenses">
+        <t t-call="coproerp_extranet.extranet_layout">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h2 class="o_ext_titre mb-0">Relevé général des dépenses</h2>
+                <a t-if="depenses" t-att-href="export_url" class="btn btn-sm btn-outline-success"><i class="fa fa-file-excel-o"/> Export Excel</a>
+            </div>
+            <div t-if="not depenses" class="alert alert-secondary my-3">
+                Le relevé des dépenses sera disponible dès la mise en place de la comptabilité de l'immeuble.
+            </div>
+            <t t-else="">
+                <t t-call="portal.portal_table">
+                    <thead>
+                        <tr>
+                            <th>Compte</th>
+                            <th>Libellé compte</th>
+                            <th>Date comptable</th>
+                            <th>Libellé écriture</th>
+                            <th class="text-end">Débit</th>
+                            <th class="text-end">Crédit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="depenses" t-as="d">
+                            <td t-out="d['compte']"/>
+                            <td t-out="d['libelle_compte']"/>
+                            <td t-out="fmt_date(d['date'])"/>
+                            <td t-out="d['libelle']"/>
+                            <td class="text-end"><t t-if="d['debit']" t-out="fmt_eur(d['debit'])"/></td>
+                            <td class="text-end"><t t-if="d['credit']" t-out="fmt_eur(d['credit'])"/></td>
+                        </tr>
+                    </tbody>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- ================================================================== -->
+    <!-- Documents                                                           -->
+    <!-- ================================================================== -->
+    <template id="page_documents" name="Extranet : documents">
+        <t t-call="coproerp_extranet.extranet_layout">
+            <h2 class="o_ext_titre">Documents</h2>
+            <div class="o_ext_immeuble_entete"><i class="fa fa-building me-2"/><t t-out="copro.name"/></div>
+            <p t-if="not par_categorie" class="text-muted mt-3">Aucun document n'est disponible pour le moment.</p>
+            <t t-foreach="par_categorie.items()" t-as="item">
+                <t t-set="categorie" t-value="item[0]"/>
+                <t t-set="docs" t-value="item[1]"/>
+                <t t-set="nb_non_lus" t-value="len(docs &amp; non_lus)"/>
+                <details class="o_ext_categorie" t-att-open="'open' if nb_non_lus else None">
+                    <summary>
+                        <span class="o_ext_categorie_nom" t-out="categorie.name"/>
+                        <span class="o_ext_categorie_compte">(<t t-out="len(docs)"/>)
+                            <t t-if="nb_non_lus"> dont <b><t t-out="nb_non_lus"/> non lu<t t-if="nb_non_lus &gt; 1">s</t></b></t>
+                        </span>
+                        <span t-if="docs[0].visibilite == 'conseil_syndical'" class="badge o_ext_badge_cs ms-2">Conseil syndical</span>
+                    </summary>
+                    <ul class="list-unstyled mb-0">
+                        <li t-foreach="docs" t-as="doc" class="o_ext_document">
+                            <a t-attf-href="/extranet/documents/#{doc.id}/telecharger">
+                                <i class="fa fa-file-o me-2"/>
+                                <span t-attf-class="#{'fw-bold' if doc in non_lus else ''}" t-out="doc.name"/>
+                            </a>
+                            <span class="text-muted small ms-2" t-out="fmt_date(doc.date_document)"/>
+                            <span t-if="doc in non_lus" class="badge text-bg-danger ms-1">Nouveau</span>
+                            <span t-if="doc.visibilite == 'personnel'" class="badge text-bg-light ms-1">Personnel</span>
+                            <div t-if="doc.description" class="small text-muted" t-out="doc.description"/>
+                        </li>
+                    </ul>
+                </details>
+            </t>
+        </t>
+    </template>
+
+    <!-- ================================================================== -->
+    <!-- Dématérialisation                                                   -->
+    <!-- ================================================================== -->
+    <template id="page_dematerialisation" name="Extranet : dématérialisation">
+        <t t-call="coproerp_extranet.extranet_layout">
+            <h2 class="o_ext_titre">Dématérialisation de documents</h2>
+            <p>
+                Vous pouvez accepter de recevoir par voie électronique, à l'adresse
+                <b t-out="partner.email or '(adresse e-mail non renseignée)'"/>, les documents ci-dessous.
+                Vous pouvez revenir sur votre choix à tout moment.
+            </p>
+            <t t-call="portal.portal_table">
+                <thead>
+                    <tr><th>Type de document</th><th>Votre choix</th><th/></tr>
+                </thead>
+                <tbody>
+                    <tr t-foreach="types.items()" t-as="t">
+                        <t t-set="courant" t-value="etat.get(t[0])"/>
+                        <td t-out="t[1]"/>
+                        <td>
+                            <span t-if="courant and courant[0]" class="badge text-bg-success"><i class="fa fa-check"/> Oui</span>
+                            <span t-else="" class="badge text-bg-secondary">Non</span>
+                            <span t-if="courant" class="small text-muted ms-1">depuis le <t t-out="fmt_date(courant[1])"/></span>
+                        </td>
+                        <td class="text-end">
+                            <form method="post" action="/extranet/dematerialisation" class="d-inline">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <input type="hidden" name="type_envoi" t-att-value="t[0]"/>
+                                <t t-if="courant and courant[0]">
+                                    <input type="hidden" name="accord" value="0"/>
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary">Retirer mon accord</button>
+                                </t>
+                                <t t-else="">
+                                    <input type="hidden" name="accord" value="1"/>
+                                    <label class="small me-2">
+                                        <input type="checkbox" name="confirmation" value="1" required="required"/>
+                                        J'accepte expressément de recevoir ces envois par voie électronique
+                                    </label>
+                                    <button type="submit" class="btn btn-sm btn-primary" t-att-disabled="None if partner.email else 'disabled'">Donner mon accord</button>
+                                </t>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </t>
+            <details class="mt-4">
+                <summary>Historique de mes choix</summary>
+                <ul class="small mt-2">
+                    <li t-foreach="historique" t-as="h">
+                        <t t-out="fmt_date(h.date)"/> — <t t-out="label(h, 'type_envoi')"/> :
+                        <t t-if="h.accord">accord</t><t t-else="">retrait</t>
+                        (<t t-out="label(h, 'origine')"/>)
+                    </li>
+                    <li t-if="not historique" class="text-muted">Aucun choix enregistré.</li>
+                </ul>
+            </details>
+        </t>
+    </template>
+
+    <!-- ================================================================== -->
+    <!-- Actualités                                                          -->
+    <!-- ================================================================== -->
+    <template id="page_actualites" name="Extranet : actualités">
+        <t t-call="coproerp_extranet.extranet_layout">
+            <h2 class="o_ext_titre">Actualités</h2>
+            <div t-if="not actualites" class="alert alert-warning">Aucune actualité pour le moment.</div>
+            <div t-foreach="actualites" t-as="a" t-attf-class="o_ext_carte mb-3 #{'border-danger' if a.importance == 'alerte' else ''}">
+                <div class="text-muted small" t-out="fmt_date(a.date_publication)"/>
+                <h5 t-attf-class="#{'text-danger' if a.importance == 'alerte' else ''}">
+                    <i t-if="a.importance == 'alerte'" class="fa fa-exclamation-triangle me-1"/>
+                    <t t-out="a.name"/>
+                </h5>
+                <div t-out="a.contenu"/>
+            </div>
+        </t>
+    </template>
+
+    <!-- ================================================================== -->
+    <!-- Modes de règlement                                                  -->
+    <!-- ================================================================== -->
+    <template id="page_reglement" name="Extranet : modes de règlement">
+        <t t-call="coproerp_extranet.extranet_layout">
+            <h2 class="o_ext_titre">Modes de règlement</h2>
+            <div class="o_ext_carte mb-3">
+                <h5 class="o_ext_carte_titre">Par prélèvement</h5>
+                <p>Pour y souscrire, déposez votre RIB (PDF, PNG ou JPG, 5 Mo maximum).
+                   Votre gestionnaire vous fera parvenir un mandat de prélèvement SEPA, révocable à tout moment.</p>
+                <form method="post" action="/extranet/reglement" enctype="multipart/form-data" class="d-flex flex-wrap gap-2 align-items-center">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <input type="file" name="rib" accept=".pdf,.png,.jpg,.jpeg" class="form-control w-auto" required="required"/>
+                    <button type="submit" class="btn btn-primary">Recevoir mon mandat SEPA</button>
+                </form>
+                <div t-if="demandes" class="small mt-3">
+                    <b>Mes dépôts :</b>
+                    <ul class="mb-0">
+                        <li t-foreach="demandes" t-as="d">
+                            <t t-out="fmt_date(d.create_date)"/> — <t t-out="d.sudo().copropriete_id.name"/> :
+                            <t t-out="label(d, 'etat')"/>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="o_ext_carte mb-3">
+                <h5 class="o_ext_carte_titre">Par virement</h5>
+                <t t-if="copro_sudo.banque_iban">
+                    <table class="table table-sm w-auto mb-2">
+                        <tr t-if="copro_sudo.banque_titulaire"><th>Titulaire</th><td t-out="copro_sudo.banque_titulaire"/></tr>
+                        <tr><th>IBAN</th><td class="font-monospace" t-out="copro_sudo.banque_iban"/></tr>
+                        <tr t-if="copro_sudo.banque_bic"><th>BIC</th><td class="font-monospace" t-out="copro_sudo.banque_bic"/></tr>
+                        <tr t-if="copro_sudo.banque_nom"><th>Banque</th><td t-out="copro_sudo.banque_nom"/></tr>
+                    </table>
+                    <p class="small mb-0">Indiquez dans le libellé de votre virement vos nom et prénom ainsi que l'adresse de votre immeuble.</p>
+                </t>
+                <p t-else="" class="text-muted mb-0">Les coordonnées bancaires du syndicat seront bientôt indiquées ici. Contactez votre gestionnaire.</p>
+            </div>
+        </t>
+    </template>
+
+    <!-- ================================================================== -->
+    <!-- Mon compte                                                          -->
+    <!-- ================================================================== -->
+    <template id="page_compte" name="Extranet : mon compte">
+        <t t-call="coproerp_extranet.extranet_layout">
+            <h2 class="o_ext_titre">Mon compte</h2>
+            <div class="o_ext_carte mb-3">
+                <h5 class="o_ext_carte_titre">Mes coordonnées</h5>
+                <div t-out="partner.name"/>
+                <div t-if="partner.email"><i class="fa fa-envelope-o me-1"/><t t-out="partner.email"/></div>
+                <div t-if="partner.phone"><i class="fa fa-phone me-1"/><t t-out="partner.phone"/></div>
+                <div class="mt-2">
+                    <a href="/my/account?redirect=/extranet/compte" class="btn btn-sm btn-outline-primary me-1">Modifier mes coordonnées</a>
+                    <a href="/my/security" class="btn btn-sm btn-outline-primary">Changer mon mot de passe</a>
+                </div>
+            </div>
+            <div class="o_ext_carte">
+                <h5 class="o_ext_carte_titre">Notifications</h5>
+                <form method="post" action="/extranet/compte">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" name="notif_documents" id="notif_documents" value="1"
+                               t-att-checked="'checked' if partner.extranet_notif_documents else None"/>
+                        <label class="form-check-label" for="notif_documents">
+                            Me prévenir par e-mail lorsqu'un nouveau document est mis en ligne
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">Enregistrer</button>
+                </form>
+            </div>
+        </t>
+    </template>
+
+</odoo>

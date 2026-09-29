@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_actualite_list" model="ir.ui.view">
+        <field name="name">coproerp.actualite.list</field>
+        <field name="model">coproerp.actualite</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="not publie" decoration-danger="importance == 'alerte'">
+                <field name="date_publication"/>
+                <field name="copropriete_id"/>
+                <field name="name"/>
+                <field name="importance"/>
+                <field name="date_fin"/>
+                <field name="publie"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_actualite_form" model="ir.ui.view">
+        <field name="name">coproerp.actualite.form</field>
+        <field name="model">coproerp.actualite</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Ex. : Coupure d'eau le 12 octobre"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="copropriete_id"/>
+                            <field name="importance"/>
+                        </group>
+                        <group>
+                            <field name="date_publication"/>
+                            <field name="date_fin"/>
+                            <field name="publie"/>
+                        </group>
+                    </group>
+                    <field name="contenu"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_actualite" model="ir.actions.act_window">
+        <field name="name">Actualités</field>
+        <field name="res_model">coproerp.actualite</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

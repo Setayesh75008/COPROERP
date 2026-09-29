@@ -12,3 +12,9 @@ __pycache__/
 # Windows
 Thumbs.db
 Desktop.ini
+
+sauvegardes/
+*.backup
+*.dump
+*.zip
+*.bak

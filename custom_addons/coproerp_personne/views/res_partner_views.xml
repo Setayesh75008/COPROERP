@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_partner_form_coproerp" model="ir.ui.view">
+        <field name="name">res.partner.form.coproerp</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+
+        <field name="arch" type="xml">
+
+            <xpath expr="//notebook" position="inside">
+
+                <page string="CoproERP">
+
+                    <group string="Rôles">
+                        <field name="role_coproprietaire"/>
+                        <field name="role_locataire"/>
+                        <field name="role_fournisseur"/>
+                        <field name="role_conseil_syndical"/>
+                        <field name="role_gardien"/>
+                    </group>
+
+                    <group string="Lots">
+                        <field
+                            name="lot_proprietaire_ids"
+                            widget="many2many_tags"
+                            options="{'no_create_edit': False}"
+                        />
+
+                        <field
+                            name="lot_occupant_ids"
+                            widget="many2many_tags"
+                            options="{'no_create_edit': False}"
+                        />
+                    </group>
+
+                </page>
+
+            </xpath>
+
+        </field>
+
+    </record>
+
+</odoo>

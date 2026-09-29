@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- ===================== -->
+    <!-- Liste des appels      -->
+    <!-- ===================== -->
+
+    <record id="view_appel_charge_tree"
+            model="ir.ui.view">
+
+        <field name="name">coproerp.appel.charge.list</field>
+        <field name="model">coproerp.appel.charge</field>
+
+        <field name="arch" type="xml">
+
+            <list>
+
+                <field name="reference"/>
+                <field name="personne_id"/>
+                <field name="copropriete_id"/>
+                <field name="type_appel"/>
+                <field name="budget_id"/>
+                <field name="date_appel"/>
+                <field name="date_echeance"/>
+                <field name="total_appel"/>
+                <field name="active"/>
+
+            </list>
+
+        </field>
+
+    </record>
+
+
+    <!-- ===================== -->
+    <!-- Formulaire appel      -->
+    <!-- ===================== -->
+
+    <record id="view_appel_charge_form"
+            model="ir.ui.view">
+
+        <field name="name">coproerp.appel.charge.form</field>
+        <field name="model">coproerp.appel.charge</field>
+
+        <field name="arch" type="xml">
+
+            <form>
+
+                <sheet>
+
+                    <group string="Informations générales">
+
+                        <group>
+
+                            <field name="reference"
+                                   readonly="1"/>
+
+                            <field name="personne_id"/>
+
+                            <field name="copropriete_id"/>
+
+                            <field name="type_appel"/>
+
+                            <!-- ========================= -->
+                            <!-- Budget annuel fonds travaux -->
+                            <!-- ========================= -->
+
+                            <field name="budget_id"
+                                   string="Budget annuel"
+                                   invisible="type_appel != 'fonds_travaux'"
+                                   domain="[('copropriete_id', '=', copropriete_id)]"/>
+
+                            <field name="montant_fonds_travaux_appel"
+                                   string="Montant par appel"
+                                   readonly="1"
+                                   invisible="type_appel != 'fonds_travaux'"/>
+
+                        </group>
+
+                        <group>
+
+                            <field name="date_appel"/>
+
+                            <field name="date_echeance"/>
+
+                            <field name="date_debut_periode"/>
+
+                            <field name="date_fin_periode"/>
+
+                            <field name="active"/>
+
+                        </group>
+
+                    </group>
+
+
+                    <group string="Total de l'appel">
+
+                        <field name="total_appel"
+                               readonly="1"/>
+
+                    </group>
+
+
+                    <notebook>
+
+                        <!-- ===================== -->
+                        <!-- DETAIL PAR LOT         -->
+                        <!-- ===================== -->
+
+                        <page string="Détail par lot">
+
+                            <field name="groupe_ids">
+
+                                <list open_form_view="1">
+
+                                    <field name="copropriete_id"
+                                           column_invisible="1"/>
+
+                                    <field name="lot_id"
+                                           string="Lot"
+                                           required="1"
+                                           domain="[('copropriete_id', '=', copropriete_id)]"/>
+
+                                    <field name="lot_numero"
+                                           string="N° de lot"
+                                           readonly="1"/>
+
+                                    <field name="lot_designation"
+                                           string="Désignation"
+                                           readonly="1"/>
+
+                                    <field name="total_groupe"
+                                           string="Total du lot"
+                                           readonly="1"/>
+
+                                </list>
+
+                            </field>
+
+                        </page>
+
+
+                        <!-- ===================== -->
+                        <!-- OBSERVATIONS           -->
+                        <!-- ===================== -->
+
+                        <page string="Observations">
+
+                            <field name="note"
+                                   placeholder="Observations concernant cet appel de fonds..."/>
+
+                        </page>
+
+                    </notebook>
+
+                </sheet>
+
+            </form>
+
+        </field>
+
+    </record>
+
+
+    <!-- ===================== -->
+    <!-- Formulaire détail lot -->
+    <!-- ===================== -->
+
+    <record id="view_appel_charge_groupe_form"
+            model="ir.ui.view">
+
+        <field name="name">coproerp.appel.charge.groupe.form</field>
+        <field name="model">coproerp.appel.charge.groupe</field>
+
+        <field name="arch" type="xml">
+
+            <form>
+
+                <sheet>
+
+                    <group string="Lot">
+
+                        <field name="appel_id"
+                               readonly="1"/>
+
+                        <field name="lot_id"
+                               string="Lot"
+                               required="1"/>
+
+                        <field name="lot_numero"
+                               string="N° de lot"
+                               readonly="1"/>
+
+                        <field name="lot_designation"
+                               string="Désignation"
+                               readonly="1"/>
+
+                    </group>
+
+
+                    <group string="Postes de dépenses">
+
+                        <field name="poste_ids">
+
+                            <list editable="bottom">
+
+                                <!-- Champ technique -->
+                                <field name="copropriete_id"
+                                       column_invisible="1"/>
+
+                                <field name="sequence"/>
+
+                                <!-- Type de poste -->
+                                <field name="type_poste"
+                                       string="Type de poste"
+                                       required="1"/>
+
+                                <!-- Désignation -->
+                                <field name="designation"
+                                       string="Désignation"
+                                       required="1"/>
+
+                                <!-- Clé de répartition -->
+                                <field name="repartition_id"
+                                       string="Clé de répartition"
+                                       required="1"
+                                       domain="[('copropriete_id', '=', copropriete_id)]"/>
+
+                                <!-- Montant global -->
+                                <field name="total_a_repartir"
+                                       string="Total à répartir"
+                                       required="1"/>
+
+                                <!-- Données automatiques -->
+                                <field name="nombre_total_parts"
+                                       string="Total des parts"
+                                       readonly="1"/>
+
+                                <field name="nombre_parts_lot"
+                                       string="Parts du lot"
+                                       readonly="1"/>
+
+                                <field name="pourcentage"
+                                       string="Quote-part (%)"
+                                       readonly="1"/>
+
+                                <field name="montant_appel"
+                                       string="Montant de l'appel"
+                                       readonly="1"/>
+
+                            </list>
+
+                        </field>
+
+                    </group>
+
+
+                    <group string="Total du lot">
+
+                        <field name="total_groupe"
+                               readonly="1"/>
+
+                    </group>
+
+                </sheet>
+
+            </form>
+
+        </field>
+
+    </record>
+
+
+    <!-- ===================== -->
+    <!-- Action                -->
+    <!-- ===================== -->
+
+    <record id="action_appels_charge"
+            model="ir.actions.act_window">
+
+        <field name="name">Appels de fonds</field>
+
+        <field name="res_model">coproerp.appel.charge</field>
+
+        <field name="view_mode">list,form</field>
+
+    </record>
+
+</odoo>

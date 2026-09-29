@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem
+        id="menu_coproerp_travaux"
+        name="Travaux"
+        parent="coproerp_copropriete.menu_coproerp_root"
+        action="action_coproerp_travaux"
+        sequence="30"
+    />
+
+</odoo>

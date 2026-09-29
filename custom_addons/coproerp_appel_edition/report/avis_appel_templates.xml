@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- Un avis par copropriétaire et par échéance (budget courant, fonds
+         travaux, travaux regroupés), sur le modèle des avis habituels. -->
+    <template id="report_avis_appel">
+        <t t-call="web.html_container">
+            <t t-foreach="docs.avis_regroupes()" t-as="avis">
+                <t t-call="coproerp_appel_edition.report_avis_appel_document"
+                   t-lang="avis['personne'].lang"/>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_avis_appel_document">
+        <t t-set="o" t-value="avis['appels'][0]"/>
+        <t t-set="copro" t-value="avis['copro'].sudo()"/>
+        <t t-set="personne" t-value="avis['personne']"/>
+        <t t-set="gestionnaire" t-value="copro.gestionnaire_id"/>
+        <t t-set="montant" t-value="{'widget': 'float', 'precision': 2}"/>
+        <t t-call="web.external_layout">
+            <div class="page o_coproerp_avis" style="font-size: 10pt;">
+
+                <!-- En-tête : références à gauche, destinataire à droite (enveloppe à fenêtre) -->
+                <div class="row">
+                    <div class="col-6">
+                        <h4 style="letter-spacing: 1px;"><b>APPEL DE FONDS</b></h4>
+                        <table class="table table-sm table-borderless mb-0" style="font-size: 9.5pt;">
+                            <tr><td class="p-0 pe-2">Date :</td>
+                                <td class="p-0"><t t-out="avis['date_edition'].strftime('%d/%m/%Y')"/></td></tr>
+                            <tr><td class="p-0 pe-2">Échéance :</td>
+                                <td class="p-0"><b t-out="avis['libelle_echeance']"/></td></tr>
+                            <tr><td class="p-0 pe-2">Immeuble :</td>
+                                <td class="p-0">
+                                    <t t-out="copro.name"/><br/>
+                                    <t t-out="copro.street"/> <t t-out="copro.zip"/> <t t-out="copro.city"/>
+                                </td></tr>
+                            <tr><td class="p-0 pe-2">Référence :</td>
+                                <td class="p-0"><t t-out="avis['reference']"/></td></tr>
+                        </table>
+                    </div>
+                    <div class="col-5 offset-1" style="margin-top: 12mm;">
+                        <div><b t-out="personne.name"/></div>
+                        <div t-if="personne.street" t-out="personne.street"/>
+                        <div t-if="personne.street2" t-out="personne.street2"/>
+                        <div><t t-out="personne.zip"/> <t t-out="personne.city"/></div>
+                        <div t-if="personne.country_id" t-out="personne.country_id.name.upper()"/>
+                    </div>
+                </div>
+
+                <!-- Lots concernés -->
+                <table class="table table-sm mt-3 mb-2" style="font-size: 9pt;">
+                    <thead>
+                        <tr>
+                            <th>N° lot</th><th>Bât.</th><th>Esc.</th><th>Étage</th>
+                            <th>Désignation</th><th class="text-end">Tantièmes généraux</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="avis['lots']" t-as="lot">
+                            <td t-out="lot.numero"/>
+                            <td t-out="lot.batiment_id.name"/>
+                            <td t-out="lot.escalier"/>
+                            <td t-out="lot.etage"/>
+                            <td t-out="lot.designation"/>
+                            <td class="text-end" t-out="lot.tantiemes"/>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="mb-1"><b>Échéance du <t t-out="avis['date_echeance'].strftime('%d/%m/%Y')"/></b></div>
+
+                <!-- Détail -->
+                <table class="table table-sm" style="font-size: 9pt;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid #333;">
+                            <th style="width: 40%;">Désignation des dépenses</th>
+                            <th class="text-end">Total à répartir</th>
+                            <th class="text-end">Nombre total de parts</th>
+                            <th class="text-end">Votre nombre de parts</th>
+                            <th class="text-end">Détail de votre participation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="avis['appels']" t-as="appel">
+                            <tr>
+                                <td colspan="5" class="pt-2"><b t-out="appel.titre_section(appel)"/></td>
+                            </tr>
+                            <t t-foreach="appel.groupe_ids" t-as="groupe">
+                                <tr t-if="len(appel.groupe_ids) &gt; 1 or len(avis['lots']) &gt; 1">
+                                    <td colspan="5" class="fst-italic">
+                                        Lot <t t-out="groupe.lot_numero"/> — <t t-out="groupe.lot_designation"/>
+                                    </td>
+                                </tr>
+                                <tr t-foreach="groupe.poste_ids" t-as="poste">
+                                    <td class="ps-3" t-out="poste.designation"/>
+                                    <td class="text-end" t-out="poste.total_a_repartir" t-options="montant"/>
+                                    <td class="text-end" t-out="poste.nombre_total_parts"/>
+                                    <td class="text-end" t-out="poste.nombre_parts_lot"/>
+                                    <td class="text-end" t-out="poste.montant_appel" t-options="montant"/>
+                                </tr>
+                                <tr t-if="len(appel.groupe_ids) &gt; 1">
+                                    <td colspan="4" class="text-end fst-italic">Total lot <t t-out="groupe.lot_numero"/></td>
+                                    <td class="text-end" t-out="groupe.total_groupe" t-options="montant"/>
+                                </tr>
+                            </t>
+                            <tr>
+                                <td colspan="4" class="text-end">Total <t t-out="appel.titre_section(appel).lower()"/></td>
+                                <td class="text-end"><b t-out="appel.total_appel" t-options="montant"/></td>
+                            </tr>
+                        </t>
+                        <tr style="border-top: 2px solid #333;">
+                            <td colspan="4" class="text-end"><b>TOTAL DE L'APPEL</b></td>
+                            <td class="text-end"><b t-out="avis['total']" t-options="montant"/> €</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Règlement -->
+                <div class="row mt-2" style="font-size: 9.5pt;">
+                    <div class="col-7">
+                        <div><b>À régler avant le <t t-out="avis['date_echeance'].strftime('%d/%m/%Y')"/></b></div>
+                        <t t-if="copro.banque_iban">
+                            <div class="mt-1">Virement à réaliser sur le compte :</div>
+                            <div t-if="copro.banque_titulaire" t-out="copro.banque_titulaire"/>
+                            <div>IBAN : <span style="font-family: monospace;" t-out="copro.banque_iban"/></div>
+                            <div t-if="copro.banque_bic">BIC : <span style="font-family: monospace;" t-out="copro.banque_bic"/></div>
+                            <div class="fst-italic">Merci d'indiquer dans le libellé de votre virement la référence ci-dessus.</div>
+                        </t>
+                    </div>
+                    <div class="col-5">
+                        <t t-if="gestionnaire">
+                            <div>Affaire suivie par : <b t-out="gestionnaire.name"/></div>
+                            <div t-if="gestionnaire.partner_id.phone">Tél. : <t t-out="gestionnaire.partner_id.phone"/></div>
+                            <div t-if="gestionnaire.email" t-out="gestionnaire.email"/>
+                        </t>
+                    </div>
+                </div>
+
+                <!-- Papillon à joindre au règlement -->
+                <div style="margin-top: 10mm; border-top: 1px dashed #555; padding-top: 3mm; font-size: 9pt;">
+                    <div class="text-center fst-italic mb-1">Joindre ce papillon à votre règlement</div>
+                    <div class="row">
+                        <div class="col-8">
+                            <div><b t-out="personne.name"/></div>
+                            <div t-out="copro.name"/>
+                            <div>Réf. <t t-out="avis['reference']"/> — <t t-out="avis['libelle_echeance']"/></div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div>Montant</div>
+                            <div style="font-size: 12pt;"><b t-out="avis['total']" t-options="montant"/> €</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+</odoo>

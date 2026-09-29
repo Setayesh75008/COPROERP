@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_copropriete_form_navigation"
+            model="ir.ui.view">
+
+        <field name="name">copropriete.form.navigation</field>
+        <field name="model">coproerp.copropriete</field>
+
+        <field name="inherit_id"
+               ref="coproerp_copropriete.view_copropriete_form"/>
+
+        <field name="arch" type="xml">
+
+            <xpath expr="//notebook" position="inside">
+
+                <page string="Clés de répartition">
+
+                    <group string="Répartition des tantièmes">
+
+                        <field name="repartition_ids"
+                               readonly="1">
+
+                            <list>
+
+                                <field name="reference"
+                                       string="Référence"/>
+
+                                <field name="name"
+                                       string="Clé de répartition"/>
+
+                                <field name="total_tantiemes"
+                                       string="Total théorique"/>
+
+                                <field name="total_attribue"
+                                       string="Tantièmes attribués"/>
+
+                                <field name="ecart_tantiemes"
+                                       string="Écart"/>
+
+                                <field name="etat_repartition"
+                                       string="État"/>
+
+                                <field name="active"
+                                       string="Actif"/>
+
+                            </list>
+
+                        </field>
+
+                    </group>
+
+                </page>
+
+            </xpath>
+
+        </field>
+
+    </record>
+
+</odoo>

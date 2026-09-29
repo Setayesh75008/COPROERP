@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <menuitem
+        id="menu_droits"
+        name="Droits"
+        parent="coproerp_copropriete.menu_coproerp_root"
+        action="action_droits"
+        sequence="40"/>
+
+</odoo>

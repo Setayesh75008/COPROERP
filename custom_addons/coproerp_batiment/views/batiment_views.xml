@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_batiment_tree" model="ir.ui.view">
+        <field name="name">coproerp.batiment.tree</field>
+        <field name="model">coproerp.batiment</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="reference"/>
+                <field name="name"/>
+                <field name="copropriete_id"/>
+                <field name="adresse"/>
+                <field name="nombre_niveaux"/>
+                <field name="nombre_logements"/>
+                <field name="nombre_locaux"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_batiment_form" model="ir.ui.view">
+        <field name="name">coproerp.batiment.form</field>
+        <field name="model">coproerp.batiment</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+
+                    <group>
+                        <group>
+                            <field name="reference"/>
+                            <field name="name"/>
+                            <field name="copropriete_id"/>
+                        </group>
+
+                        <group>
+                            <field name="active"/>
+                        </group>
+                    </group>
+
+<notebook>
+
+    <page name="informations" string="Informations">
+        <group>
+            <field name="adresse"/>
+
+            <group>
+                <field name="nombre_niveaux"/>
+                <field name="nombre_logements"/>
+                <field name="nombre_locaux"/>
+            </group>
+        </group>
+    </page>
+
+    <page name="observations" string="Observations">
+        <field name="note"/>
+    </page>
+
+</notebook>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_batiments" model="ir.actions.act_window">
+        <field name="name">Bâtiments</field>
+        <field name="res_model">coproerp.batiment</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_budget_annuel_form_appel_edition" model="ir.ui.view">
+        <field name="name">coproerp.budget.annuel.form.appel.edition</field>
+        <field name="model">coproerp.budget.annuel</field>
+        <field name="inherit_id" ref="coproerp_budget.view_budget_annuel_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/button[@name='action_generer_appels_fonds_travaux']" position="replace">
+                <button name="action_generer_appel_budget_suivant" type="object"
+                        string="Appel budget : échéance suivante" class="oe_highlight"
+                        help="Génère les appels du budget courant de la prochaine échéance non encore appelée."/>
+                <button name="action_generer_appels_budget_tous" type="object"
+                        string="Appel budget : toute l'année"
+                        confirm="Générer les appels du budget courant pour toutes les échéances de l'exercice ?"/>
+                <button name="action_generer_appel_fonds_suivant" type="object"
+                        string="Fonds travaux : échéance suivante"/>
+                <button name="action_generer_appels_fonds_travaux" type="object"
+                        string="Fonds travaux : toute l'année"
+                        confirm="Générer les appels du fonds travaux pour toutes les échéances ?"/>
+                <button name="action_voir_appels_budget" type="object" string="Voir les appels"
+                        class="btn-secondary"/>
+            </xpath>
+            <xpath expr="//field[@name='nombre_appels_fonds']" position="after">
+                <field name="repartition_fonds_travaux_id"/>
+                <field name="date_premier_appel_fonds"/>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Répartition du budget" name="repartition_budget">
+                    <group>
+                        <group>
+                            <field name="nombre_appels_budget"/>
+                            <field name="delai_edition_jours"/>
+                        </group>
+                        <group>
+                            <field name="total_lignes"/>
+                            <field name="ecart_ventilation"
+                                   decoration-danger="ecart_ventilation != 0"/>
+                        </group>
+                    </group>
+                    <field name="ligne_ids">
+                        <list editable="bottom">
+                            <field name="sequence" widget="handle"/>
+                            <field name="copropriete_id" column_invisible="True"/>
+                            <field name="repartition_id"/>
+                            <field name="designation"/>
+                            <field name="montant_annuel" sum="Total"/>
+                            <field name="montant_par_appel"/>
+                        </list>
+                    </field>
+                    <div class="text-muted">
+                        Exemple : charges communes générales 39 025 €, ascenseur 3 250 €,
+                        chauffage 27 725 € pour un budget de 70 000 €. Chaque appel est
+                        exigible le 1er jour de sa période ; si le budget est actualisé en
+                        cours d'année, le reste à appeler est réparti sur les échéances suivantes.
+                    </div>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

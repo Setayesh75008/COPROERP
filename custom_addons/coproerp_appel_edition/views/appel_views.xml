@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_appel_charge_form_appel_edition" model="ir.ui.view">
+        <field name="name">coproerp.appel.charge.form.appel.edition</field>
+        <field name="model">coproerp.appel.charge</field>
+        <field name="inherit_id" ref="coproerp_appel_charge.view_appel_charge_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="before">
+                <header>
+                    <button name="%(action_report_avis_appel)d" type="action"
+                            string="Imprimer l'avis" class="oe_highlight" icon="fa-print"/>
+                    <button name="action_publier_avis_extranet" type="object"
+                            string="Publier sur l'extranet" icon="fa-cloud-upload"
+                            confirm="Publier l'avis sur l'extranet du copropriétaire (alerte e-mail s'il l'a activée) ?"/>
+                </header>
+            </xpath>
+            <xpath expr="//field[@name='date_fin_periode']" position="after">
+                <field name="libelle_echeance"/>
+                <field name="budget_origine_id" readonly="1" invisible="not budget_origine_id"/>
+                <field name="echeance_travaux_id" readonly="1" invisible="not echeance_travaux_id"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Action « Publier sur l'extranet » depuis la liste (sélection multiple) -->
+    <record id="action_server_publier_avis" model="ir.actions.server">
+        <field name="name">Publier les avis sur l'extranet</field>
+        <field name="model_id" ref="coproerp_appel_charge.model_coproerp_appel_charge"/>
+        <field name="binding_model_id" ref="coproerp_appel_charge.model_coproerp_appel_charge"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_publier_avis_extranet()</field>
+    </record>
+</odoo>

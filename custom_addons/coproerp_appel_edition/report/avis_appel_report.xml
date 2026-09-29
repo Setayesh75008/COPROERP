@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_report_avis_appel" model="ir.actions.report">
+        <field name="name">Avis d'appel de fonds</field>
+        <field name="model">coproerp.appel.charge</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">coproerp_appel_edition.report_avis_appel</field>
+        <field name="report_file">coproerp_appel_edition.report_avis_appel</field>
+        <field name="print_report_name">'Appel de fonds - %s - %s' % (object.libelle_echeance or '', object.personne_id.name or '')</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+        <field name="binding_model_id" ref="coproerp_appel_charge.model_coproerp_appel_charge"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

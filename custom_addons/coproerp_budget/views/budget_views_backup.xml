@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- ===================== -->
+    <!-- Liste des budgets     -->
+    <!-- ===================== -->
+
+    <record id="view_budget_annuel_tree"
+            model="ir.ui.view">
+
+        <field name="name">coproerp.budget.annuel.list</field>
+        <field name="model">coproerp.budget.annuel</field>
+
+        <field name="arch" type="xml">
+
+            <list>
+
+                <field name="reference"/>
+                <field name="copropriete_id"/>
+                <field name="exercice"/>
+                <field name="budget_previsionnel"/>
+                <field name="taux_fonds_travaux"/>
+                <field name="cotisation_annuelle_fonds"/>
+                <field name="nombre_appels_fonds"/>
+                <field name="cotisation_par_appel_fonds"/>
+                <field name="active"/>
+
+            </list>
+
+        </field>
+
+    </record>
+
+
+    <!-- ===================== -->
+    <!-- Formulaire budget     -->
+    <!-- ===================== -->
+
+    <record id="view_budget_annuel_form"
+            model="ir.ui.view">
+
+        <field name="name">coproerp.budget.annuel.form</field>
+        <field name="model">coproerp.budget.annuel</field>
+
+        <field name="arch" type="xml">
+
+            <form>
+
+                <sheet>
+
+                    <!-- ===================== -->
+                    <!-- Identification          -->
+                    <!-- ===================== -->
+
+                    <group string="Identification">
+
+                        <group>
+
+                            <field name="reference"
+                                   readonly="1"/>
+
+                            <field name="copropriete_id"/>
+
+                            <field name="exercice"/>
+
+                        </group>
+
+                        <group>
+
+                            <field name="date_debut"/>
+
+                            <field name="date_fin"/>
+
+                            <field name="active"/>
+
+                        </group>
+
+                    </group>
+
+
+                    <!-- ===================== -->
+                    <!-- Budget prévisionnel    -->
+                    <!-- ===================== -->
+
+                    <group string="Budget prévisionnel">
+
+                        <field name="budget_previsionnel"/>
+
+                    </group>
+
+
+                    <!-- ===================== -->
+                    <!-- Fonds de travaux       -->
+                    <!-- ===================== -->
+
+                    <group string="Fonds obligatoire travaux">
+
+                        <group>
+
+                            <field name="ppt_adopte"/>
+
+                            <field name="montant_travaux_ppt"
+                                   invisible="not ppt_adopte"/>
+
+                            <field name="taux_fonds_travaux"/>
+
+                        </group>
+
+
+                        <group>
+
+                            <field name="minimum_fonds_5pct"
+                                   readonly="1"/>
+
+                            <field name="minimum_fonds_ppt"
+                                   readonly="1"
+                                   invisible="not ppt_adopte"/>
+
+                            <field name="minimum_legal_fonds"
+                                   readonly="1"/>
+
+                            <field name="cotisation_annuelle_fonds"
+                                   readonly="1"/>
+
+                        </group>
+
+                    </group>
+
+
+                    <!-- ===================== -->
+                    <!-- Appels du fonds       -->
+                    <!-- ===================== -->
+
+                    <group string="Appels du fonds travaux">
+
+                        <field name="nombre_appels_fonds"/>
+
+                        <field name="cotisation_par_appel_fonds"
+                               readonly="1"/>
+
+                    </group>
+
+
+                    <!-- ===================== -->
+                    <!-- Observations           -->
+                    <!-- ===================== -->
+
+                    <notebook>
+
+                        <page string="Observations">
+
+                            <field name="note"
+                                   placeholder="Observations concernant le budget et le fonds de travaux..."/>
+
+                        </page>
+
+                    </notebook>
+
+                </sheet>
+
+            </form>
+
+        </field>
+
+    </record>
+
+
+    <!-- ===================== -->
+    <!-- Action                -->
+    <!-- ===================== -->
+
+    <record id="action_budget_annuel"
+            model="ir.actions.act_window">
+
+        <field name="name">Budgets annuels</field>
+
+        <field name="res_model">coproerp.budget.annuel</field>
+
+        <field name="view_mode">list,form</field>
+
+    </record>
+
+</odoo>

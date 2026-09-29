@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- ========================= -->
+    <!-- Vue Liste -->
+    <!-- ========================= -->
+
+    <record id="view_copropriete_tree" model="ir.ui.view">
+        <field name="name">coproerp.copropriete.list</field>
+        <field name="model">coproerp.copropriete</field>
+
+        <field name="arch" type="xml">
+            <list>
+                <field name="reference"/>
+                <field name="name"/>
+                <field name="city"/>
+                <field name="siren"/>
+                <field name="nombre_lots"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+
+    <!-- ========================= -->
+    <!-- Vue Formulaire -->
+    <!-- ========================= -->
+
+    <record id="view_copropriete_form" model="ir.ui.view">
+
+    <field name="name">coproerp.copropriete.form</field>
+    <field name="model">coproerp.copropriete</field>
+
+    <field name="arch" type="xml">
+
+        <form>
+
+            <sheet>
+
+                <group>
+        <group>
+
+            <field name="image_1920" widget="image" class="oe_avatar"/>
+
+        </group>
+
+        <group>
+
+            <field name="name"/>
+
+            <field name="reference" readonly="1"/>
+
+            <field name="active"/>
+
+        </group>
+
+    </group>
+
+    <group>
+
+        <group>
+
+            <field name="syndic_id"/>
+
+            <field name="siren"/>
+
+            <field name="siret"/>
+
+        </group>
+
+        <group>
+
+            <field name="date_creation"/>
+
+            <field name="annee_construction"/>
+
+        </group>
+
+    </group>
+
+
+                <notebook>
+
+                    <!-- ONGLET INFORMATIONS -->
+
+                    <page string="Informations">
+
+                        <group>
+
+                            <field name="date_creation"/>
+
+                        </group>
+
+                    </page>
+
+
+                    <!-- ONGLET ADRESSE -->
+
+                    <page string="Adresse">
+
+                        <group>
+
+                            <field name="street"/>
+                            <field name="zip"/>
+                            <field name="city"/>
+                            <field name="country_id"/>
+
+                        </group>
+
+                    </page>
+
+
+                    <!-- ONGLET JURIDIQUE -->
+
+                    <page string="Juridique">
+
+                        <group>
+
+                            <field name="numero_rnc"/>
+                            <field name="date_immatriculation"/>
+                            <field name="date_reglement"/>
+
+                        </group>
+
+                    </page>
+
+
+                    <!-- ONGLET ORGANISATION -->
+
+                    <page string="Organisation">
+
+                        <group>
+
+                            <field name="nombre_batiments"/>
+                            <field name="nombre_lots"/>
+                            <field name="nombre_lots_principaux"/>
+                            <field name="nombre_lots_secondaires"/>
+
+                        </group>
+
+                    </page>
+
+
+                    <!-- ONGLET GESTION -->
+
+                    <page string="Gestion">
+
+                        <group>
+
+                            <field name="date_derniere_ag"/>
+                            <field name="date_prochaine_ag"/>
+
+                        </group>
+
+                    </page>
+
+                    <!-- ONGLET BÂTIMENTS -->
+
+                                        
+                    <!-- ONGLET OBSERVATIONS -->
+
+                    <page name="observations" string="Observations">
+
+                        <field name="note"/>
+
+                    </page>
+
+
+                                   </notebook>
+
+            </sheet>
+
+        </form>
+
+    </field>
+
+</record>
+    <!-- ========================= -->
+    <!-- Recherche -->
+    <!-- ========================= -->
+
+   <record id="action_coproprietes" model="ir.actions.act_window">
+    <field name="name">Copropriétés</field>
+    <field name="res_model">coproerp.copropriete</field>
+    <field name="view_mode">list,form</field>
+</record>
+
+
+    <!-- ========================= -->
+    <!-- Action -->
+    <!-- ========================= -->
+
+    
+</odoo>

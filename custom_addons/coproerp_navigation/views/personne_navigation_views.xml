@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_partner_form_navigation_coproerp"
+            model="ir.ui.view">
+
+        <field name="name">res.partner.form.navigation.coproerp</field>
+        <field name="model">res.partner</field>
+
+        <field name="inherit_id" ref="base.view_partner_form"/>
+
+        <field name="arch" type="xml">
+
+            <xpath expr="//notebook" position="inside">
+
+                <page string="Navigation">
+
+                    <!-- ====================================== -->
+                    <!-- Lots dont la personne est propriétaire -->
+                    <!-- ====================================== -->
+
+                    <group string="Lots propriétaires">
+
+                        <field name="lot_proprietaire_ids"
+                               widget="many2many_tags"
+                               readonly="1"/>
+
+                    </group>
+
+
+                    <!-- ====================================== -->
+                    <!-- Lots dont la personne est occupante   -->
+                    <!-- ====================================== -->
+
+                    <group string="Lots occupants">
+
+                        <field name="lot_occupant_ids"
+                               widget="many2many_tags"
+                               readonly="1"/>
+
+                    </group>
+
+
+                    <!-- ====================================== -->
+                    <!-- Droits détenus par la personne        -->
+                    <!-- ====================================== -->
+
+                    <group string="Droits">
+
+                        <field name="droit_ids"
+                               readonly="1">
+
+                            <list>
+
+                                <field name="reference"
+                                       string="Référence"/>
+
+                                <field name="lot_numero"
+                                       string="N° de lot"/>
+
+                                <field name="lot_designation"
+                                       string="Désignation"/>
+
+                                <field name="type_droit"
+                                       string="Type de droit"/>
+
+                                <field name="date_debut"
+                                       string="Date de début"/>
+
+                                <field name="date_fin"
+                                       string="Date de fin"/>
+
+                                <field name="active"
+                                       string="Actif"/>
+
+                            </list>
+
+                        </field>
+
+                    </group>
+
+                </page>
+
+            </xpath>
+
+        </field>
+
+    </record>
+
+</odoo>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_cs_mandat_list" model="ir.ui.view">
+        <field name="name">coproerp.cs.mandat.list</field>
+        <field name="model">coproerp.cs.mandat</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="not en_cours">
+                <field name="copropriete_id"/>
+                <field name="personne_id"/>
+                <field name="fonction"/>
+                <field name="date_debut"/>
+                <field name="date_fin"/>
+                <field name="en_cours"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_cs_mandat_form" model="ir.ui.view">
+        <field name="name">coproerp.cs.mandat.form</field>
+        <field name="model">coproerp.cs.mandat</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <widget name="web_ribbon" title="Terminé" bg_color="text-bg-secondary" invisible="en_cours"/>
+                    <group>
+                        <group>
+                            <field name="copropriete_id"/>
+                            <field name="personne_id"/>
+                            <field name="fonction"/>
+                        </group>
+                        <group>
+                            <field name="date_ag_designation"/>
+                            <field name="date_debut"/>
+                            <field name="date_fin"/>
+                            <field name="en_cours"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                    </group>
+                    <field name="note" placeholder="Observations..."/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_cs_mandat_search" model="ir.ui.view">
+        <field name="name">coproerp.cs.mandat.search</field>
+        <field name="model">coproerp.cs.mandat</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="personne_id"/>
+                <field name="copropriete_id"/>
+                <filter name="en_cours" string="Mandats en cours" domain="[('en_cours', '=', True)]"/>
+                <filter name="archives" string="Archivés" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="group_copro" string="Copropriété" context="{'group_by': 'copropriete_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_cs_mandat" model="ir.actions.act_window">
+        <field name="name">Conseils syndicaux</field>
+        <field name="res_model">coproerp.cs.mandat</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_en_cours': 1, 'search_default_group_copro': 1}</field>
+    </record>
+
+</odoo>

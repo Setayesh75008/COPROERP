@@ -1,0 +1,174 @@
+// Extranet copropriétaires : mise en forme
+$ext-nuit: #1f2d3d;
+$ext-accent: #1d5fa8;
+$ext-fond: #f3f5f8;
+
+.o_coproerp_extranet {
+    background: $ext-fond;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    min-height: 70vh;
+
+    .o_ext_sidebar {
+        background: $ext-nuit;
+        color: #e8edf3;
+        padding: 1.25rem 0;
+
+        a {
+            color: #e8edf3;
+            text-decoration: none;
+        }
+    }
+
+    .o_ext_identite {
+        padding: 0 1.25rem 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        font-size: 0.9rem;
+
+        .o_ext_nom {
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+        .o_ext_immeuble {
+            margin-top: 0.35rem;
+            font-weight: 600;
+        }
+        .o_ext_adresse,
+        .o_ext_qualite {
+            opacity: 0.8;
+        }
+    }
+
+    .o_ext_selecteur {
+        padding: 0.75rem 1.25rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        font-size: 0.85rem;
+
+        .o_ext_copro_choix {
+            padding: 0.15rem 0;
+            opacity: 0.8;
+            &.active {
+                opacity: 1;
+                font-weight: 600;
+            }
+        }
+    }
+
+    .o_ext_menu {
+        display: flex;
+        flex-direction: column;
+        padding-top: 0.5rem;
+
+        a,
+        .o_ext_menu_titre {
+            display: block;
+            padding: 0.55rem 1.25rem;
+            font-size: 0.92rem;
+        }
+        a:hover {
+            background: rgba(255, 255, 255, 0.07);
+        }
+        a.active {
+            background: $ext-accent;
+            color: #fff;
+        }
+        .o_ext_sous {
+            padding-left: 2.6rem;
+            font-size: 0.87rem;
+        }
+    }
+
+    .o_ext_badge_cs {
+        background: #f0ad4e;
+        color: #1f2d3d;
+        font-size: 0.7rem;
+    }
+
+    .o_ext_contenu {
+        padding: 1.5rem;
+    }
+
+    .o_ext_titre {
+        font-weight: 300;
+        margin-bottom: 1rem;
+    }
+
+    .o_ext_carte {
+        background: #fff;
+        border-left: 3px solid $ext-accent;
+        padding: 1rem 1.25rem;
+        border-radius: 0.25rem;
+    }
+    .o_ext_carte_titre {
+        color: $ext-accent;
+        font-size: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    .o_ext_alerte {
+        margin-bottom: 1rem;
+    }
+
+    .o_ext_solde {
+        background: $ext-nuit;
+        color: #fff;
+        padding: 1.1rem 1.25rem;
+        border-radius: 0.25rem;
+
+        .o_ext_solde_label {
+            font-size: 0.95rem;
+            opacity: 0.85;
+        }
+        .o_ext_solde_montant {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        .o_ext_solde_sens {
+            opacity: 0.85;
+        }
+        .o_ext_solde_lien {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            text-align: right;
+            opacity: 0.85;
+        }
+    }
+
+    .o_ext_personne {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.6rem;
+    }
+
+    .o_ext_immeuble_entete {
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+    }
+
+    .o_ext_categorie {
+        background: #fff;
+        border-left: 3px solid $ext-accent;
+        margin-bottom: 0.5rem;
+        border-radius: 0.25rem;
+
+        summary {
+            padding: 0.8rem 1rem;
+            cursor: pointer;
+            color: $ext-accent;
+        }
+        .o_ext_categorie_nom {
+            font-weight: 600;
+        }
+        ul {
+            padding: 0 1rem 0.8rem 1.5rem;
+        }
+    }
+
+    .o_ext_document {
+        padding: 0.3rem 0;
+        border-top: 1px solid $ext-fond;
+    }
+}

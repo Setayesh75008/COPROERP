@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <menuitem
+        id="menu_appels_charge"
+        name="Appels de fonds"
+        parent="coproerp_copropriete.menu_coproerp_root"
+        action="action_appels_charge"
+        sequence="60"/>
+
+</odoo>

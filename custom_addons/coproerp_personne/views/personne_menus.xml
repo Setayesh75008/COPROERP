@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- Action -->
+    <record id="action_personnes" model="ir.actions.act_window">
+        <field name="name">Personnes</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Menu -->
+    <menuitem
+        id="menu_personnes"
+        name="Personnes"
+        parent="coproerp_copropriete.menu_coproerp_root"
+        action="action_personnes"
+        sequence="40"/>
+
+</odoo>

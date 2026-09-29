@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Cloisonnement de l'extranet.
+
+    Ces règles s'appliquent aux utilisateurs du portail (copropriétaires).
+    Elles sont appliquées par la base de données elle-même : un copropriétaire
+    ne peut pas lire une donnée hors de son périmètre, même en modifiant une URL.
+
+    "Mes personnes" = la personne connectée et, si elle est le contact d'une
+    société (SCI...), cette société.
+
+    Pour un même modèle, les règles d'un même groupe se cumulent (OU).
+-->
+<odoo>
+    <data noupdate="0">
+
+        <!-- ============================================================ -->
+        <!-- Copropriétés : celles où j'ai un droit en cours, ou un mandat -->
+        <!-- de conseiller syndical en cours.                              -->
+        <!-- ============================================================ -->
+        <record id="rule_copropriete_portal" model="ir.rule">
+            <field name="name">Extranet : mes copropriétés</field>
+            <field name="model_id" ref="coproerp_copropriete.model_coproerp_copropriete"/>
+            <field name="groups" eval="[Command.link(ref('base.group_portal'))]"/>
+            <field name="domain_force">[
+                ('extranet_actif', '=', True),
+                '|',
+                ('droit_ids', 'any', [
+                    ('personne_id', 'in', [user.partner_id.id, user.partner_id.commercial_partner_id.id]),
+                    ('acces_extranet', '=', True),
+                ]),
+                ('mandat_cs_ids', 'any', [
+                    ('personne_id', 'in', [user.partner_id.id, user.partner_id.commercial_partner_id.id]),
+                    ('en_cours', '=', True),
+                ]),
+            ]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Droits : uniquement les miens, en cours -->
+        <record id="rule_droit_portal" model="ir.rule">
+            <field name="name">Extranet : mes droits</field>
+            <field name="model_id" ref="coproerp_droit.model_coproerp_droit"/>
+            <field name="groups" eval="[Command.link(ref('base.group_portal'))]"/>
+            <field name="domain_force">[
+                ('personne_id', 'in', [user.partner_id.id, user.partner_id.commercial_partner_id.id]),
+                ('acces_extranet', '=', True),
+            ]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Conseil syndical : composition visible des copropriétaires de l'immeuble -->
+        <record id="rule_cs_mandat_portal" model="ir.rule">
+            <field name="name">Extranet : conseil syndical de mes copropriétés</field>
+            <field name="model_id" ref="model_coproerp_cs_mandat"/>
+            <field name="groups" eval="[Command.link(ref('base.group_portal'))]"/>
+            <field name="domain_force">[
+                ('active', '=', True),
+                '|',
+                ('personne_id', 'in', [user.partner_id.id, user.partner_id.commercial_partner_id.id]),
+                ('copropriete_id.droit_ids', 'any', [
+                    ('personne_id', 'in', [user.partner_id.id, user.partner_id.commercial_partner_id.id]),
+                    ('acces_extranet', '=', True),
+                ]),
+            ]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- Documents : trois règles cumulées                            -->
+        <!-- ============================================================ -->
+        <record id="rule_document_portal_tous" model="ir.rule">
+            <field name="name">Extranet : documents communs de mes copropriétés</field>
+            <field name="model_id" ref="model_coproerp_extranet_document"/>
+            <field name="groups" eval="[Command.link(ref('base.group_portal'))]"/>
+            <field name="domain_force">[
+                ('publie', '=', True),
+                ('visibilite', '=', 'tous'),
+                ('copropriete_id.extranet_actif', '=', True),
+                '|',
+                ('copropriete_id.droit_ids', 'any', [
+                    ('personne_id', 'in', [user.partner_id.id, user.partner_id.commercial_partner_id.id]),
+                    ('acces_extranet', '=', True),
+                ]),
+                ('copropriete_id.mandat_cs_ids', 'any', [
+                    ('personne_id', 'in', [user.partner_id.id, user.partner_id.commercial_partner_id.id]),
+                    ('en_cours', '=', True),
+                ]),
+            ]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="rule_document_portal_cs" model="ir.rule">
+            <field name="name">Extranet : documents réservés au conseil syndical (mandat en cours)</field>
+            <field name="model_id" ref="model_coproerp_extranet_document"/>
+            <field name="groups" eval="[Command.link(ref('base.group_portal'))]"/>
+            <field name="domain_force">[
+                ('publie', '=', True),
+                ('visibilite', '=', 'conseil_syndical'),
+                ('copropriete_id.extranet_actif', '=', True),
+                ('copropriete_id.mandat_cs_ids', 'any', [
+                    ('personne_id', 'in', [user.partner_id.id, user.partner_id.commercial_partner_id.id]),
+                    ('en_cours', '=', True),
+                ]),
+            ]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="rule_document_portal_personnel" model="ir.rule">
+            <field name="name">Extranet : mes documents personnels</field>
+            <field name="model_id" ref="model_coproerp_extranet_document"/>
+            <field name="groups" eval="[Command.link(ref('base.group_portal'))]"/>
+            <field name="domain_force">[
+                ('publie', '=', True),
+                ('visibilite', '=', 'personnel'),
+                ('personne_id', 'in', [user.partner_id.id, user.partner_id.commercial_partner_id.id]),
+            ]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="rule_document_lecture_portal" model="ir.rule">
+            <field name="name">Extranet : mes consultations</field>
+            <field name="model_id" ref="model_coproerp_extranet_document_lecture"/>
+            <field name="groups" eval="[Command.link(ref('base.group_portal'))]"/>
+            <field name="domain_force">[('personne_id', 'in', [user.partner_id.id, user.partner_id.commercial_partner_id.id])]</field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- Appels de fonds : les miens + ceux de l'immeuble pour le CS   -->
+        <!-- ============================================================ -->
+        <record id="rule_appel_charge_portal" model="ir.rule">
+            <field name="name">Extranet : mes appels de fonds, ou tous ceux de l'immeuble pour le conseil syndical</field>
+            <field name="model_id" ref="coproerp_appel_charge.model_coproerp_appel_charge"/>
+            <field name="groups" eval="[Command.link(ref('base.group_portal'))]"/>
+            <field name="domain_force">[
+                ('active', '=', True),
+                '|',
+                ('personne_id', 'in', [user.partner_id.id, user.partner_id.commercial_partner_id.id]),
+                ('copropriete_id.mandat_cs_ids', 'any', [
+                    ('personne_id', 'in', [user.partner_id.id, user.partner_id.commercial_partner_id.id]),
+                    ('en_cours', '=', True),
+                ]),
+            ]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="rule_appel_charge_groupe_portal" model="ir.rule">
+            <field name="name">Extranet : détail par lot des appels visibles</field>
+            <field name="model_id" ref="coproerp_appel_charge.model_coproerp_appel_charge_groupe"/>
+            <field name="groups" eval="[Command.link(ref('base.group_portal'))]"/>
+            <field name="domain_force">[
+                '|',
+                ('appel_id.personne_id', 'in', [user.partner_id.id, user.partner_id.commercial_partner_id.id]),
+                ('copropriete_id.mandat_cs_ids', 'any', [
+                    ('personne_id', 'in', [user.partner_id.id, user.partner_id.commercial_partner_id.id]),
+                    ('en_cours', '=', True),
+                ]),
+            ]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="rule_appel_charge_poste_portal" model="ir.rule">
+            <field name="name">Extranet : postes des appels visibles</field>
+            <field name="model_id" ref="coproerp_appel_charge.model_coproerp_appel_charge_poste"/>
+            <field name="groups" eval="[Command.link(ref('base.group_portal'))]"/>
+            <field name="domain_force">[
+                '|',
+                ('appel_id.personne_id', 'in', [user.partner_id.id, user.partner_id.commercial_partner_id.id]),
+                ('copropriete_id.mandat_cs_ids', 'any', [
+                    ('personne_id', 'in', [user.partner_id.id, user.partner_id.commercial_partner_id.id]),
+                    ('en_cours', '=', True),
+                ]),
+            ]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- Actualités, dématérialisation, RIB                           -->
+        <!-- ============================================================ -->
+        <record id="rule_actualite_portal" model="ir.rule">
+            <field name="name">Extranet : actualités de mes copropriétés</field>
+            <field name="model_id" ref="model_coproerp_actualite"/>
+            <field name="groups" eval="[Command.link(ref('base.group_portal'))]"/>
+            <field name="domain_force">[
+                ('publie', '=', True),
+                ('copropriete_id.extranet_actif', '=', True),
+                '|',
+                ('copropriete_id.droit_ids', 'any', [
+                    ('personne_id', 'in', [user.partner_id.id, user.partner_id.commercial_partner_id.id]),
+                    ('acces_extranet', '=', True),
+                ]),
+                ('copropriete_id.mandat_cs_ids', 'any', [
+                    ('personne_id', 'in', [user.partner_id.id, user.partner_id.commercial_partner_id.id]),
+                    ('en_cours', '=', True),
+                ]),
+            ]</field>
+        </record>
+
+        <record id="rule_demat_portal" model="ir.rule">
+            <field name="name">Extranet : mes accords de dématérialisation</field>
+            <field name="model_id" ref="model_coproerp_demat_consentement"/>
+            <field name="groups" eval="[Command.link(ref('base.group_portal'))]"/>
+            <field name="domain_force">[('personne_id', 'in', [user.partner_id.id, user.partner_id.commercial_partner_id.id])]</field>
+        </record>
+
+        <record id="rule_rib_demande_portal" model="ir.rule">
+            <field name="name">Extranet : mes dépôts de RIB</field>
+            <field name="model_id" ref="model_coproerp_rib_demande"/>
+            <field name="groups" eval="[Command.link(ref('base.group_portal'))]"/>
+            <field name="domain_force">[('personne_id', 'in', [user.partner_id.id, user.partner_id.commercial_partner_id.id])]</field>
+        </record>
+
+    </data>
+</odoo>

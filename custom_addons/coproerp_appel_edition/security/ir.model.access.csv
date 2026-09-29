@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_budget_ligne_user,budget.ligne.user,model_coproerp_budget_ligne,base.group_user,1,1,1,1
+access_travaux_echeance_user,travaux.echeance.user,model_coproerp_travaux_echeance,base.group_user,1,1,1,1

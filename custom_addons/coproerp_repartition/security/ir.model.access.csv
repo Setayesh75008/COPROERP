@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_coproerp_repartition_user,coproerp.repartition.user,model_coproerp_repartition,base.group_user,1,1,1,1
+access_coproerp_repartition_lot_user,coproerp.repartition.lot.user,model_coproerp_repartition_lot,base.group_user,1,1,1,1

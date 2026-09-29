@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_lot_form_appel_edition" model="ir.ui.view">
+        <field name="name">coproerp.lot.form.appel.edition</field>
+        <field name="model">coproerp.lot</field>
+        <field name="inherit_id" ref="coproerp_lot.view_lot_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='etage']" position="after">
+                <field name="escalier"/>
+            </xpath>
+            <xpath expr="//page[.//field[@name='proprietaire_ids']]" position="inside">
+                <group string="Destinataire des appels de fonds">
+                    <group>
+                        <field name="mandataire_commun_id"/>
+                        <field name="propriete_syndicat"/>
+                    </group>
+                    <group>
+                        <button name="action_verifier_destinataires" type="object"
+                                string="Vérifier le destinataire" class="btn-secondary"/>
+                    </group>
+                </group>
+                <div class="text-muted mb-2">
+                    En cas d'indivision ou de démembrement (usufruit / nue-propriété),
+                    les appels sont adressés au mandataire commun (art. 23 de la loi du
+                    10 juillet 1965). Les lots du syndicat sont exclus des appels.
+                </div>
+                <field name="droit_ids" readonly="1">
+                    <list>
+                        <field name="personne_id"/>
+                        <field name="type_droit"/>
+                        <field name="quotite"/>
+                        <field name="date_debut"/>
+                        <field name="date_fin"/>
+                    </list>
+                </field>
+            </xpath>
+        </field>
+    </record>
+</odoo>

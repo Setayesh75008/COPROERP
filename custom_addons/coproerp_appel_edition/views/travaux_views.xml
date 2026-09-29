@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- La liste des financements n'est plus éditable en ligne : un clic
+         ouvre la fiche du financement avec son échéancier. -->
+    <record id="view_travaux_form_appel_edition" model="ir.ui.view">
+        <field name="name">coproerp.travaux.form.appel.edition</field>
+        <field name="model">coproerp.travaux</field>
+        <field name="inherit_id" ref="coproerp_travaux.view_coproerp_travaux_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='financement_ids']/list" position="attributes">
+                <attribute name="editable"/>
+            </xpath>
+            <xpath expr="//field[@name='financement_ids']/list/field[@name='montant_par_appel']" position="after">
+                <field name="honoraires_syndic"/>
+                <field name="total_pourcentage" string="Échéancier (%)"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_travaux_financement_form_appel_edition" model="ir.ui.view">
+        <field name="name">coproerp.travaux.financement.form.appel.edition</field>
+        <field name="model">coproerp.travaux.financement</field>
+        <field name="priority">5</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_generer_echeancier_egal" type="object"
+                            string="Échéancier en parts égales" class="btn-secondary"
+                            invisible="not id"
+                            confirm="Remplacer l'échéancier par des parts égales (selon le nombre d'appels) ?"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="travaux_id"/>
+                            <field name="copropriete_id" invisible="1"/>
+                            <field name="type_financement"/>
+                            <field name="name"/>
+                            <field name="repartition_id"/>
+                        </group>
+                        <group>
+                            <field name="montant_prevu"/>
+                            <field name="honoraires_syndic"/>
+                            <field name="nombre_appels"/>
+                            <field name="date_prevue"/>
+                            <field name="total_pourcentage"
+                                   decoration-danger="total_pourcentage &gt; 100"/>
+                        </group>
+                    </group>
+                    <separator string="Échéancier des appels de fonds"/>
+                    <field name="echeance_ids" context="{'default_financement_id': id}">
+                        <list editable="bottom">
+                            <field name="sequence" widget="handle"/>
+                            <field name="numero" readonly="1"/>
+                            <field name="pourcentage" sum="Total"/>
+                            <field name="name" placeholder="APPEL 40 % RAVALEMENT…"/>
+                            <field name="date_edition"/>
+                            <field name="date_echeance"/>
+                            <field name="montant" sum="Total"/>
+                            <field name="montant_honoraires" sum="Total"/>
+                            <field name="appel_count" string="Appels"/>
+                            <button name="action_generer_appels" type="object" string="Générer"
+                                    icon="fa-cogs" invisible="appel_count or not id"/>
+                            <button name="action_voir_appels" type="object" string="Voir"
+                                    icon="fa-list" invisible="not appel_count"/>
+                        </list>
+                    </field>
+                    <div class="text-muted">
+                        Exemple : 40 % au 15/05, 30 % au 15/09, 30 % au 15/01. Les honoraires
+                        du syndic sont appelés au même pourcentage, sur une ligne distincte.
+                        Enregistrez avant de cliquer sur « Générer ».
+                    </div>
+                    <field name="note" placeholder="Observations…"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

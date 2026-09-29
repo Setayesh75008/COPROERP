@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_coproerp_appel_charge_user,coproerp.appel.charge.user,model_coproerp_appel_charge,base.group_user,1,1,1,1
+access_coproerp_appel_charge_groupe_user,coproerp.appel.charge.groupe.user,model_coproerp_appel_charge_groupe,base.group_user,1,1,1,1
+access_coproerp_appel_charge_poste_user,coproerp.appel.charge.poste.user,model_coproerp_appel_charge_poste,base.group_user,1,1,1,1

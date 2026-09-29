@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Liste -->
+    <record id="view_copropriete_tree" model="ir.ui.view">
+        <field name="name">coproerp.copropriete.tree</field>
+        <field name="model">coproerp.copropriete</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="reference"/>
+                <field name="name"/>
+                <field name="city"/>
+                <field name="siren"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Formulaire -->
+    <record id="view_copropriete_form" model="ir.ui.view">
+        <field name="name">coproerp.copropriete.form</field>
+        <field name="model">coproerp.copropriete</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+
+                    <group>
+                        <field name="reference"/>
+                        <field name="name"/>
+                    </group>
+
+                    <group>
+                        <field name="street"/>
+                        <field name="zip"/>
+                        <field name="city"/>
+                        <field name="country_id"/>
+                    </group>
+
+                    <group>
+                        <field name="siren"/>
+                        <field name="date_creation"/>
+                        <field name="active"/>
+                    </group>
+
+                    <group>
+                        <field name="note"/>
+                    </group>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_copropriete" model="ir.actions.act_window">
+        <field name="name">Copropriétés</field>
+        <field name="res_model">coproerp.copropriete</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Menus -->
+    <menuitem
+        id="menu_coproerp"
+        name="CoproERP"
+        sequence="1"/>
+
+    <menuitem
+        id="menu_coproprietes"
+        name="Copropriétés"
+        parent="menu_coproerp"
+        action="action_copropriete"
+        sequence="10"/>
+
+</odoo>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <menuitem id="menu_extranet_root"
+              name="Extranet"
+              parent="coproerp_copropriete.menu_coproerp_root"
+              sequence="80"/>
+
+    <menuitem id="menu_extranet_documents" name="Documents"
+              parent="menu_extranet_root" action="action_extranet_document" sequence="10"/>
+    <menuitem id="menu_extranet_actualites" name="Actualités"
+              parent="menu_extranet_root" action="action_actualite" sequence="20"/>
+    <menuitem id="menu_extranet_cs" name="Conseils syndicaux"
+              parent="menu_extranet_root" action="action_cs_mandat" sequence="30"/>
+    <menuitem id="menu_extranet_rib" name="Demandes de prélèvement"
+              parent="menu_extranet_root" action="action_rib_demande" sequence="40"/>
+    <menuitem id="menu_extranet_demat" name="Accords de dématérialisation"
+              parent="menu_extranet_root" action="action_demat" sequence="50"/>
+    <menuitem id="menu_extranet_categories" name="Catégories de documents"
+              parent="menu_extranet_root" action="action_document_categorie" sequence="90"/>
+
+</odoo>

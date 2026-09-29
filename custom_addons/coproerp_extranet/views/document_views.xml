@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- ===================== Catégories ===================== -->
+    <record id="view_document_categorie_list" model="ir.ui.view">
+        <field name="name">coproerp.extranet.document.categorie.list</field>
+        <field name="model">coproerp.extranet.document.categorie</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="visibilite_defaut"/>
+                <field name="obligatoire"/>
+                <field name="reference_legale"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_document_categorie" model="ir.actions.act_window">
+        <field name="name">Catégories de documents</field>
+        <field name="res_model">coproerp.extranet.document.categorie</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- ===================== Documents ===================== -->
+    <record id="view_extranet_document_list" model="ir.ui.view">
+        <field name="name">coproerp.extranet.document.list</field>
+        <field name="model">coproerp.extranet.document</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="not publie">
+                <field name="date_document"/>
+                <field name="copropriete_id"/>
+                <field name="categorie_id"/>
+                <field name="name"/>
+                <field name="visibilite"/>
+                <field name="personne_id" optional="show"/>
+                <field name="publie"/>
+                <field name="lecture_count" string="Consultations" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_extranet_document_form" model="ir.ui.view">
+        <field name="name">coproerp.extranet.document.form</field>
+        <field name="model">coproerp.extranet.document</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_publier" type="object" string="Publier sur l'extranet"
+                            class="btn-primary" invisible="publie"
+                            confirm="Le document sera visible des destinataires et une alerte e-mail leur sera envoyée. Continuer ?"/>
+                    <button name="action_depublier" type="object" string="Retirer de l'extranet"
+                            invisible="not publie"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Publié" invisible="not publie"/>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Titre du document"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="copropriete_id"/>
+                            <field name="categorie_id"/>
+                            <field name="visibilite"/>
+                            <field name="personne_id"
+                                   invisible="visibilite != 'personnel'"
+                                   required="visibilite == 'personnel'"/>
+                            <field name="appel_id" invisible="visibilite != 'personnel'"
+                                   domain="[('copropriete_id', '=', copropriete_id), ('personne_id', '=', personne_id)]"/>
+                        </group>
+                        <group>
+                            <field name="fichier" filename="nom_fichier"/>
+                            <field name="nom_fichier" invisible="1"/>
+                            <field name="date_document"/>
+                            <field name="publie" readonly="1"/>
+                            <field name="date_publication"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description">
+                            <field name="description" placeholder="Informations complémentaires affichées sur l'extranet"/>
+                        </page>
+                        <page string="Consultations">
+                            <field name="lecture_ids">
+                                <list>
+                                    <field name="personne_id"/>
+                                    <field name="date_lecture"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_extranet_document_search" model="ir.ui.view">
+        <field name="name">coproerp.extranet.document.search</field>
+        <field name="model">coproerp.extranet.document</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="copropriete_id"/>
+                <field name="categorie_id"/>
+                <field name="personne_id"/>
+                <filter name="non_publie" string="Non publiés" domain="[('publie', '=', False)]"/>
+                <filter name="publie" string="Publiés" domain="[('publie', '=', True)]"/>
+                <separator/>
+                <filter name="tous" string="Tous les copropriétaires" domain="[('visibilite', '=', 'tous')]"/>
+                <filter name="cs" string="Conseil syndical" domain="[('visibilite', '=', 'conseil_syndical')]"/>
+                <filter name="personnel" string="Personnels" domain="[('visibilite', '=', 'personnel')]"/>
+                <group>
+                    <filter name="group_copro" string="Copropriété" context="{'group_by': 'copropriete_id'}"/>
+                    <filter name="group_categorie" string="Catégorie" context="{'group_by': 'categorie_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_extranet_document" model="ir.actions.act_window">
+        <field name="name">Documents extranet</field>
+        <field name="res_model">coproerp.extranet.document</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Déposez un premier document</p>
+            <p>Choisissez la copropriété, la catégorie et qui peut le voir, puis cliquez sur « Publier ».</p>
+        </field>
+    </record>
+
+</odoo>

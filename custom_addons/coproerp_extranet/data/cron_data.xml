@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Chaque nuit : ouvre / ferme l'accès selon les dates de début et de fin -->
+        <record id="cron_maj_acces_droits" model="ir.cron">
+            <field name="name">Extranet : mise à jour des accès (droits sur les lots)</field>
+            <field name="model_id" ref="coproerp_droit.model_coproerp_droit"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_maj_acces_extranet()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="nextcall" eval="(DateTime.now().replace(hour=1, minute=5) + timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        </record>
+
+        <record id="cron_maj_mandats_cs" model="ir.cron">
+            <field name="name">Extranet : mise à jour des mandats du conseil syndical</field>
+            <field name="model_id" ref="model_coproerp_cs_mandat"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_maj_en_cours()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="nextcall" eval="(DateTime.now().replace(hour=1, minute=10) + timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        </record>
+    </data>
+</odoo>

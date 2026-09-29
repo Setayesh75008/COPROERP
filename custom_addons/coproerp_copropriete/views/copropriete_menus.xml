@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- Menu principal CoproERP -->
+    <menuitem
+        id="menu_coproerp_root"
+        name="CoproERP"
+        sequence="10"/>
+
+    <!-- Menu Copropriétés -->
+    <menuitem
+        id="menu_coproprietes"
+        name="Copropriétés"
+        parent="menu_coproerp_root"
+        action="action_coproprietes"
+        sequence="10"/>
+
+</odoo>
