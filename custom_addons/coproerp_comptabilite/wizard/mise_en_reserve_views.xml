@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_mise_en_reserve_form" model="ir.ui.view">
+        <field name="name">coproerp.mise.en.reserve.form</field>
+        <field name="model">coproerp.mise.en.reserve</field>
+        <field name="arch" type="xml">
+            <form>
+                <p>Le solde des allocations de fonds de travaux (705) à la date de clôture est viré
+                   au fonds de travaux (105), copropriétaire par copropriétaire.</p>
+                <group>
+                    <field name="copropriete_id"/>
+                    <field name="date_cloture"/>
+                </group>
+                <footer>
+                    <button name="action_valider" type="object" string="Passer l'écriture" class="btn-primary"/>
+                    <button string="Annuler" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

@@ -25,6 +25,7 @@
                 <div class="row">
                     <div class="col-6">
                         <h4 style="letter-spacing: 1px;"><b>APPEL DE FONDS</b></h4>
+                        <div t-if="avis.get('projet')" class="text-danger fw-bold mb-1">PROJET — non comptabilisé</div>
                         <table class="table table-sm table-borderless mb-0" style="font-size: 9.5pt;">
                             <tr><td class="p-0 pe-2">Date :</td>
                                 <td class="p-0"><t t-out="avis['date_edition'].strftime('%d/%m/%Y')"/></td></tr>
@@ -114,10 +115,53 @@
                     </tbody>
                 </table>
 
+                <!-- Relevé de compte (si la comptabilité est tenue) -->
+                <t t-if="avis.get('releve')">
+                    <t t-set="rel" t-value="avis['releve']"/>
+                    <table class="table table-sm table-borderless mb-1" style="font-size: 9pt;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid #333;">
+                                <th style="width: 14%;">Date</th>
+                                <th>Relevé de compte</th>
+                                <th class="text-end" style="width: 16%;">Débit</th>
+                                <th class="text-end" style="width: 16%;">Crédit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-if="rel['date_precedent']">
+                                <td/>
+                                <td>SOLDE DU PRÉCÉDENT RELEVÉ DU <t t-out="rel['date_precedent'].strftime('%d/%m/%Y')"/></td>
+                                <td class="text-end"><t t-if="rel['solde_precedent'] &gt; 0" t-out="rel['solde_precedent']" t-options="montant"/></td>
+                                <td class="text-end"><t t-if="rel['solde_precedent'] &lt; 0" t-out="-rel['solde_precedent']" t-options="montant"/></td>
+                            </tr>
+                            <tr t-foreach="rel['mouvements']" t-as="m">
+                                <td><t t-out="m['date'].strftime('%d/%m/%Y')"/></td>
+                                <td><t t-out="m['libelle'] or ''"/></td>
+                                <td class="text-end"><t t-if="m['debit']" t-out="m['debit']" t-options="montant"/></td>
+                                <td class="text-end"><t t-if="m['credit']" t-out="m['credit']" t-options="montant"/></td>
+                            </tr>
+                            <tr style="border-top: 1px solid #333;">
+                                <td/>
+                                <td><b>SOLDE AU <t t-out="rel['date_solde'].strftime('%d/%m/%Y')"/></b></td>
+                                <td class="text-end"><b t-if="rel['solde'] &gt; 0" t-out="rel['solde']" t-options="montant"/></td>
+                                <td class="text-end"><b t-if="rel['solde'] &lt; 0" t-out="-rel['solde']" t-options="montant"/></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div t-if="avis.get('fonds')" class="mb-2" style="font-size: 9pt;">
+                        Fonds de roulement : <t t-out="avis['fonds']['fonds_roulement']" t-options="montant"/> € CR
+                        — Fonds de travaux : <t t-out="avis['fonds']['fonds_travaux']" t-options="montant"/> € CR
+                    </div>
+                </t>
+
                 <!-- Règlement -->
                 <div class="row mt-2" style="font-size: 9.5pt;">
                     <div class="col-7">
-                        <div><b>À régler avant le <t t-out="avis['date_echeance'].strftime('%d/%m/%Y')"/></b></div>
+                        <div><b>Montant à régler : <t t-out="avis['a_regler']" t-options="montant"/> €
+                            avant le <t t-out="avis['date_echeance'].strftime('%d/%m/%Y')"/></b></div>
+                        <div t-if="avis.get('releve') and avis['releve']['solde'] &lt; 0" class="fst-italic">
+                            Votre compte est créditeur : aucun règlement n'est à effectuer.
+                        </div>
                         <t t-if="copro.banque_iban">
                             <div class="mt-1">Virement à réaliser sur le compte :</div>
                             <div t-if="copro.banque_titulaire" t-out="copro.banque_titulaire"/>
@@ -146,7 +190,7 @@
                         </div>
                         <div class="col-4 text-end">
                             <div>Montant</div>
-                            <div style="font-size: 12pt;"><b t-out="avis['total']" t-options="montant"/> €</div>
+                            <div style="font-size: 12pt;"><b t-out="avis['a_regler']" t-options="montant"/> €</div>
                         </div>
                     </div>
                 </div>

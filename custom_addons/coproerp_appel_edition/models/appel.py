@@ -74,12 +74,18 @@ class AppelCharge(models.Model):
                 "libelle_echeance": premier.libelle_echeance,
                 "lots": lots,
                 "total": float_round(sum(appels.mapped("total_appel")), precision_digits=2),
+                # Complétés par le module de comptabilité s'il est installé
+                "projet": False,
+                "releve": False,
+                "fonds": False,
                 "reference": "%s %s %s" % (
                     premier.copropriete_id.reference or premier.copropriete_id.id,
                     premier.personne_id.ref or str(premier.personne_id.id).zfill(7),
                     premier.reference or "",
                 ),
             })
+        for a in avis:
+            a["a_regler"] = a["total"]
         return avis
 
     @api.model

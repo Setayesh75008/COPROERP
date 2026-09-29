@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_mise_en_reserve" model="ir.actions.act_window">
+        <field name="name">Mise en réserve du fonds de travaux</field>
+        <field name="res_model">coproerp.mise.en.reserve</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="view_copropriete_form_comptabilite" model="ir.ui.view">
+        <field name="name">coproerp.copropriete.form.comptabilite</field>
+        <field name="model">coproerp.copropriete</field>
+        <field name="inherit_id" ref="coproerp_copropriete.view_copropriete_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Comptabilité" name="comptabilite">
+                    <div class="mb-3">
+                        <button name="action_creer_dossier_comptable" type="object"
+                                string="Créer le dossier comptable" class="btn-primary"
+                                invisible="company_id"
+                                confirm="Créer la comptabilité propre à ce syndicat (plan comptable des copropriétés, journaux scellés) ?"/>
+                        <button name="action_ouvrir_comptabilite" type="object"
+                                string="Voir les écritures" class="btn-secondary me-2"
+                                invisible="not company_id"/>
+                        <button name="%(action_mise_en_reserve)d" type="action"
+                                string="Mettre en réserve le fonds de travaux (clôture)"
+                                class="btn-secondary" invisible="not company_id"
+                                context="{'default_copropriete_id': id}"/>
+                    </div>
+                    <group>
+                        <field name="company_id"/>
+                    </group>
+                    <group string="Comptes utilisés par les écritures automatiques">
+                        <group string="Copropriétaires (débit à l'appel)">
+                            <field name="compte_copro_budget"/>
+                            <field name="compte_copro_fonds"/>
+                            <field name="compte_copro_travaux"/>
+                            <field name="compte_copro_avances"/>
+                        </group>
+                        <group string="Contrepartie (crédit à l'appel)">
+                            <field name="compte_produit_budget"/>
+                            <field name="compte_produit_fonds"/>
+                            <field name="compte_produit_travaux"/>
+                            <field name="compte_avances"/>
+                            <field name="compte_reserve_fonds"/>
+                        </group>
+                    </group>
+                    <div class="text-muted">
+                        Budget courant : 450010 / 701000 — Fonds de travaux : 450050 / 705000,
+                        mis en réserve au 105000 à la clôture — Travaux : 450020 / 702000 —
+                        Avances : 450030 / 103100. Pour tenir la comptabilité de l'immeuble,
+                        sélectionnez « SDC … » dans le sélecteur de sociétés en haut à droite.
+                    </div>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

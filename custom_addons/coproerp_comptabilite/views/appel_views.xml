@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_appel_charge_form_comptabilite" model="ir.ui.view">
+        <field name="name">coproerp.appel.charge.form.comptabilite</field>
+        <field name="model">coproerp.appel.charge</field>
+        <field name="inherit_id" ref="coproerp_appel_edition.view_appel_charge_form_appel_edition"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_comptabiliser" type="object" string="Comptabiliser"
+                        class="oe_highlight" invisible="etat_comptable != 'projet'"
+                        confirm="L'écriture comptable sera validée et scellée : l'appel ne pourra plus être modifié. Continuer ?"/>
+                <button name="action_annuler_comptabilisation" type="object" string="Annuler (contre-passation)"
+                        invisible="etat_comptable != 'comptabilise'"
+                        confirm="Une écriture inverse sera passée ; l'appel restera visible comme annulé. Continuer ?"/>
+                <field name="etat_comptable" widget="statusbar" statusbar_visible="projet,comptabilise"/>
+            </xpath>
+            <xpath expr="//field[@name='libelle_echeance']" position="after">
+                <field name="move_id" invisible="not move_id"/>
+                <field name="move_annulation_id" invisible="not move_annulation_id"/>
+                <field name="montant_restant" invisible="etat_comptable != 'comptabilise'"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_appel_charge_list_comptabilite" model="ir.ui.view">
+        <field name="name">coproerp.appel.charge.list.comptabilite</field>
+        <field name="model">coproerp.appel.charge</field>
+        <field name="inherit_id" ref="coproerp_appel_charge.view_appel_charge_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='total_appel']" position="after">
+                <field name="etat_comptable" widget="badge"
+                       decoration-success="etat_comptable == 'comptabilise'"
+                       decoration-muted="etat_comptable == 'annule'"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_server_comptabiliser_appels" model="ir.actions.server">
+        <field name="name">Comptabiliser les appels</field>
+        <field name="model_id" ref="coproerp_appel_charge.model_coproerp_appel_charge"/>
+        <field name="binding_model_id" ref="coproerp_appel_charge.model_coproerp_appel_charge"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">records.action_comptabiliser()</field>
+    </record>
+</odoo>
