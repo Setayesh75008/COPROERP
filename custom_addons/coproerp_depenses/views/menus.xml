@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <menuitem id="menu_depenses" name="Factures fournisseurs"
+              parent="coproerp_comptabilite.menu_comptabilite_root" action="action_depense" sequence="20"/>
+    <menuitem id="menu_paiements_fournisseurs" name="Paiements fournisseurs"
+              parent="coproerp_comptabilite.menu_comptabilite_root" action="action_depense_paiement" sequence="30"/>
+    <menuitem id="menu_natures_depense" name="Natures de dépenses"
+              parent="coproerp_comptabilite.menu_comptabilite_root" action="action_nature_depense" sequence="90"/>
+</odoo>

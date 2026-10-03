@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="nature_601" model="coproerp.nature.depense">
+            <field name="code">601000</field>
+            <field name="name">Eau</field>
+            <field name="travaux" eval="False"/>
+        </record>
+        <record id="nature_602" model="coproerp.nature.depense">
+            <field name="code">602000</field>
+            <field name="name">Électricité</field>
+            <field name="travaux" eval="False"/>
+        </record>
+        <record id="nature_603" model="coproerp.nature.depense">
+            <field name="code">603000</field>
+            <field name="name">Chauffage, énergie et combustibles</field>
+            <field name="travaux" eval="False"/>
+        </record>
+        <record id="nature_604" model="coproerp.nature.depense">
+            <field name="code">604000</field>
+            <field name="name">Achats de produits d'entretien et petits équipements</field>
+            <field name="travaux" eval="False"/>
+        </record>
+        <record id="nature_605" model="coproerp.nature.depense">
+            <field name="code">605000</field>
+            <field name="name">Matériel</field>
+            <field name="travaux" eval="False"/>
+        </record>
+        <record id="nature_606" model="coproerp.nature.depense">
+            <field name="code">606000</field>
+            <field name="name">Fournitures</field>
+            <field name="travaux" eval="False"/>
+        </record>
+        <record id="nature_611" model="coproerp.nature.depense">
+            <field name="code">611000</field>
+            <field name="name">Nettoyage des locaux</field>
+            <field name="travaux" eval="False"/>
+        </record>
+        <record id="nature_612" model="coproerp.nature.depense">
+            <field name="code">612000</field>
+            <field name="name">Locations immobilières</field>
+            <field name="travaux" eval="False"/>
+        </record>
+        <record id="nature_613" model="coproerp.nature.depense">
+            <field name="code">613000</field>
+            <field name="name">Locations mobilières</field>
+            <field name="travaux" eval="False"/>
+        </record>
+        <record id="nature_614" model="coproerp.nature.depense">
+            <field name="code">614000</field>
+            <field name="name">Contrats de maintenance</field>
+            <field name="travaux" eval="False"/>
+        </record>
+        <record id="nature_615" model="coproerp.nature.depense">
+            <field name="code">615000</field>
+            <field name="name">Entretien et petites réparations</field>
+            <field name="travaux" eval="False"/>
+        </record>
+        <record id="nature_616" model="coproerp.nature.depense">
+            <field name="code">616000</field>
+            <field name="name">Primes d'assurances</field>
+            <field name="travaux" eval="False"/>
+        </record>
+        <record id="nature_621" model="coproerp.nature.depense">
+            <field name="code">621000</field>
+            <field name="name">Rémunération du syndic sur gestion copropriété</field>
+            <field name="travaux" eval="False"/>
+        </record>
+        <record id="nature_622" model="coproerp.nature.depense">
+            <field name="code">622000</field>
+            <field name="name">Autres honoraires du syndic (dont travaux)</field>
+            <field name="travaux" eval="False"/>
+        </record>
+        <record id="nature_623" model="coproerp.nature.depense">
+            <field name="code">623000</field>
+            <field name="name">Rémunérations de tiers intervenants</field>
+            <field name="travaux" eval="False"/>
+        </record>
+        <record id="nature_624" model="coproerp.nature.depense">
+            <field name="code">624000</field>
+            <field name="name">Frais du conseil syndical</field>
+            <field name="travaux" eval="False"/>
+        </record>
+        <record id="nature_632" model="coproerp.nature.depense">
+            <field name="code">632000</field>
+            <field name="name">Taxe de balayage</field>
+            <field name="travaux" eval="False"/>
+        </record>
+        <record id="nature_633" model="coproerp.nature.depense">
+            <field name="code">633000</field>
+            <field name="name">Taxe foncière</field>
+            <field name="travaux" eval="False"/>
+        </record>
+        <record id="nature_634" model="coproerp.nature.depense">
+            <field name="code">634000</field>
+            <field name="name">Autres impôts et taxes</field>
+            <field name="travaux" eval="False"/>
+        </record>
+        <record id="nature_641" model="coproerp.nature.depense">
+            <field name="code">641000</field>
+            <field name="name">Salaires</field>
+            <field name="travaux" eval="False"/>
+        </record>
+        <record id="nature_642" model="coproerp.nature.depense">
+            <field name="code">642000</field>
+            <field name="name">Charges sociales et organismes sociaux</field>
+            <field name="travaux" eval="False"/>
+        </record>
+        <record id="nature_643" model="coproerp.nature.depense">
+            <field name="code">643000</field>
+            <field name="name">Taxe sur les salaires</field>
+            <field name="travaux" eval="False"/>
+        </record>
+        <record id="nature_644" model="coproerp.nature.depense">
+            <field name="code">644000</field>
+            <field name="name">Autres charges de personnel</field>
+            <field name="travaux" eval="False"/>
+        </record>
+        <record id="nature_661" model="coproerp.nature.depense">
+            <field name="code">661000</field>
+            <field name="name">Remboursement d'annuités d'emprunt</field>
+            <field name="travaux" eval="False"/>
+        </record>
+        <record id="nature_662" model="coproerp.nature.depense">
+            <field name="code">662000</field>
+            <field name="name">Autres charges financières et agios</field>
+            <field name="travaux" eval="False"/>
+        </record>
+        <record id="nature_671" model="coproerp.nature.depense">
+            <field name="code">671000</field>
+            <field name="name">Travaux décidés par l'assemblée générale</field>
+            <field name="travaux" eval="True"/>
+        </record>
+        <record id="nature_672" model="coproerp.nature.depense">
+            <field name="code">672000</field>
+            <field name="name">Travaux urgents</field>
+            <field name="travaux" eval="False"/>
+        </record>
+        <record id="nature_673" model="coproerp.nature.depense">
+            <field name="code">673000</field>
+            <field name="name">Études techniques, diagnostics, consultations</field>
+            <field name="travaux" eval="False"/>
+        </record>
+        <record id="nature_678" model="coproerp.nature.depense">
+            <field name="code">678000</field>
+            <field name="name">Charges exceptionnelles</field>
+            <field name="travaux" eval="False"/>
+        </record>
+    </data>
+</odoo>

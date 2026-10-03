@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_nature_depense_user,nature.depense.user,model_coproerp_nature_depense,base.group_user,1,1,1,0
+access_depense_user,depense.user,model_coproerp_depense,base.group_user,1,1,1,1
+access_depense_ligne_user,depense.ligne.user,model_coproerp_depense_ligne,base.group_user,1,1,1,1
+access_depense_paiement_user,depense.paiement.user,model_coproerp_depense_paiement,base.group_user,1,1,1,1

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_depense_list" model="ir.ui.view">
+        <field name="name">coproerp.depense.list</field>
+        <field name="model">coproerp.depense</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="etat == 'annulee'" decoration-info="etat == 'brouillon'">
+                <field name="date_facture"/>
+                <field name="name"/>
+                <field name="copropriete_id"/>
+                <field name="fournisseur_id"/>
+                <field name="reference_fournisseur"/>
+                <field name="date_echeance" optional="show"/>
+                <field name="montant_total" sum="Total"/>
+                <field name="est_payee" string="Payée" optional="show"/>
+                <field name="etat" widget="badge"
+                       decoration-info="etat == 'brouillon'" decoration-success="etat == 'validee'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_depense_form" model="ir.ui.view">
+        <field name="name">coproerp.depense.form</field>
+        <field name="model">coproerp.depense</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_valider" type="object" string="Comptabiliser"
+                            class="oe_highlight" invisible="etat != 'brouillon'"
+                            confirm="La facture sera comptabilisée et ne pourra plus être modifiée. Continuer ?"/>
+                    <button name="action_enregistrer_paiement" type="object" string="Enregistrer un paiement"
+                            class="oe_highlight" invisible="etat != 'validee' or est_payee"/>
+                    <button name="action_annuler" type="object" string="Annuler la facture"
+                            invisible="etat != 'validee'"
+                            confirm="Une écriture inverse sera passée. Continuer ?"/>
+                    <field name="etat" widget="statusbar" statusbar_visible="brouillon,validee"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Payée" bg_color="text-bg-success" invisible="not est_payee"/>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="copropriete_id" readonly="etat != 'brouillon'"/>
+                            <field name="fournisseur_id" readonly="etat != 'brouillon'"/>
+                            <field name="reference_fournisseur" readonly="etat != 'brouillon'"/>
+                            <field name="travaux_id" readonly="etat != 'brouillon'"
+                                   invisible="not copropriete_id"/>
+                        </group>
+                        <group>
+                            <field name="date_facture" readonly="etat != 'brouillon'"/>
+                            <field name="date_echeance" readonly="etat != 'brouillon'"/>
+                            <field name="budget_id"/>
+                            <field name="montant_total"/>
+                            <field name="montant_restant" invisible="etat != 'validee'"/>
+                            <field name="est_payee" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Ventilation" name="ventilation">
+                            <field name="ligne_ids" readonly="etat != 'brouillon'">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="copropriete_id" column_invisible="True"/>
+                                    <field name="nature_id"/>
+                                    <field name="designation"/>
+                                    <field name="repartition_id"/>
+                                    <field name="montant" sum="Total TTC"/>
+                                </list>
+                            </field>
+                            <div class="text-muted">
+                                Montants TTC : le syndicat ne récupère pas la TVA. La clé de
+                                répartition détermine les copropriétaires qui supporteront la dépense.
+                                Les travaux décidés par l'assemblée (compte 671) sont rattachés à une
+                                opération de travaux et suivis hors budget.
+                            </div>
+                        </page>
+                        <page string="Paiements" name="paiements" invisible="etat == 'brouillon'">
+                            <field name="paiement_ids" readonly="1">
+                                <list decoration-muted="etat == 'annule'">
+                                    <field name="date"/>
+                                    <field name="name"/>
+                                    <field name="mode"/>
+                                    <field name="reference"/>
+                                    <field name="montant" sum="Total"/>
+                                    <field name="etat" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Facture et comptabilité" name="justificatif">
+                            <group>
+                                <field name="justificatif" filename="justificatif_nom"/>
+                                <field name="justificatif_nom" invisible="1"/>
+                                <field name="move_id" invisible="not move_id"/>
+                                <field name="move_annulation_id" invisible="not move_annulation_id"/>
+                                <field name="note"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_depense_search" model="ir.ui.view">
+        <field name="name">coproerp.depense.search</field>
+        <field name="model">coproerp.depense</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="fournisseur_id"/>
+                <field name="reference_fournisseur"/>
+                <field name="copropriete_id"/>
+                <field name="name"/>
+                <filter name="brouillon" string="À comptabiliser" domain="[('etat', '=', 'brouillon')]"/>
+                <filter name="a_payer" string="À payer"
+                        domain="[('etat', '=', 'validee'), ('est_payee', '=', False)]"/>
+                <filter name="payees" string="Payées" domain="[('est_payee', '=', True)]"/>
+                <separator/>
+                <filter name="travaux" string="Travaux" domain="[('travaux_id', '!=', False)]"/>
+                <group>
+                    <filter name="group_copro" string="Copropriété" context="{'group_by': 'copropriete_id'}"/>
+                    <filter name="group_fournisseur" string="Fournisseur" context="{'group_by': 'fournisseur_id'}"/>
+                    <filter name="group_budget" string="Exercice" context="{'group_by': 'budget_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_depense" model="ir.actions.act_window">
+        <field name="name">Factures fournisseurs</field>
+        <field name="res_model">coproerp.depense</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Saisir une facture fournisseur</p>
+            <p>Indiquez la copropriété, le fournisseur et la ventilation de la facture
+            (nature de la dépense et clé de répartition), puis comptabilisez-la.</p>
+        </field>
+    </record>
+</odoo>

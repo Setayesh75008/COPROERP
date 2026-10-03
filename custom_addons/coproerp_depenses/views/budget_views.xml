@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_budget_annuel_form_depenses" model="ir.ui.view">
+        <field name="name">coproerp.budget.annuel.form.depenses</field>
+        <field name="model">coproerp.budget.annuel</field>
+        <field name="inherit_id" ref="coproerp_appel_edition.view_budget_annuel_form_appel_edition"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='ligne_ids']/list/field[@name='montant_par_appel']" position="after">
+                <field name="montant_realise" sum="Total réalisé"/>
+                <field name="ecart_realise" sum="Écart"
+                       decoration-danger="ecart_realise &lt; 0" decoration-success="ecart_realise &gt;= 0"/>
+            </xpath>
+            <xpath expr="//field[@name='ecart_ventilation']" position="after">
+                <field name="total_realise"/>
+            </xpath>
+            <xpath expr="//button[@name='action_voir_appels_budget']" position="after">
+                <button name="action_voir_depenses" type="object" string="Voir les factures"
+                        class="btn-secondary"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
