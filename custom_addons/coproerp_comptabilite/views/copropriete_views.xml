@@ -19,6 +19,11 @@
                                 string="Créer le dossier comptable" class="btn-primary"
                                 invisible="company_id"
                                 confirm="Créer la comptabilité propre à ce syndicat (plan comptable des copropriétés, journaux scellés) ?"/>
+                        <field name="dossier_a_reparer" invisible="1"/>
+                        <button name="action_reparer_dossier_comptable" type="object"
+                                string="Réparer le dossier comptable" class="btn-primary me-2"
+                                invisible="not dossier_a_reparer"
+                                confirm="Réinstaller le plan comptable des copropriétés dans ce dossier ? (possible uniquement s'il ne contient aucune écriture)"/>
                         <button name="action_ouvrir_comptabilite" type="object"
                                 string="Voir les écritures" class="btn-secondary me-2"
                                 invisible="not company_id"/>

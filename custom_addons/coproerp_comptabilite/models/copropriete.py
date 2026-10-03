@@ -64,6 +64,9 @@ class Copropriete(models.Model):
             "company_registry": self.siret or False,
             "fiscalyear_last_day": fin.day if fin else 31,
             "fiscalyear_last_month": str(fin.month) if fin else "12",
+            # Protège le dossier contre le chargement automatique du plan
+            # comptable général français (voir coproerp_plan_comptable).
+            "coproerp_dossier_copro": True,
         })
         # Les utilisateurs internes du cabinet accèdent au nouveau dossier.
         utilisateurs = self.env["res.users"].sudo().search([
@@ -73,8 +76,15 @@ class Copropriete(models.Model):
         utilisateurs.write({"company_ids": [Command.link(company.id)]})
 
         self.env["account.chart.template"].sudo().try_loading("copro_fr", company, install_demo=False)
+        self.company_id = company
+        self._configurer_dossier_comptable(company)
+        return company
 
-        company.sudo().restrictive_audit_trail = True
+    def _configurer_dossier_comptable(self, company):
+        """Réglages du dossier après chargement du plan comptable."""
+        self.ensure_one()
+        company = company.sudo()
+        company.restrictive_audit_trail = True
         journaux = self.env["account.journal"].sudo().search([
             ("company_id", "=", company.id),
             ("code", "in", list(JOURNAUX.values())),
@@ -82,14 +92,41 @@ class Copropriete(models.Model):
         # Inaltérabilité : les écritures validées sont scellées (chaînage).
         journaux.write({"restrict_mode_hash_table": True})
         banque = journaux.filtered(lambda j: j.code == JOURNAUX["banque"])
-        if banque and self.banque_iban:
-            compte_bancaire = self.env["res.partner.bank"].sudo().create({
+        if banque and self.banque_iban and not banque.bank_account_id:
+            Banque = self.env["res.partner.bank"].sudo().with_context(active_test=False)
+            iban = self.banque_iban.replace(" ", "").upper()
+            compte_bancaire = Banque.search([
+                ("partner_id", "=", company.partner_id.id),
+                ("sanitized_acc_number", "=", iban),
+            ], limit=1) or Banque.create({
                 "acc_number": self.banque_iban,
                 "partner_id": company.partner_id.id,
             })
             banque.bank_account_id = compte_bancaire
-        self.company_id = company
-        return company
+
+    # ------------------------------------------------------------------
+    # Réparation d'un dossier dont le plan comptable a été remplacé
+    # ------------------------------------------------------------------
+    dossier_a_reparer = fields.Boolean(compute="_compute_dossier_a_reparer")
+
+    def _compute_dossier_a_reparer(self):
+        for copro in self:
+            copro.dossier_a_reparer = bool(
+                copro.company_id and copro.company_id.sudo().chart_template != "copro_fr"
+            )
+
+    def action_reparer_dossier_comptable(self):
+        for copro in self.filtered("dossier_a_reparer"):
+            company = copro.company_id.sudo()
+            if self.env["account.move"].sudo().search_count([("company_id", "=", company.id)]):
+                raise UserError(
+                    "Le dossier comptable de %s contient déjà des écritures : il ne peut "
+                    "pas être réparé automatiquement." % copro.name
+                )
+            company.coproerp_dossier_copro = True
+            self.env["account.chart.template"].sudo().try_loading("copro_fr", company, install_demo=False)
+            copro._configurer_dossier_comptable(company)
+        return True
 
     # ------------------------------------------------------------------
     # Outils comptables
@@ -101,7 +138,15 @@ class Copropriete(models.Model):
                 "La copropriété %s n'a pas de dossier comptable : créez-le depuis sa "
                 "fiche (onglet Comptabilité)." % self.name
             )
-        return self.company_id
+        if self.company_id.sudo().chart_template != "copro_fr":
+            raise UserError(
+                "Le dossier comptable de %s n'a pas le plan comptable des copropriétés. "
+                "Fiche de la copropriété, onglet Comptabilité : cliquez sur "
+                "« Réparer le dossier comptable »." % self.name
+            )
+        # sudo : la fiche de la société doit rester lisible (devise, etc.)
+        # même si l'utilisateur ne l'a pas cochée dans le sélecteur de sociétés.
+        return self.company_id.sudo()
 
     def _compte(self, code):
         company = self._verifier_dossier()
@@ -130,7 +175,7 @@ class Copropriete(models.Model):
 
     def _journal(self, cle):
         company = self._verifier_dossier()
-        journal = self.env["account.journal"].search(
+        journal = self.env["account.journal"].with_company(company).search(
             [("company_id", "=", company.id), ("code", "=", JOURNAUX[cle])], limit=1
         )
         if not journal:
@@ -269,6 +314,9 @@ class Copropriete(models.Model):
         copropriétaire (pour conserver le cumul par copropriétaire)."""
         self.ensure_one()
         company = self._verifier_dossier()
+        # Travaille dans la société de la copropriété, même si l'utilisateur
+        # ne l'a pas cochée dans le sélecteur de sociétés.
+        self = self.with_company(company)
         compte_705 = self._compte(self.compte_produit_fonds)
         compte_105 = self._compte(self.compte_reserve_fonds)
         lignes = self.env["account.move.line"].search([

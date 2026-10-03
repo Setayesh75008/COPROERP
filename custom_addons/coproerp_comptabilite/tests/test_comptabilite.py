@@ -169,6 +169,25 @@ class TestComptabilite(TransactionCase):
         self.assertIn("SOLDE AU", html)
         self.assertIn("PROJET", html)
 
+    def test_releve_inclut_reglements_posterieurs_a_l_echeance(self):
+        """Avis imprimé après l'échéance : les règlements déjà reçus (même
+        datés après l'échéance) doivent apparaître dans le relevé."""
+        appels = self._premier_trimestre()
+        appels.action_comptabiliser()
+        self.budget.action_generer_appel_budget_suivant()
+        suivant = self._appels(budget_origine_id=self.budget.id, numero_appel_budget=2,
+                               personne_id=self.alice.id)
+        # Règlement daté après l'échéance du 2e trimestre (01/04/2026)
+        self.env["coproerp.reglement"].create({
+            "copropriete_id": self.copro.id, "personne_id": self.alice.id,
+            "date": date(2026, 5, 15), "montant": 1500.0}).action_valider()
+        avis = suivant.with_context(tz="Europe/Paris").avis_regroupes()[0]
+        releve = avis["releve"]
+        # 1200 (T1) - 1500 + 1200 (T2, projet) = 900, si l'avis est imprimé après le 15/05/2026
+        if releve["date_solde"] >= date(2026, 5, 15):
+            self.assertAlmostEqual(releve["solde"], 900.0)
+            self.assertAlmostEqual(avis["a_regler"], 900.0)
+
     def test_extranet_solde_reel_et_cloisonnement(self):
         appels = self._premier_trimestre()
         appels.action_comptabiliser()
@@ -181,6 +200,69 @@ class TestComptabilite(TransactionCase):
         self.assertEqual({m["personne_id"] for m in vues}, {self.alice.id})
         vues = self.copro.with_user(user_alice)._extranet_mouvements()
         self.assertEqual({m["personne_id"] for m in vues}, {self.alice.id})
+
+    def _plan_fr_disponible(self):
+        return "fr" in self.env["account.chart.template"]._get_chart_template_mapping(get_all=True)
+
+    def test_plan_general_ne_remplace_pas_le_plan_copro(self):
+        """Odoo peut charger le plan général « fr » sur une société française
+        au moment de l'enregistrement : il doit être ignoré pour un dossier
+        de copropriété."""
+        if not self._plan_fr_disponible():
+            self.skipTest("Plan comptable français (l10n_fr) non installé")
+        self.assertTrue(self.company.coproerp_dossier_copro)
+        self.env["account.chart.template"]._load("fr", self.company, install_demo=False)
+        self.assertEqual(self.company.chart_template, "copro_fr")
+        self.assertTrue(self.copro._compte("450010"))
+        self.assertTrue(self.copro._journal("appels"))
+
+    def test_reparation_dossier(self):
+        if not self._plan_fr_disponible():
+            self.skipTest("Plan comptable français (l10n_fr) non installé")
+        copro = self.env["coproerp.copropriete"].create({
+            "name": "Résidence à réparer", "street": "2 rue Y", "zip": "75008", "city": "Paris",
+            "banque_iban": "FR7630001007941234567890185",
+        })
+        copro.action_creer_dossier_comptable()
+        company = copro.company_id
+        # Reproduit le dossier abîmé : plan général chargé à la place
+        company.coproerp_dossier_copro = False
+        self.env["account.chart.template"].try_loading("fr", company, install_demo=False)
+        self.assertEqual(company.chart_template, "fr")
+        self.assertTrue(copro.dossier_a_reparer)
+        with self.assertRaises(UserError):
+            copro._compte("450010")
+        copro.action_reparer_dossier_comptable()
+        copro.invalidate_recordset(["dossier_a_reparer"])
+        self.assertEqual(company.chart_template, "copro_fr")
+        self.assertFalse(copro.dossier_a_reparer)
+        self.assertTrue(copro._compte("450010"))
+        banque = copro._journal("banque")
+        self.assertTrue(banque.restrict_mode_hash_table)
+        self.assertTrue(banque.bank_account_id)
+
+    def test_gestionnaire_sans_societe_cochee(self):
+        """Un gestionnaire qui n'a coché que la société principale dans le
+        sélecteur doit pouvoir comptabiliser et imputer un règlement."""
+        principale = self.env.ref("base.main_company")
+        gestionnaire = new_test_user(
+            self.env, login="gestionnaire_compta",
+            groups="base.group_user,account.group_account_manager",
+            company_id=principale.id,
+            company_ids=[Command.set([principale.id, self.company.id])],
+        )
+        env_g = self.env(user=gestionnaire, context={"allowed_company_ids": [principale.id]})
+        self.budget.action_generer_appel_budget_suivant()
+        appels = self._appels(budget_origine_id=self.budget.id).with_env(env_g)
+        appels.action_comptabiliser()
+        reglement = env_g["coproerp.reglement"].create({
+            "copropriete_id": self.copro.id, "personne_id": self.alice.id,
+            "date": date(2026, 1, 5), "montant": 1000.0})
+        reglement.action_valider()
+        self.assertNotIn("avance", reglement.imputation)
+        self.env.invalidate_all()
+        alice = appels.filtered(lambda a: a.personne_id == self.alice).sudo()
+        self.assertAlmostEqual(alice.montant_restant, 200.0)
 
     def test_releve_des_depenses(self):
         move = self.env["account.move"].with_company(self.company).create({

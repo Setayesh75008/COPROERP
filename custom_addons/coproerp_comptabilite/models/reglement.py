@@ -95,8 +95,12 @@ class Reglement(models.Model):
 
     def action_valider(self):
         for reglement in self.filtered(lambda r: r.etat == "brouillon"):
+            company = reglement.copropriete_id._verifier_dossier()
+            # Société de la copropriété active, même si elle n'est pas cochée
+            # dans le sélecteur : sinon la recherche des appels à solder
+            # serait vide (règles multi-sociétés).
+            reglement = reglement.with_company(company)
             copro = reglement.copropriete_id
-            company = copro._verifier_dossier()
             arrondi = company.currency_id.round
             journal = copro._journal("banque")
             if not journal.default_account_id:
@@ -166,6 +170,7 @@ class Reglement(models.Model):
     def action_annuler(self):
         """Chèque impayé, erreur de saisie… : contre-passation de l'écriture."""
         for reglement in self.filtered(lambda r: r.etat == "valide"):
+            reglement = reglement.with_company(reglement.copropriete_id._verifier_dossier())
             date = max(fields.Date.context_today(self), reglement.move_id.date)
             annulation = reglement.move_id._reverse_moves(
                 [{"date": date, "ref": "Annulation %s" % (reglement.move_id.ref or "")}], cancel=True

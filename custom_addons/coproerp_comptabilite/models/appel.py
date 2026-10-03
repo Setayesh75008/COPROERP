@@ -52,8 +52,9 @@ class AppelCharge(models.Model):
     def action_comptabiliser(self):
         arrondi = None
         for appel in self.filtered(lambda a: a.etat_comptable == "projet"):
+            company = appel.copropriete_id._verifier_dossier()
+            appel = appel.with_company(company)
             copro = appel.copropriete_id
-            company = copro._verifier_dossier()
             arrondi = company.currency_id.round
             if appel.total_appel <= 0:
                 raise UserError("L'appel %s a un montant nul : rien à comptabiliser." % appel.reference)
@@ -104,6 +105,9 @@ class AppelCharge(models.Model):
     def _lettrer_avec_avoirs(self):
         """Impute sur l'appel les sommes déjà versées d'avance (trop-perçus)."""
         for appel in self:
+            if not appel.move_id:
+                continue
+            appel = appel.with_company(appel.sudo().move_id.company_id)
             debit = appel.move_id.line_ids.filtered(
                 lambda l: l.account_id.account_type == "asset_receivable" and l.debit
             )
@@ -123,6 +127,7 @@ class AppelCharge(models.Model):
     def action_annuler_comptabilisation(self):
         """Annule l'écriture par contre-passation (l'écriture d'origine reste visible)."""
         for appel in self.filtered(lambda a: a.etat_comptable == "comptabilise"):
+            appel = appel.with_company(appel.copropriete_id._verifier_dossier())
             date = fields.Date.context_today(self)
             if date < appel.move_id.date:
                 date = appel.move_id.date
@@ -170,7 +175,11 @@ class AppelCharge(models.Model):
                 ("etat_comptable", "=", "comptabilise"),
             ], order="date_echeance desc", limit=1)
             date_precedent = precedent.date_echeance if precedent else False
-            releve = copro.sudo().releve_compte(personne, date_precedent, avis["date_echeance"])
+            # Le relevé est arrêté à la date d'échéance, ou à la date du jour si
+            # l'avis est imprimé plus tard : les règlements déjà reçus doivent
+            # y figurer, sinon on réclamerait des sommes déjà payées.
+            date_fin = max(avis["date_echeance"], fields.Date.context_today(self))
+            releve = copro.sudo().releve_compte(personne, date_precedent, date_fin)
             # Appels de cet avis pas encore comptabilisés : présentés pour mémoire
             for appel in appels.filtered(lambda a: a.etat_comptable == "projet"):
                 releve["mouvements"].append({
