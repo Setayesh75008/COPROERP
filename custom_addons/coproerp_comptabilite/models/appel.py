@@ -189,6 +189,8 @@ class AppelCharge(models.Model):
                     "credit": 0.0,
                 })
                 releve["solde"] = round(releve["solde"] + appel.total_appel, 2)
+            # Ordre chronologique (l'appel en projet peut être antérieur à un règlement)
+            releve["mouvements"].sort(key=lambda m: m["date"])
             avis["releve"] = releve
             avis["a_regler"] = max(releve["solde"], 0.0)
             avis["fonds"] = copro.sudo().fonds_du_coproprietaire(personne)

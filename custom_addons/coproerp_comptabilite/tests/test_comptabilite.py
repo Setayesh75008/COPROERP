@@ -137,6 +137,15 @@ class TestComptabilite(TransactionCase):
         self.assertEqual(r2.etat, "annule")
         self.assertAlmostEqual(self._solde(self.alice, "450010"), 1200.0 + 1200.0 - 1000.0)
 
+    def test_reglement_date_future_refusee(self):
+        from datetime import timedelta
+        from odoo.exceptions import ValidationError
+        demain = date.today() + timedelta(days=2)
+        with self.assertRaises(ValidationError):
+            self.env["coproerp.reglement"].create({
+                "copropriete_id": self.copro.id, "personne_id": self.alice.id,
+                "date": demain, "montant": 10.0})
+
     def test_annulation_appel(self):
         appels = self._premier_trimestre()
         appels.action_comptabiliser()

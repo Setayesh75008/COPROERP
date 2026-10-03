@@ -61,6 +61,14 @@ class Reglement(models.Model):
             if reglement.montant <= 0:
                 raise ValidationError("Le montant d'un règlement doit être positif.")
 
+    @api.constrains("date")
+    def _check_date(self):
+        for reglement in self:
+            if reglement.date and reglement.date > fields.Date.context_today(reglement):
+                raise ValidationError(
+                    "La date de réception d'un règlement ne peut pas être dans le futur."
+                )
+
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
