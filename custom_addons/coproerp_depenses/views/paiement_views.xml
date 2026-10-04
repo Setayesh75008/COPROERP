@@ -92,7 +92,7 @@
                 <field name="copropriete_id"/>
                 <field name="depense_id"/>
                 <field name="reference"/>
-                <filter name="valide" string="Validés" domain="[('etat', '=', 'valide')]"/>
+                <filter name="valide" string="Réalisés" domain="[('etat', '=', 'valide')]"/>
                 <group>
                     <filter name="group_copro" string="Copropriété" context="{'group_by': 'copropriete_id'}"/>
                     <filter name="group_fournisseur" string="Fournisseur" context="{'group_by': 'fournisseur_id'}"/>

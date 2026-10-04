@@ -47,7 +47,7 @@ class DepensePaiement(models.Model):
     )
     reference = fields.Char(string="Référence (n° de chèque, libellé du virement…)", tracking=True)
     etat = fields.Selection(
-        [("brouillon", "Brouillon"), ("valide", "Validé"), ("annule", "Annulé")],
+        [("brouillon", "Brouillon"), ("valide", "Réalisé"), ("annule", "Annulé")],
         string="État",
         default="brouillon",
         required=True,
