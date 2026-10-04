@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="report_decompte">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="compte">
+                <t t-set="d" t-value="compte.donnees_decompte()"/>
+                <t t-call="coproerp_regularisation.report_decompte_document" t-lang="d['personne'].lang"/>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_decompte_document">
+        <t t-set="copro" t-value="d['copro']"/>
+        <t t-set="personne" t-value="d['personne']"/>
+        <t t-set="regul" t-value="d['regul']"/>
+        <t t-set="montant" t-value="{'widget': 'float', 'precision': 2}"/>
+        <t t-call="web.external_layout">
+            <div class="page" style="font-size: 10pt;">
+                <div class="row">
+                    <div class="col-6">
+                        <h4 style="letter-spacing: 1px;"><b>DÉCOMPTE INDIVIDUEL DE CHARGES</b></h4>
+                        <div t-if="d['projet']" class="text-danger fw-bold mb-1">
+                            PROJET — sous réserve de l'approbation des comptes
+                        </div>
+                        <table class="table table-sm table-borderless mb-0" style="font-size: 9.5pt;">
+                            <tr><td class="p-0 pe-2">Exercice :</td>
+                                <td class="p-0">du <t t-out="regul.date_debut.strftime('%d/%m/%Y')"/>
+                                    au <t t-out="regul.date_fin.strftime('%d/%m/%Y')"/></td></tr>
+                            <tr><td class="p-0 pe-2">Immeuble :</td>
+                                <td class="p-0"><t t-out="copro.name"/><br/>
+                                    <t t-out="copro.street or ''"/> <t t-out="copro.zip or ''"/> <t t-out="copro.city or ''"/></td></tr>
+                        </table>
+                    </div>
+                    <div class="col-5 offset-1" style="margin-top: 12mm;">
+                        <div><b t-out="personne.name"/></div>
+                        <div t-if="personne.street" t-out="personne.street"/>
+                        <div t-if="personne.street2" t-out="personne.street2"/>
+                        <div><t t-out="personne.zip or ''"/> <t t-out="personne.city or ''"/></div>
+                    </div>
+                </div>
+
+                <div class="mt-3 mb-2" style="font-size: 9pt;">
+                    <t t-foreach="d['lots']" t-as="lot">
+                        <div><b>Lot <t t-out="lot.numero or ''"/></b>
+                            <t t-if="lot.designation"> — <t t-out="lot.designation"/></t></div>
+                    </t>
+                </div>
+
+                <table class="table table-sm" style="font-size: 9pt;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid #333;">
+                            <th style="width: 40%;">Dépenses de l'exercice</th>
+                            <th class="text-end">Total à répartir</th>
+                            <th class="text-end">Nombre total de parts</th>
+                            <th class="text-end">Votre nombre de parts</th>
+                            <th class="text-end">Votre quote-part</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="d['sections']" t-as="s">
+                            <tr><td colspan="5" class="pt-2"><b t-out="(s['cle'].name or '').upper()"/></td></tr>
+                            <tr t-foreach="s['natures']" t-as="n">
+                                <td class="ps-3"><t t-out="n['code']"/> — <t t-out="n['libelle'] or ''"/></td>
+                                <td class="text-end"><t t-out="n['total']" t-options="montant"/></td>
+                                <td class="text-end"><t t-out="s['total_parts']"/></td>
+                                <td class="text-end"><t t-out="s['parts']"/></td>
+                                <td class="text-end"><t t-out="n['quote_part']" t-options="montant"/></td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="text-end">Vos charges réelles</td>
+                                <td class="text-end"><b t-out="s['quote_part']" t-options="montant"/></td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="text-end">Provisions appelées</td>
+                                <td class="text-end"><t t-out="-s['provisions']" t-options="montant"/></td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="text-end fst-italic">Solde <t t-out="(s['cle'].name or '').lower()"/></td>
+                                <td class="text-end"><i t-out="s['solde']" t-options="montant"/></td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+
+                <table class="table table-sm table-borderless" style="font-size: 10pt; width: 70%; margin-left: 30%;">
+                    <tr><td>Total de vos charges réelles de l'exercice</td>
+                        <td class="text-end"><t t-out="d['charges']" t-options="montant"/> €</td></tr>
+                    <tr><td>Total des provisions appelées</td>
+                        <td class="text-end"><t t-out="d['provisions']" t-options="montant"/> €</td></tr>
+                    <tr style="border-top: 2px solid #333;">
+                        <td t-if="d['solde'] &gt;= 0"><b>RÉGULARISATION : COMPLÉMENT À VOTRE CHARGE</b></td>
+                        <td t-else=""><b>RÉGULARISATION : SOMME EN VOTRE FAVEUR</b></td>
+                        <td class="text-end"><b t-out="abs(d['solde'])" t-options="montant"/> €</td>
+                    </tr>
+                </table>
+
+                <div class="mt-3" style="font-size: 8.5pt;">
+                    <p t-if="d['solde'] &lt; 0">Cette somme est portée au crédit de votre compte et sera
+                        imputée sur vos prochains appels de fonds.</p>
+                    <p t-if="d['solde'] &gt; 0">Ce complément est porté au débit de votre compte ; il figurera
+                        sur votre prochain avis d'appel de fonds.</p>
+                    <p class="text-muted">Le solde de la régularisation est porté au compte de celui qui est
+                        copropriétaire à la date d'approbation des comptes (art. 6-2 du décret n° 67-223 du
+                        17 mars 1967). Les travaux décidés par l'assemblée générale et le fonds de travaux
+                        font l'objet d'un suivi distinct.</p>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

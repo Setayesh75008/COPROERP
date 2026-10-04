@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_report_decompte" model="ir.actions.report">
+        <field name="name">Décompte individuel de charges</field>
+        <field name="model">coproerp.regularisation.compte</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">coproerp_regularisation.report_decompte</field>
+        <field name="report_file">coproerp_regularisation.report_decompte</field>
+        <field name="print_report_name">'Decompte de charges %s - %s' % (object.regularisation_id.budget_id.exercice or '', object.personne_id.name or '')</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+        <field name="binding_model_id" ref="model_coproerp_regularisation_compte"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_regularisation_user,regularisation.user,model_coproerp_regularisation,base.group_user,1,1,1,1
+access_regularisation_ligne_user,regularisation.ligne.user,model_coproerp_regularisation_ligne,base.group_user,1,1,1,1
+access_regularisation_detail_user,regularisation.detail.user,model_coproerp_regularisation_detail,base.group_user,1,1,1,1
+access_regularisation_compte_user,regularisation.compte.user,model_coproerp_regularisation_compte,base.group_user,1,1,1,1

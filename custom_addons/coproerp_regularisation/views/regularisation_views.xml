@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_regularisation_list" model="ir.ui.view">
+        <field name="name">coproerp.regularisation.list</field>
+        <field name="model">coproerp.regularisation</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="etat == 'annulee'" decoration-info="etat in ('brouillon', 'calculee')">
+                <field name="copropriete_id"/>
+                <field name="budget_id"/>
+                <field name="date_comptable"/>
+                <field name="total_depenses"/>
+                <field name="total_provisions"/>
+                <field name="total_solde"/>
+                <field name="etat" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_regularisation_form" model="ir.ui.view">
+        <field name="name">coproerp.regularisation.form</field>
+        <field name="model">coproerp.regularisation</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_calculer" type="object" string="Calculer"
+                            class="oe_highlight" invisible="etat != 'brouillon'"/>
+                    <button name="action_calculer" type="object" string="Recalculer"
+                            invisible="etat != 'calculee'"/>
+                    <button name="action_imprimer_decomptes" type="object" string="Imprimer les décomptes"
+                            invisible="etat not in ('calculee', 'comptabilisee')"/>
+                    <button name="action_comptabiliser" type="object" string="Comptabiliser"
+                            class="oe_highlight" invisible="etat != 'calculee'"
+                            confirm="Le solde de chaque copropriétaire sera porté à son compte. Continuer ?"/>
+                    <button name="action_remettre_brouillon" type="object" string="Remettre en brouillon"
+                            invisible="etat != 'calculee'"/>
+                    <button name="action_annuler" type="object" string="Annuler la régularisation"
+                            invisible="etat != 'comptabilisee'"
+                            confirm="Une écriture inverse sera passée. Continuer ?"/>
+                    <field name="etat" widget="statusbar" statusbar_visible="brouillon,calculee,comptabilisee"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="budget_id" readonly="etat != 'brouillon'"/>
+                            <field name="copropriete_id"/>
+                            <label for="date_debut" string="Exercice"/>
+                            <div>du <field name="date_debut" class="oe_inline"/> au <field name="date_fin" class="oe_inline"/></div>
+                        </group>
+                        <group>
+                            <field name="date_comptable" readonly="etat not in ('brouillon', 'calculee')"/>
+                            <field name="date_attribution" readonly="etat not in ('brouillon', 'calculee')"/>
+                        </group>
+                    </group>
+                    <group invisible="etat == 'brouillon'">
+                        <group>
+                            <field name="total_depenses"/>
+                            <field name="total_provisions"/>
+                            <field name="total_solde"/>
+                        </group>
+                        <group>
+                            <field name="move_id" invisible="not move_id"/>
+                            <field name="move_annulation_id" invisible="not move_annulation_id"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-warning" role="alert" invisible="not avertissement">
+                        <field name="avertissement"/>
+                    </div>
+                    <div class="text-muted" invisible="etat != 'brouillon'">
+                        Le calcul reprend les dépenses comptabilisées de l'exercice (hors travaux décidés par
+                        l'assemblée) et les provisions appelées sur le budget prévisionnel. Rien n'est
+                        comptabilisé tant que vous n'avez pas cliqué sur « Comptabiliser ».
+                    </div>
+                    <notebook invisible="etat == 'brouillon'">
+                        <page string="Par copropriétaire" name="comptes">
+                            <field name="compte_ids" readonly="1">
+                                <list>
+                                    <field name="personne_id"/>
+                                    <field name="charges" sum="Total"/>
+                                    <field name="provisions" sum="Total"/>
+                                    <field name="solde" sum="Total"
+                                           decoration-danger="solde &gt; 0" decoration-success="solde &lt; 0"/>
+                                </list>
+                            </field>
+                            <div class="text-muted">
+                                Solde positif : complément à régler par le copropriétaire.
+                                Solde négatif : somme en sa faveur, imputée sur ses prochains appels.
+                            </div>
+                        </page>
+                        <page string="Par lot et par clé" name="lignes">
+                            <field name="ligne_ids" readonly="1">
+                                <list>
+                                    <field name="repartition_id"/>
+                                    <field name="lot_id"/>
+                                    <field name="personne_id"/>
+                                    <field name="depenses_cle"/>
+                                    <field name="parts"/>
+                                    <field name="total_parts"/>
+                                    <field name="quote_part" sum="Total"/>
+                                    <field name="provisions" sum="Total"/>
+                                    <field name="solde" sum="Total"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_regularisation" model="ir.actions.act_window">
+        <field name="name">Régularisations des charges</field>
+        <field name="res_model">coproerp.regularisation</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p>La régularisation se lance depuis le budget de l'exercice
+            (bouton « Régularisation des charges »).</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_regularisations" name="Régularisations des charges"
+              parent="coproerp_comptabilite.menu_comptabilite_root" action="action_regularisation" sequence="40"/>
+</odoo>

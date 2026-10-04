@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_budget_annuel_form_regularisation" model="ir.ui.view">
+        <field name="name">coproerp.budget.annuel.form.regularisation</field>
+        <field name="model">coproerp.budget.annuel</field>
+        <field name="inherit_id" ref="coproerp_depenses.view_budget_annuel_form_depenses"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_voir_depenses']" position="after">
+                <button name="action_regularisation" type="object" string="Régularisation des charges"
+                        class="btn-secondary"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
