@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="page_situation_releve_pdf" inherit_id="coproerp_extranet.page_situation"
+              name="Extranet : relevé de compte PDF">
+        <xpath expr="//a[@t-att-href='export_url']" position="before">
+            <a t-if="not retour and copro and copro.sudo().company_id" href="/extranet/situation/releve"
+               class="btn btn-sm btn-outline-primary me-1">
+                <i class="fa fa-file-pdf-o"/> Relevé de compte (PDF)</a>
+        </xpath>
+    </template>
+</odoo>

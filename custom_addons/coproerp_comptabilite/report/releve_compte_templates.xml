@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="report_releve_compte">
+        <t t-call="web.html_container">
+            <t t-foreach="releves" t-as="d">
+                <t t-call="coproerp_comptabilite.report_releve_compte_document" t-lang="d['personne'].lang"/>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_releve_compte_document">
+        <t t-set="copro" t-value="d['copro']"/>
+        <t t-set="personne" t-value="d['personne']"/>
+        <t t-set="gestionnaire" t-value="copro.gestionnaire_id"/>
+        <t t-set="montant" t-value="{'widget': 'float', 'precision': 2}"/>
+        <t t-call="web.external_layout">
+            <div class="page" style="font-size: 10pt;">
+                <div class="row">
+                    <div class="col-6">
+                        <h4 style="letter-spacing: 1px;"><b>RELEVÉ DE COMPTE</b></h4>
+                        <table class="table table-sm table-borderless mb-0" style="font-size: 9.5pt;">
+                            <tr><td class="p-0 pe-2">Date :</td>
+                                <td class="p-0"><t t-out="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y')"/></td></tr>
+                            <tr><td class="p-0 pe-2">Période :</td>
+                                <td class="p-0">du <t t-out="d['date_debut'].strftime('%d/%m/%Y')"/>
+                                    au <t t-out="d['date_fin'].strftime('%d/%m/%Y')"/></td></tr>
+                            <tr><td class="p-0 pe-2">Immeuble :</td>
+                                <td class="p-0"><t t-out="copro.name"/><br/>
+                                    <t t-out="copro.street or ''"/> <t t-out="copro.zip or ''"/> <t t-out="copro.city or ''"/></td></tr>
+                            <tr t-if="copro.reference or personne.ref"><td class="p-0 pe-2">Référence :</td>
+                                <td class="p-0"><t t-out="copro.reference or ''"/> <t t-out="personne.ref or ''"/></td></tr>
+                        </table>
+                    </div>
+                    <div class="col-5 offset-1" style="margin-top: 12mm;">
+                        <div><b t-out="personne.name"/></div>
+                        <div t-if="personne.street" t-out="personne.street"/>
+                        <div t-if="personne.street2" t-out="personne.street2"/>
+                        <div><t t-out="personne.zip or ''"/> <t t-out="personne.city or ''"/></div>
+                        <div t-if="personne.country_id" t-out="personne.country_id.name.upper()"/>
+                    </div>
+                </div>
+
+                <table class="table table-sm mt-4" style="font-size: 9pt;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid #333;">
+                            <th style="width: 12%;">Date</th>
+                            <th>Libellé</th>
+                            <th class="text-end" style="width: 13%;">Débit</th>
+                            <th class="text-end" style="width: 13%;">Crédit</th>
+                            <th class="text-end" style="width: 16%;">Solde</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td/>
+                            <td class="text-center">SOLDE AU <t t-out="d['date_solde_initial'].strftime('%d/%m/%Y')"/></td>
+                            <td/><td/>
+                            <td class="text-end">
+                                <t t-out="abs(d['solde_initial'])" t-options="montant"/>
+                                <t t-if="d['solde_initial'] &gt; 0">DB</t><t t-elif="d['solde_initial'] &lt; 0">CR</t>
+                            </td>
+                        </tr>
+                        <tr t-foreach="d['lignes']" t-as="l">
+                            <td><t t-out="l['date'].strftime('%d/%m/%Y')"/></td>
+                            <td><t t-out="l['libelle'] or ''"/></td>
+                            <td class="text-end"><t t-if="l['debit']" t-out="l['debit']" t-options="montant"/></td>
+                            <td class="text-end"><t t-if="l['credit']" t-out="l['credit']" t-options="montant"/></td>
+                            <td class="text-end">
+                                <t t-out="abs(l['solde'])" t-options="montant"/>
+                                <t t-if="l['solde'] &gt; 0">DB</t><t t-elif="l['solde'] &lt; 0">CR</t>
+                            </td>
+                        </tr>
+                        <tr style="border-top: 2px solid #333;">
+                            <td/>
+                            <td class="text-center"><b>SOLDE AU <t t-out="d['date_fin'].strftime('%d/%m/%Y')"/></b></td>
+                            <td class="text-end"><t t-out="d['total_debit']" t-options="montant"/></td>
+                            <td class="text-end"><t t-out="d['total_credit']" t-options="montant"/></td>
+                            <td class="text-end"><b>
+                                <t t-out="abs(d['solde_final'])" t-options="montant"/>
+                                <t t-if="d['solde_final'] &gt; 0">DB</t><t t-elif="d['solde_final'] &lt; 0">CR</t>
+                            </b></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="row mt-3" style="font-size: 9pt;">
+                    <div class="col-7">
+                        <div>FONDS DE ROULEMENT : <t t-out="d['fonds']['fonds_roulement']" t-options="montant"/> CR</div>
+                        <div>FONDS DE TRAVAUX : <t t-out="d['fonds']['fonds_travaux']" t-options="montant"/> CR</div>
+                    </div>
+                    <div class="col-5 text-end">
+                        <t t-if="gestionnaire">
+                            <div>Affaire suivie par : <b t-out="gestionnaire.name"/></div>
+                            <div t-if="gestionnaire.partner_id.phone">Tél. : <t t-out="gestionnaire.partner_id.phone"/></div>
+                        </t>
+                    </div>
+                </div>
+                <div class="mt-3 text-muted" style="font-size: 8pt;">
+                    DB : somme due par le copropriétaire. CR : somme en sa faveur.
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

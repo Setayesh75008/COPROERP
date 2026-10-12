@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_releve_wizard_form" model="ir.ui.view">
+        <field name="name">coproerp.releve.wizard.form</field>
+        <field name="model">coproerp.releve.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Relevés de compte">
+                <group>
+                    <group>
+                        <field name="copropriete_id"/>
+                        <field name="date_debut"/>
+                        <field name="date_fin"/>
+                    </group>
+                </group>
+                <field name="personne_ids" widget="many2many_tags"
+                       placeholder="Tous les copropriétaires de l'immeuble"/>
+                <div class="text-muted mt-2">
+                    Un relevé par copropriétaire : solde au jour précédant la période, mouvements avec
+                    solde progressif, solde final, fonds de roulement et fonds de travaux.
+                </div>
+                <footer>
+                    <button name="action_imprimer" type="object" string="Imprimer" class="btn-primary"/>
+                    <button special="cancel" string="Annuler"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_releve_wizard" model="ir.actions.act_window">
+        <field name="name">Relevés de compte</field>
+        <field name="res_model">coproerp.releve.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Depuis la fiche d'un contact : menu Action > Relevé de compte -->
+    <record id="action_releve_wizard_partenaire" model="ir.actions.act_window">
+        <field name="name">Relevé de compte</field>
+        <field name="res_model">coproerp.releve.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="base.model_res_partner"/>
+        <field name="binding_view_types">form,list</field>
+    </record>
+
+    <record id="view_copropriete_form_releve" model="ir.ui.view">
+        <field name="name">coproerp.copropriete.form.releve</field>
+        <field name="model">coproerp.copropriete</field>
+        <field name="inherit_id" ref="coproerp_comptabilite.view_copropriete_form_comptabilite"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_ouvrir_comptabilite']" position="after">
+                <button name="%(action_releve_wizard)d" type="action" string="Relevés de compte"
+                        class="btn-secondary me-2" invisible="not company_id"/>
+            </xpath>
+        </field>
+    </record>
+
+    <menuitem id="menu_releves_compte" name="Relevés de compte"
+              parent="menu_comptabilite_root" action="action_releve_wizard" sequence="15"/>
+</odoo>

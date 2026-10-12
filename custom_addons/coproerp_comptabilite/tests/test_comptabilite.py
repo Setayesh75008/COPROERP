@@ -146,6 +146,39 @@ class TestComptabilite(TransactionCase):
                 "copropriete_id": self.copro.id, "personne_id": self.alice.id,
                 "date": demain, "montant": 10.0})
 
+    def test_releve_de_compte(self):
+        appels = self._premier_trimestre()
+        appels.action_comptabiliser()
+        self.env["coproerp.reglement"].create({
+            "copropriete_id": self.copro.id, "personne_id": self.alice.id,
+            "date": date(2026, 1, 5), "montant": 1000.0}).action_valider()
+        d = self.copro.donnees_releve(self.alice.id, "2026-01-01", "2026-03-31")
+        self.assertEqual(d["date_solde_initial"], date(2025, 12, 31))
+        self.assertAlmostEqual(d["solde_initial"], 0.0)
+        self.assertEqual([l["solde"] for l in d["lignes"]], [1200.0, 200.0])
+        self.assertAlmostEqual(d["solde_final"], 200.0)
+        # Période commençant après les mouvements : tout est dans le solde initial
+        d = self.copro.donnees_releve(self.alice.id, "2026-02-01", "2026-03-31")
+        self.assertAlmostEqual(d["solde_initial"], 200.0)
+        self.assertFalse(d["lignes"])
+        # Assistant et PDF
+        wizard = self.env["coproerp.releve.wizard"].with_context(
+            active_model="coproerp.copropriete", active_ids=self.copro.ids).create({
+                "date_debut": date(2026, 1, 1), "date_fin": date(2026, 3, 31)})
+        self.assertEqual(wizard.copropriete_id, self.copro)
+        self.assertIn(self.alice, wizard.personne_ids)
+        # discard_logo_check : sans mise en page configurée pour la société, Odoo
+        # ouvre d'abord l'assistant « Mise en page des documents ».
+        action = wizard.with_context(discard_logo_check=True).action_imprimer()
+        self.assertEqual(action["type"], "ir.actions.report")
+        self.assertEqual(action["data"]["personne_ids"], wizard.personne_ids.ids)
+        html = self.env["ir.actions.report"]._render_qweb_html(
+            "coproerp_comptabilite.report_releve_compte", self.copro.ids, data=action["data"])[0]
+        html = html.decode() if isinstance(html, bytes) else html
+        self.assertIn("RELEVÉ DE COMPTE", html)
+        self.assertIn("SOLDE AU 31/12/2025", html)
+        self.assertIn("DB", html)
+
     def test_annulation_appel(self):
         appels = self._premier_trimestre()
         appels.action_comptabiliser()

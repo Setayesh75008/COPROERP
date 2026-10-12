@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from odoo import Command, api, fields, models
 from odoo.exceptions import UserError
 
@@ -248,6 +250,42 @@ class Copropriete(models.Model):
         return {
             "fonds_roulement": solde_crediteur([self.compte_avances]),
             "fonds_travaux": solde_crediteur([self.compte_produit_fonds, self.compte_reserve_fonds]),
+        }
+
+    # ------------------------------------------------------------------
+    # Relevé de compte d'un copropriétaire (période libre)
+    # ------------------------------------------------------------------
+    def donnees_releve(self, personne, date_debut, date_fin):
+        """Données du relevé de compte : solde au jour précédant la période,
+        mouvements avec solde progressif, solde final et fonds au crédit.
+
+        Solde positif = somme due par le copropriétaire (DB) ; négatif = CR.
+        """
+        self.ensure_one()
+        copro = self.sudo()
+        if isinstance(personne, int):
+            personne = self.env["res.partner"].sudo().browse(personne)
+        date_debut = fields.Date.to_date(date_debut)
+        date_fin = fields.Date.to_date(date_fin)
+        veille = date_debut - timedelta(days=1)
+        releve = copro.releve_compte(personne, veille, date_fin)
+        solde = releve["solde_precedent"]
+        lignes = []
+        for mouvement in releve["mouvements"]:
+            solde = round(solde + mouvement["debit"] - mouvement["credit"], 2)
+            lignes.append(dict(mouvement, solde=solde))
+        return {
+            "copro": copro,
+            "personne": personne,
+            "date_debut": date_debut,
+            "date_fin": date_fin,
+            "date_solde_initial": veille,
+            "solde_initial": releve["solde_precedent"],
+            "lignes": lignes,
+            "total_debit": round(sum(l["debit"] for l in lignes), 2),
+            "total_credit": round(sum(l["credit"] for l in lignes), 2),
+            "solde_final": releve["solde"],
+            "fonds": copro.fonds_du_coproprietaire(personne),
         }
 
     # ------------------------------------------------------------------
