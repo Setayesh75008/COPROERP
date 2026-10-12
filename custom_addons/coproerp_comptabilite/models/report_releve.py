@@ -10,6 +10,10 @@ class ReportReleveCompte(models.AbstractModel):
     @api.model
     def _get_report_values(self, docids, data=None):
         data = data or {}
+        # Avec des données (« data »), le client web n'ajoute pas les
+        # identifiants des documents à l'adresse d'impression : on les
+        # transmet donc aussi dans les données.
+        docids = docids or data.get("copropriete_ids") or []
         coproprietes = self.env["coproerp.copropriete"].browse(docids)
         aujourdhui = fields.Date.context_today(self)
         date_debut = data.get("date_debut") or aujourdhui.replace(month=1, day=1)

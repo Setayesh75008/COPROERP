@@ -172,8 +172,9 @@ class TestComptabilite(TransactionCase):
         action = wizard.with_context(discard_logo_check=True).action_imprimer()
         self.assertEqual(action["type"], "ir.actions.report")
         self.assertEqual(action["data"]["personne_ids"], wizard.personne_ids.ids)
+        # Comme le client web : identifiants absents de l'adresse, seules les données
         html = self.env["ir.actions.report"]._render_qweb_html(
-            "coproerp_comptabilite.report_releve_compte", self.copro.ids, data=action["data"])[0]
+            "coproerp_comptabilite.report_releve_compte", None, data=action["data"])[0]
         html = html.decode() if isinstance(html, bytes) else html
         self.assertIn("RELEVÉ DE COMPTE", html)
         self.assertIn("SOLDE AU 31/12/2025", html)

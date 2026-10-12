@@ -51,6 +51,7 @@ class ReleveCompteWizard(models.TransientModel):
         return self.env.ref("coproerp_comptabilite.action_report_releve_compte").report_action(
             self.copropriete_id,
             data={
+                "copropriete_ids": self.copropriete_id.ids,
                 "personne_ids": self.personne_ids.ids,
                 "date_debut": fields.Date.to_string(self.date_debut),
                 "date_fin": fields.Date.to_string(self.date_fin),

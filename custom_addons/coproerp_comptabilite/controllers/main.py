@@ -30,6 +30,7 @@ class ExtranetReleveCompte(ExtranetPortal):
             "coproerp_comptabilite.report_releve_compte",
             [copro.id],
             data={
+                "copropriete_ids": copro.ids,
                 "personne_ids": titulaires.ids,
                 "date_debut": fields.Date.to_string(date_debut),
                 "date_fin": fields.Date.to_string(date_fin),
