@@ -19,14 +19,15 @@
         <t t-set="gestionnaire" t-value="copro.gestionnaire_id"/>
         <t t-set="montant" t-value="{'widget': 'float', 'precision': 2}"/>
         <t t-call="web.external_layout">
-            <div class="page o_coproerp_avis" style="font-size: 11.5pt;">
+            <div class="page o_coproerp_avis o_copro_doc" style="font-size: 11.5pt;">
+                <t t-call="coproerp_appel_edition.style_documents"/>
 
                 <!-- En-tête : références à gauche, destinataire à droite (enveloppe à fenêtre) -->
                 <div class="row">
                     <div class="col-6">
                         <h4 style="letter-spacing: 1px;"><b>APPEL DE FONDS</b></h4>
                         <div t-if="avis.get('projet')" class="text-danger fw-bold mb-1">PROJET — non comptabilisé</div>
-                        <table class="table table-sm table-borderless mb-0" style="font-size: 11pt;">
+                        <table class="table table-sm table-borderless mb-0 o_cd_refs" style="font-size: 11pt;">
                             <tr><td class="p-0 pe-2">Date :</td>
                                 <td class="p-0"><t t-out="avis['date_edition'].strftime('%d/%m/%Y')"/></td></tr>
                             <tr><td class="p-0 pe-2">Échéance :</td>
@@ -72,7 +73,7 @@
                 <!-- Détail -->
                 <table class="table table-sm" style="font-size: 10.5pt;">
                     <thead>
-                        <tr style="border-bottom: 1px solid #333;">
+                        <tr class="o_cd_entete">
                             <th style="width: 40%;">Désignation des dépenses</th>
                             <th class="text-end">Total à répartir</th>
                             <th class="text-end">Nombre total de parts</th>
@@ -82,7 +83,7 @@
                     </thead>
                     <tbody>
                         <t t-foreach="avis['appels']" t-as="appel">
-                            <tr>
+                            <tr class="o_cd_section">
                                 <td colspan="5" class="pt-2"><b t-out="appel.titre_section(appel)"/></td>
                             </tr>
                             <t t-foreach="appel.groupe_ids" t-as="groupe">
@@ -91,7 +92,7 @@
                                         Lot <t t-out="groupe.lot_numero"/> — <t t-out="groupe.lot_designation"/>
                                     </td>
                                 </tr>
-                                <tr t-foreach="groupe.poste_ids" t-as="poste">
+                                <tr t-foreach="groupe.poste_ids" t-as="poste" t-att-class="'o_cd_alt' if poste_index % 2 else None">
                                     <td class="ps-3"><t t-out="poste.designation or ''"/></td>
                                     <td class="text-end"><t t-out="poste.total_a_repartir" t-options="montant"/></td>
                                     <td class="text-end"><t t-out="poste.nombre_total_parts"/></td>
@@ -108,7 +109,7 @@
                                 <td class="text-end"><b t-out="appel.total_appel" t-options="montant"/></td>
                             </tr>
                         </t>
-                        <tr style="border-top: 2px solid #333;">
+                        <tr class="o_cd_total">
                             <td colspan="4" class="text-end"><b>TOTAL DE L'APPEL</b></td>
                             <td class="text-end"><b t-out="avis['total']" t-options="montant"/> €</td>
                         </tr>
@@ -120,7 +121,7 @@
                     <t t-set="rel" t-value="avis['releve']"/>
                     <table class="table table-sm table-borderless mb-1" style="font-size: 10.5pt;">
                         <thead>
-                            <tr style="border-bottom: 1px solid #333;">
+                            <tr class="o_cd_entete">
                                 <th style="width: 14%;">Date</th>
                                 <th>Relevé de compte</th>
                                 <th class="text-end" style="width: 16%;">Débit</th>
@@ -128,19 +129,19 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr t-if="rel['date_precedent']">
+                            <tr t-if="rel['date_precedent']" class="o_cd_section">
                                 <td/>
                                 <td>SOLDE DU PRÉCÉDENT RELEVÉ DU <t t-out="rel['date_precedent'].strftime('%d/%m/%Y')"/></td>
                                 <td class="text-end"><t t-if="rel['solde_precedent'] &gt; 0" t-out="rel['solde_precedent']" t-options="montant"/></td>
                                 <td class="text-end"><t t-if="rel['solde_precedent'] &lt; 0" t-out="-rel['solde_precedent']" t-options="montant"/></td>
                             </tr>
-                            <tr t-foreach="rel['mouvements']" t-as="m">
+                            <tr t-foreach="rel['mouvements']" t-as="m" t-att-class="'o_cd_alt' if m_index % 2 else None">
                                 <td><t t-out="m['date'].strftime('%d/%m/%Y')"/></td>
                                 <td><t t-out="m['libelle'] or ''"/></td>
                                 <td class="text-end"><t t-if="m['debit']" t-out="m['debit']" t-options="montant"/></td>
                                 <td class="text-end"><t t-if="m['credit']" t-out="m['credit']" t-options="montant"/></td>
                             </tr>
-                            <tr style="border-top: 1px solid #333;">
+                            <tr class="o_cd_total">
                                 <td/>
                                 <td><b>SOLDE AU <t t-out="rel['date_solde'].strftime('%d/%m/%Y')"/></b></td>
                                 <td class="text-end"><b t-if="rel['solde'] &gt; 0" t-out="rel['solde']" t-options="montant"/></td>

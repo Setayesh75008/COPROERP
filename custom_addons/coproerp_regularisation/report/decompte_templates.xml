@@ -15,14 +15,15 @@
         <t t-set="regul" t-value="d['regul']"/>
         <t t-set="montant" t-value="{'widget': 'float', 'precision': 2}"/>
         <t t-call="web.external_layout">
-            <div class="page" style="font-size: 11.5pt;">
+            <div class="page o_copro_doc" style="font-size: 11.5pt;">
+                <t t-call="coproerp_appel_edition.style_documents"/>
                 <div class="row">
                     <div class="col-6">
                         <h4 style="letter-spacing: 1px;"><b>DÉCOMPTE INDIVIDUEL DE CHARGES</b></h4>
                         <div t-if="d['projet']" class="text-danger fw-bold mb-1">
                             PROJET — sous réserve de l'approbation des comptes
                         </div>
-                        <table class="table table-sm table-borderless mb-0" style="font-size: 11pt;">
+                        <table class="table table-sm table-borderless mb-0 o_cd_refs" style="font-size: 11pt;">
                             <tr><td class="p-0 pe-2">Exercice :</td>
                                 <td class="p-0">du <t t-out="regul.date_debut.strftime('%d/%m/%Y')"/>
                                     au <t t-out="regul.date_fin.strftime('%d/%m/%Y')"/></td></tr>
@@ -48,7 +49,7 @@
 
                 <table class="table table-sm" style="font-size: 10.5pt;">
                     <thead>
-                        <tr style="border-bottom: 1px solid #333;">
+                        <tr class="o_cd_entete">
                             <th style="width: 40%;">Dépenses de l'exercice</th>
                             <th class="text-end">Total à répartir</th>
                             <th class="text-end">Nombre total de parts</th>
@@ -58,8 +59,8 @@
                     </thead>
                     <tbody>
                         <t t-foreach="d['sections']" t-as="s">
-                            <tr><td colspan="5" class="pt-2"><b t-out="(s['cle'].name or '').upper()"/></td></tr>
-                            <tr t-foreach="s['natures']" t-as="n">
+                            <tr class="o_cd_section"><td colspan="5" class="pt-2"><b t-out="(s['cle'].name or '').upper()"/></td></tr>
+                            <tr t-foreach="s['natures']" t-as="n" t-att-class="'o_cd_alt' if n_index % 2 else None">
                                 <td class="ps-3"><t t-out="n['code']"/> — <t t-out="n['libelle'] or ''"/></td>
                                 <td class="text-end"><t t-out="n['total']" t-options="montant"/></td>
                                 <td class="text-end"><t t-out="s['total_parts']"/></td>
@@ -87,7 +88,7 @@
                         <td class="text-end"><t t-out="d['charges']" t-options="montant"/> €</td></tr>
                     <tr><td>Total des provisions appelées</td>
                         <td class="text-end"><t t-out="d['provisions']" t-options="montant"/> €</td></tr>
-                    <tr style="border-top: 2px solid #333;">
+                    <tr class="o_cd_total">
                         <td t-if="d['solde'] &gt;= 0"><b>RÉGULARISATION : COMPLÉMENT À VOTRE CHARGE</b></td>
                         <td t-else=""><b>RÉGULARISATION : SOMME EN VOTRE FAVEUR</b></td>
                         <td class="text-end"><b t-out="abs(d['solde'])" t-options="montant"/> €</td>

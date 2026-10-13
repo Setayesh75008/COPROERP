@@ -14,11 +14,12 @@
         <t t-set="gestionnaire" t-value="copro.gestionnaire_id"/>
         <t t-set="montant" t-value="{'widget': 'float', 'precision': 2}"/>
         <t t-call="web.external_layout">
-            <div class="page" style="font-size: 11.5pt;">
+            <div class="page o_copro_doc" style="font-size: 11.5pt;">
+                <t t-call="coproerp_appel_edition.style_documents"/>
                 <div class="row">
                     <div class="col-6">
                         <h4 style="letter-spacing: 1px;"><b>RELEVÉ DE COMPTE</b></h4>
-                        <table class="table table-sm table-borderless mb-0" style="font-size: 11pt;">
+                        <table class="table table-sm table-borderless mb-0 o_cd_refs" style="font-size: 11pt;">
                             <tr><td class="p-0 pe-2">Date :</td>
                                 <td class="p-0"><t t-out="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y')"/></td></tr>
                             <tr><td class="p-0 pe-2">Période :</td>
@@ -42,7 +43,7 @@
 
                 <table class="table table-sm mt-4" style="font-size: 10.5pt;">
                     <thead>
-                        <tr style="border-bottom: 1px solid #333;">
+                        <tr class="o_cd_entete">
                             <th style="width: 12%;">Date</th>
                             <th>Libellé</th>
                             <th class="text-end" style="width: 13%;">Débit</th>
@@ -51,7 +52,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
+                        <tr class="o_cd_section">
                             <td/>
                             <td class="text-center">SOLDE AU <t t-out="d['date_solde_initial'].strftime('%d/%m/%Y')"/></td>
                             <td/><td/>
@@ -60,7 +61,7 @@
                                 <t t-if="d['solde_initial'] &gt; 0">DB</t><t t-elif="d['solde_initial'] &lt; 0">CR</t>
                             </td>
                         </tr>
-                        <tr t-foreach="d['lignes']" t-as="l">
+                        <tr t-foreach="d['lignes']" t-as="l" t-att-class="'o_cd_alt' if l_index % 2 else None">
                             <td><t t-out="l['date'].strftime('%d/%m/%Y')"/></td>
                             <td><t t-out="l['libelle'] or ''"/></td>
                             <td class="text-end"><t t-if="l['debit']" t-out="l['debit']" t-options="montant"/></td>
@@ -70,7 +71,7 @@
                                 <t t-if="l['solde'] &gt; 0">DB</t><t t-elif="l['solde'] &lt; 0">CR</t>
                             </td>
                         </tr>
-                        <tr style="border-top: 2px solid #333;">
+                        <tr class="o_cd_total">
                             <td/>
                             <td class="text-center"><b>SOLDE AU <t t-out="d['date_fin'].strftime('%d/%m/%Y')"/></b></td>
                             <td class="text-end"><t t-out="d['total_debit']" t-options="montant"/></td>

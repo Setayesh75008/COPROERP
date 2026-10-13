@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Style commun des documents CoproERP (avis d'appel, relevé de compte,
+         décompte de charges) : zones grisées imprimées.
+         print-color-adjust : les fonds sont conservés à l'impression. -->
+    <template id="style_documents">
+        <style>
+            .o_copro_doc { -webkit-print-color-adjust: exact; print-color-adjust: exact; color: #000; }
+            .o_copro_doc .o_cd_refs,
+            .o_copro_doc .o_cd_refs td { background-color: #ececec !important; box-shadow: none !important; }
+            .o_copro_doc .o_cd_refs { border-radius: 2px; }
+            .o_copro_doc .o_cd_refs td { padding: 1px 6px !important; }
+            .o_copro_doc tr.o_cd_entete > th,
+            .o_copro_doc tr.o_cd_entete > td { background-color: #3c3c3c !important; color: #fff !important;
+                                               box-shadow: none !important; border-color: #3c3c3c !important; }
+            .o_copro_doc tr.o_cd_section > td { background-color: #e4e4e4 !important; box-shadow: none !important; }
+            .o_copro_doc tr.o_cd_alt > td { background-color: #efefef !important; box-shadow: none !important; }
+            .o_copro_doc tr.o_cd_total > td { background-color: #d6d6d6 !important; box-shadow: none !important;
+                                              font-weight: bold; }
+        </style>
+    </template>
+</odoo>
