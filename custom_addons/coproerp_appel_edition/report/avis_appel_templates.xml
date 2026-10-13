@@ -19,14 +19,14 @@
         <t t-set="gestionnaire" t-value="copro.gestionnaire_id"/>
         <t t-set="montant" t-value="{'widget': 'float', 'precision': 2}"/>
         <t t-call="web.external_layout">
-            <div class="page o_coproerp_avis" style="font-size: 10pt;">
+            <div class="page o_coproerp_avis" style="font-size: 11.5pt;">
 
                 <!-- En-tête : références à gauche, destinataire à droite (enveloppe à fenêtre) -->
                 <div class="row">
                     <div class="col-6">
                         <h4 style="letter-spacing: 1px;"><b>APPEL DE FONDS</b></h4>
                         <div t-if="avis.get('projet')" class="text-danger fw-bold mb-1">PROJET — non comptabilisé</div>
-                        <table class="table table-sm table-borderless mb-0" style="font-size: 9.5pt;">
+                        <table class="table table-sm table-borderless mb-0" style="font-size: 11pt;">
                             <tr><td class="p-0 pe-2">Date :</td>
                                 <td class="p-0"><t t-out="avis['date_edition'].strftime('%d/%m/%Y')"/></td></tr>
                             <tr><td class="p-0 pe-2">Échéance :</td>
@@ -51,7 +51,7 @@
 
                 <!-- Lots concernés : simple information, sans cases ni traits
                      (présentation des avis habituels). -->
-                <div class="mt-3 mb-2" style="font-size: 9pt;">
+                <div class="mt-3 mb-2" style="font-size: 10.5pt;">
                     <t t-foreach="avis['lots']" t-as="lot">
                         <t t-set="details" t-value="[
                             lot.batiment_id.name and ('Bât. ' + lot.batiment_id.name) or '',
@@ -70,7 +70,7 @@
                 <div class="mb-1"><b>Échéance du <t t-out="avis['date_echeance'].strftime('%d/%m/%Y')"/></b></div>
 
                 <!-- Détail -->
-                <table class="table table-sm" style="font-size: 9pt;">
+                <table class="table table-sm" style="font-size: 10.5pt;">
                     <thead>
                         <tr style="border-bottom: 1px solid #333;">
                             <th style="width: 40%;">Désignation des dépenses</th>
@@ -118,7 +118,7 @@
                 <!-- Relevé de compte (si la comptabilité est tenue) -->
                 <t t-if="avis.get('releve')">
                     <t t-set="rel" t-value="avis['releve']"/>
-                    <table class="table table-sm table-borderless mb-1" style="font-size: 9pt;">
+                    <table class="table table-sm table-borderless mb-1" style="font-size: 10.5pt;">
                         <thead>
                             <tr style="border-bottom: 1px solid #333;">
                                 <th style="width: 14%;">Date</th>
@@ -148,14 +148,14 @@
                             </tr>
                         </tbody>
                     </table>
-                    <div t-if="avis.get('fonds')" class="mb-2" style="font-size: 9pt;">
+                    <div t-if="avis.get('fonds')" class="mb-2" style="font-size: 10.5pt;">
                         Fonds de roulement : <t t-out="avis['fonds']['fonds_roulement']" t-options="montant"/> € CR
                         — Fonds de travaux : <t t-out="avis['fonds']['fonds_travaux']" t-options="montant"/> € CR
                     </div>
                 </t>
 
                 <!-- Règlement -->
-                <div class="row mt-2" style="font-size: 9.5pt;">
+                <div class="row mt-2" style="font-size: 11pt;">
                     <div class="col-7">
                         <div><b>Montant à régler : <t t-out="avis['a_regler']" t-options="montant"/> €
                             avant le <t t-out="avis['date_echeance'].strftime('%d/%m/%Y')"/></b></div>
@@ -180,7 +180,7 @@
                 </div>
 
                 <!-- Papillon à joindre au règlement -->
-                <div style="margin-top: 10mm; border-top: 1px dashed #555; padding-top: 3mm; font-size: 9pt;">
+                <div style="margin-top: 10mm; border-top: 1px dashed #555; padding-top: 3mm; font-size: 10.5pt;">
                     <div class="text-center fst-italic mb-1">Joindre ce papillon à votre règlement</div>
                     <div class="row">
                         <div class="col-8">
@@ -190,7 +190,7 @@
                         </div>
                         <div class="col-4 text-end">
                             <div>Montant</div>
-                            <div style="font-size: 12pt;"><b t-out="avis['a_regler']" t-options="montant"/> €</div>
+                            <div style="font-size: 13.5pt;"><b t-out="avis['a_regler']" t-options="montant"/> €</div>
                         </div>
                     </div>
                 </div>
