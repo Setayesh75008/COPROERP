@@ -202,6 +202,9 @@ class TestAppelEdition(TransactionCase):
         self.assertIn("Appartement 1", html)
         self.assertIn("Étage 2", html)
         self.assertNotIn("Tantièmes généraux", html)
+        # Mention obligatoire : possibilité de demander la voie postale (art. 42-1 loi 1965)
+        self.assertIn("article 42-1", html)
+        self.assertIn("voie postale", html)
 
     def test_publication_extranet(self):
         self.budget.action_generer_appel_budget_suivant()

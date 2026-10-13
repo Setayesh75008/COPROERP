@@ -6,3 +6,4 @@ from . import actualite
 from . import dematerialisation
 from . import rib_demande
 from . import res_partner
+from . import notification_mode

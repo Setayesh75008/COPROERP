@@ -60,7 +60,7 @@
                             <i class="fa fa-folder-open fa-fw"/> Documents
                             <span t-if="nb_docs_non_lus" class="badge rounded-pill text-bg-danger ms-1" t-out="nb_docs_non_lus"/></a>
                         <a href="/extranet/dematerialisation" t-attf-class="#{'active' if ext_page == 'demat' else ''}">
-                            <i class="fa fa-envelope-o fa-fw"/> Dématérialisation</a>
+                            <i class="fa fa-envelope-o fa-fw"/> Réception des notifications</a>
                         <a href="/extranet/actualites" t-attf-class="#{'active' if ext_page == 'actualites' else ''}">
                             <i class="fa fa-newspaper-o fa-fw"/> Actualités</a>
                         <a href="/extranet/reglement" t-attf-class="#{'active' if ext_page == 'reglement' else ''}">
@@ -491,57 +491,82 @@
     <!-- ================================================================== -->
     <!-- Dématérialisation                                                   -->
     <!-- ================================================================== -->
-    <template id="page_dematerialisation" name="Extranet : dématérialisation">
+    <template id="page_dematerialisation" name="Extranet : réception des notifications">
         <t t-call="coproerp_extranet.extranet_layout">
-            <h2 class="o_ext_titre">Dématérialisation de documents</h2>
+            <h2 class="o_ext_titre">Réception des notifications</h2>
             <p>
-                Vous pouvez accepter de recevoir par voie électronique, à l'adresse
-                <b t-out="partner.email or '(adresse e-mail non renseignée)'"/>, les documents ci-dessous.
-                Vous pouvez revenir sur votre choix à tout moment.
+                Les notifications et mises en demeure du syndic (convocations et procès-verbaux
+                d'assemblée générale, mises en demeure…) sont faites <b>par voie électronique</b>, à
+                l'adresse que vous avez communiquée à cet effet. Vous pouvez <b>à tout moment</b>
+                demander à les recevoir <b>par voie postale</b> (art. 42-1 de la loi du 10 juillet 1965).
+                Votre demande prend effet le 9<sup>e</sup> jour suivant sa réception.
             </p>
-            <t t-call="portal.portal_table">
-                <thead>
-                    <tr><th>Type de document</th><th>Votre choix</th><th/></tr>
-                </thead>
-                <tbody>
-                    <tr t-foreach="types.items()" t-as="t">
-                        <t t-set="courant" t-value="etat.get(t[0])"/>
-                        <td t-out="t[1]"/>
-                        <td>
-                            <span t-if="courant and courant[0]" class="badge text-bg-success"><i class="fa fa-check"/> Oui</span>
-                            <span t-else="" class="badge text-bg-secondary">Non</span>
-                            <span t-if="courant" class="small text-muted ms-1">depuis le <t t-out="fmt_date(courant[1])"/></span>
-                        </td>
-                        <td class="text-end">
-                            <form method="post" action="/extranet/dematerialisation" class="d-inline">
-                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                <input type="hidden" name="type_envoi" t-att-value="t[0]"/>
-                                <t t-if="courant and courant[0]">
-                                    <input type="hidden" name="accord" value="0"/>
-                                    <button type="submit" class="btn btn-sm btn-outline-secondary">Retirer mon accord</button>
-                                </t>
-                                <t t-else="">
-                                    <input type="hidden" name="accord" value="1"/>
-                                    <label class="small me-2">
-                                        <input type="checkbox" name="confirmation" value="1" required="required"/>
-                                        J'accepte expressément de recevoir ces envois par voie électronique
-                                    </label>
-                                    <button type="submit" class="btn btn-sm btn-primary" t-att-disabled="None if partner.email else 'disabled'">Donner mon accord</button>
-                                </t>
-                            </form>
-                        </td>
-                    </tr>
-                </tbody>
-            </t>
+
+            <div class="o_ext_carte my-3">
+                <div class="text-muted small">Mode de réception actuel</div>
+                <div class="fs-5">
+                    <t t-if="mode == 'electronique'"><i class="fa fa-at me-1"/>Voie électronique
+                        <span class="small text-muted">— <t t-out="adresse_notification"/></span></t>
+                    <t t-else=""><i class="fa fa-envelope-o me-1"/>Voie postale</t>
+                </div>
+                <div t-if="attente" class="small text-warning mt-1">
+                    <i class="fa fa-clock-o"/> Changement demandé :
+                    <t t-if="attente.objet == 'postal'">voie postale</t><t t-else="">voie électronique</t>,
+                    à compter du <t t-out="fmt_date(attente.date_effet)"/>.
+                </div>
+                <div t-if="mode == 'postal' and not adresse_notification and not attente" class="small text-muted mt-1">
+                    Aucune adresse électronique de notification n'est enregistrée : vos notifications vous
+                    sont adressées par voie postale.
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-lg-6">
+                    <div class="o_ext_carte h-100">
+                        <h5>Adresse électronique de notification</h5>
+                        <form method="post" action="/extranet/dematerialisation">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <input type="hidden" name="action" value="adresse"/>
+                            <input type="email" name="email" class="form-control mb-2" required="required"
+                                   t-att-value="adresse_notification or ''" placeholder="vous@exemple.fr"/>
+                            <button type="submit" class="btn btn-sm btn-outline-primary">Enregistrer cette adresse</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="o_ext_carte h-100">
+                        <h5>Changer de mode de réception</h5>
+                        <form t-if="mode == 'electronique' or (attente and attente.objet == 'electronique')"
+                              method="post" action="/extranet/dematerialisation">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <input type="hidden" name="action" value="postal"/>
+                            <label class="small d-block mb-2">
+                                <input type="checkbox" name="confirmation" value="1" required="required"/>
+                                Je demande à recevoir les notifications et mises en demeure par voie postale.
+                            </label>
+                            <button type="submit" class="btn btn-sm btn-primary">Recevoir par voie postale</button>
+                        </form>
+                        <form t-else="" method="post" action="/extranet/dematerialisation">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <input type="hidden" name="action" value="electronique"/>
+                            <p class="small">Vous recevez vos notifications par voie postale. Vous pouvez revenir
+                                à la voie électronique, à l'adresse indiquée ci-contre.</p>
+                            <button type="submit" class="btn btn-sm btn-primary"
+                                    t-att-disabled="None if adresse_notification else 'disabled'">Revenir à la voie électronique</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
             <details class="mt-4">
-                <summary>Historique de mes choix</summary>
+                <summary>Historique de mes demandes</summary>
                 <ul class="small mt-2">
                     <li t-foreach="historique" t-as="h">
-                        <t t-out="fmt_date(h.date)"/> — <t t-out="label(h, 'type_envoi')"/> :
-                        <t t-if="h.accord">accord</t><t t-else="">retrait</t>
-                        (<t t-out="label(h, 'origine')"/>)
+                        <t t-out="fmt_date(h.date_reception)"/> — <t t-out="label(h, 'objet')"/>
+                        <t t-if="h.objet == 'adresse'"> (<t t-out="h.email"/>)</t>
+                        — effet le <t t-out="fmt_date(h.date_effet)"/> (<t t-out="label(h, 'origine')"/>)
                     </li>
-                    <li t-if="not historique" class="text-muted">Aucun choix enregistré.</li>
+                    <li t-if="not historique" class="text-muted">Aucune demande enregistrée.</li>
                 </ul>
             </details>
         </t>

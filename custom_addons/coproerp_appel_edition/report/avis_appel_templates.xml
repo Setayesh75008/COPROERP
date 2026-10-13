@@ -180,6 +180,11 @@
                     </div>
                 </div>
 
+                <!-- Mention obligatoire : possibilité de revenir à la voie postale -->
+                <div class="mt-2 text-muted" style="font-size: 8.5pt;">
+                    <t t-out="o.env['coproerp.notification.mode'].mention_voie_postale()"/>
+                </div>
+
                 <!-- Papillon à joindre au règlement -->
                 <div style="margin-top: 10mm; border-top: 1px dashed #555; padding-top: 3mm; font-size: 10.5pt;">
                     <div class="text-center fst-italic mb-1">Joindre ce papillon à votre règlement</div>

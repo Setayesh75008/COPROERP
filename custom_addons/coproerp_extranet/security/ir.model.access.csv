@@ -18,3 +18,5 @@ access_droit_portal,droit.portal,coproerp_droit.model_coproerp_droit,base.group_
 access_appel_charge_portal,appel.charge.portal,coproerp_appel_charge.model_coproerp_appel_charge,base.group_portal,1,0,0,0
 access_appel_charge_groupe_portal,appel.charge.groupe.portal,coproerp_appel_charge.model_coproerp_appel_charge_groupe,base.group_portal,1,0,0,0
 access_appel_charge_poste_portal,appel.charge.poste.portal,coproerp_appel_charge.model_coproerp_appel_charge_poste,base.group_portal,1,0,0,0
+access_notification_mode_user,notification.mode.user,model_coproerp_notification_mode,base.group_user,1,0,1,0
+access_notification_mode_portal,notification.mode.portal,model_coproerp_notification_mode,base.group_portal,1,0,0,0

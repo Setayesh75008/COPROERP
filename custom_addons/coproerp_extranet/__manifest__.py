@@ -13,7 +13,7 @@ les copropriétaires de l'immeuble et aux documents réservés.
     "author": "SSB AVOCAT",
     "website": "https://www.ssb-avocat.fr",
     "category": "Real Estate",
-    "version": "19.0.1.0.2",
+    "version": "19.0.1.0.3",
     "license": "LGPL-3",
     "depends": [
         "portal",
@@ -36,6 +36,7 @@ les copropriétaires de l'immeuble et aux documents réservés.
         "views/document_views.xml",
         "views/actualite_views.xml",
         "views/dematerialisation_views.xml",
+        "views/notification_mode_views.xml",
         "views/rib_demande_views.xml",
         "views/res_partner_views.xml",
         "views/extranet_menus.xml",

@@ -238,6 +238,46 @@ class TestExtranetAcces(ExtranetCommon):
         self.assertTrue(etat["convocation_ag"][0])
 
 
+    # ---- Réception des notifications (art. 42-1 loi 1965) ------------------
+    def test_notification_par_defaut_electronique(self):
+        Mode = self.env["coproerp.notification.mode"]
+        self.alice.email_notification = False
+        self.assertEqual(Mode.mode_au(self.alice), ("postal", False),
+                         "Sans adresse de notification, la voie postale s'impose")
+        Mode.create({"personne_id": self.alice.id, "objet": "adresse",
+                     "email": "alice@exemple.fr", "origine": "extranet"})
+        self.assertEqual(self.alice.email_notification, "alice@exemple.fr")
+        self.assertEqual(Mode.mode_au(self.alice), ("electronique", "alice@exemple.fr"))
+
+    def test_demande_voie_postale_effet_neuvieme_jour(self):
+        Mode = self.env["coproerp.notification.mode"]
+        self.alice.email_notification = "alice@exemple.fr"
+        demande = Mode.create({"personne_id": self.alice.id, "objet": "postal",
+                               "origine": "courrier", "date_reception": self.today})
+        self.assertEqual(demande.date_effet, self.today + timedelta(days=9))
+        self.assertEqual(Mode.mode_au(self.alice, self.today)[0], "electronique")
+        self.assertEqual(Mode.mode_au(self.alice, self.today + timedelta(days=9))[0], "postal")
+        self.assertEqual(Mode.demande_en_attente(self.alice), demande)
+
+    def test_demande_en_assemblee_effet_immediat(self):
+        Mode = self.env["coproerp.notification.mode"]
+        self.alice.email_notification = "alice@exemple.fr"
+        Mode.create({"personne_id": self.alice.id, "objet": "postal",
+                     "origine": "ag", "date_reception": self.today})
+        self.assertEqual(Mode.mode_au(self.alice, self.today)[0], "postal")
+
+    def test_journal_notifications_non_modifiable(self):
+        Mode = self.env["coproerp.notification.mode"]
+        ligne = Mode.create({"personne_id": self.alice.id, "objet": "postal", "origine": "courrier"})
+        with self.assertRaises(Exception):
+            ligne.write({"objet": "electronique"})
+        with self.assertRaises(Exception):
+            ligne.unlink()
+        with self.assertRaises(Exception):
+            Mode.create({"personne_id": self.alice.id, "objet": "postal", "origine": "courrier",
+                         "date_reception": self.today + timedelta(days=3)})
+
+
 @tagged("post_install", "-at_install", "coproerp_extranet")
 class TestExtranetPages(HttpCase, ExtranetCommon):
 

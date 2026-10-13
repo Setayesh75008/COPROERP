@@ -486,37 +486,58 @@ class ExtranetPortal(CustomerPortal):
     @http.route(["/extranet/dematerialisation"], type="http", auth="user", website=True,
                 methods=["GET", "POST"])
     def extranet_dematerialisation(self, **post):
+        """Réception des notifications (art. 42-1 de la loi du 10 juillet 1965).
+
+        La voie électronique est le principe ; le copropriétaire peut demander
+        la voie postale à tout moment. Chaque demande est journalisée (date,
+        adresse IP) et prend effet le 9e jour suivant sa réception.
+        """
+        import re
         partner = self._ext_partner()
-        Consentement = request.env["coproerp.demat.consentement"]
-        types = dict(Consentement._fields["type_envoi"]._description_selection(request.env))
+        Mode = request.env["coproerp.notification.mode"]
         message = False
         if request.httprequest.method == "POST" and self._ext_coproprietes():
-            type_envoi = post.get("type_envoi")
-            accord = post.get("accord") == "1"
-            if type_envoi in types:
-                if accord and not post.get("confirmation"):
-                    message = ("danger", "Merci de cocher la case de confirmation pour donner votre accord.")
-                elif accord and not partner.email:
-                    message = ("danger", "Renseignez d'abord votre adresse e-mail dans « Mon compte ».")
+            action = post.get("action")
+            trace = {
+                "personne_id": partner.id,
+                "origine": "extranet",
+                "adresse_ip": request.httprequest.remote_addr,
+                "user_agent": (request.httprequest.user_agent.string or "")[:250],
+                "utilisateur_id": request.env.user.id,
+            }
+            mode_actuel = Mode.mode_au(partner)[0]
+            attente = Mode.demande_en_attente(partner)
+            if action == "adresse":
+                email = (post.get("email") or "").strip()
+                if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
+                    message = ("danger", "Adresse électronique invalide.")
                 else:
-                    Consentement.sudo().create(
-                        {
-                            "personne_id": partner.id,
-                            "type_envoi": type_envoi,
-                            "accord": accord,
-                            "origine": "extranet",
-                            "adresse_ip": request.httprequest.remote_addr,
-                            "user_agent": (request.httprequest.user_agent.string or "")[:250],
-                            "email": partner.email,
-                            "utilisateur_id": request.env.user.id,
-                        }
-                    )
-                    message = ("success", "Votre choix a bien été enregistré.")
-        etat = Consentement.etat_actuel(partner)
-        historique = Consentement.search([("personne_id", "=", partner.id)], limit=20)
+                    Mode.sudo().create(dict(trace, objet="adresse", email=email))
+                    message = ("success", "Votre adresse électronique de notification est enregistrée.")
+            elif action == "postal":
+                if not post.get("confirmation"):
+                    message = ("danger", "Merci de cocher la case de confirmation.")
+                elif (attente and attente.objet == "postal") or (mode_actuel == "postal" and not attente):
+                    message = ("warning", "Vous recevez déjà, ou recevrez bientôt, vos notifications par voie postale.")
+                else:
+                    ligne = Mode.sudo().create(dict(trace, objet="postal"))
+                    message = ("success", "Votre demande est enregistrée. Elle prendra effet le %s."
+                               % ligne.date_effet.strftime("%d/%m/%Y"))
+            elif action == "electronique":
+                if not (partner.sudo().email_notification or "").strip():
+                    message = ("danger", "Indiquez d'abord votre adresse électronique de notification.")
+                elif (attente and attente.objet == "electronique") or (mode_actuel == "electronique" and not attente):
+                    message = ("warning", "Vous recevez déjà vos notifications par voie électronique.")
+                else:
+                    ligne = Mode.sudo().create(dict(trace, objet="electronique"))
+                    message = ("success", "Votre demande est enregistrée. Elle prendra effet le %s."
+                               % ligne.date_effet.strftime("%d/%m/%Y"))
+        mode, adresse = Mode.mode_au(partner)
+        historique = Mode.sudo().search([("personne_id", "=", partner.id)], limit=20)
         return self._ext_render(
             "coproerp_extranet.page_dematerialisation", "demat",
-            types=types, etat=etat, historique=historique, message=message,
+            mode=mode, adresse_notification=partner.sudo().email_notification,
+            attente=Mode.demande_en_attente(partner), historique=historique, message=message,
         )
 
     # ==================================================================

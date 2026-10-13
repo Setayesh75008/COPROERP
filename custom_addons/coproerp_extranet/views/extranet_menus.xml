@@ -14,8 +14,10 @@
               parent="menu_extranet_root" action="action_cs_mandat" sequence="30"/>
     <menuitem id="menu_extranet_rib" name="Demandes de prélèvement"
               parent="menu_extranet_root" action="action_rib_demande" sequence="40"/>
-    <menuitem id="menu_extranet_demat" name="Accords de dématérialisation"
-              parent="menu_extranet_root" action="action_demat" sequence="50"/>
+    <menuitem id="menu_extranet_notification_mode" name="Réception des notifications"
+              parent="menu_extranet_root" action="coproerp_extranet.action_notification_mode" sequence="50"/>
+    <menuitem id="menu_extranet_demat" name="Anciens accords (avant la loi de 2024)"
+              parent="menu_extranet_root" action="action_demat" sequence="95"/>
     <menuitem id="menu_extranet_categories" name="Catégories de documents"
               parent="menu_extranet_root" action="action_document_categorie" sequence="90"/>
 

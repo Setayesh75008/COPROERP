@@ -31,7 +31,26 @@
                             <field name="en_cours"/>
                         </list>
                     </field>
-                    <separator string="Accords de dématérialisation (journal)"/>
+                    <separator string="Réception des notifications (art. 42-1 loi 1965)"/>
+                    <group>
+                        <field name="email_notification" readonly="1"/>
+                        <field name="mode_notification"/>
+                    </group>
+                    <div class="text-muted small mb-2">
+                        Pour changer l'adresse de notification ou enregistrer une demande de voie postale,
+                        utilisez le menu Extranet → Réception des notifications : chaque demande y est datée
+                        et conservée comme preuve.
+                    </div>
+                    <field name="notification_mode_ids" readonly="1">
+                        <list>
+                            <field name="date_reception"/>
+                            <field name="objet"/>
+                            <field name="email"/>
+                            <field name="origine"/>
+                            <field name="date_effet"/>
+                        </list>
+                    </field>
+                    <separator string="Anciens accords de dématérialisation (avant la loi de 2024)"/>
                     <field name="demat_consentement_ids" readonly="1">
                         <list>
                             <field name="date"/>

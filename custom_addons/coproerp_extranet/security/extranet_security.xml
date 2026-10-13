@@ -230,6 +230,13 @@
             <field name="domain_force">[('personne_id', 'in', [user.partner_id.id, user.partner_id.commercial_partner_id.id])]</field>
         </record>
 
+        <record id="rule_notification_mode_portal" model="ir.rule">
+            <field name="name">Extranet : mes choix de réception des notifications</field>
+            <field name="model_id" ref="model_coproerp_notification_mode"/>
+            <field name="groups" eval="[Command.link(ref('base.group_portal'))]"/>
+            <field name="domain_force">[('personne_id', 'in', [user.partner_id.id, user.partner_id.commercial_partner_id.id])]</field>
+        </record>
+
         <record id="rule_rib_demande_portal" model="ir.rule">
             <field name="name">Extranet : mes dépôts de RIB</field>
             <field name="model_id" ref="model_coproerp_rib_demande"/>
