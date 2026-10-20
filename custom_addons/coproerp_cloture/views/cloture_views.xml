@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_cloture_list" model="ir.ui.view">
+        <field name="name">coproerp.cloture.list</field>
+        <field name="model">coproerp.cloture</field>
+        <field name="arch" type="xml">
+            <list decoration-info="etat == 'brouillon'">
+                <field name="copropriete_id"/>
+                <field name="budget_id"/>
+                <field name="date_fin"/>
+                <field name="date_cloture"/>
+                <field name="etat" widget="badge" decoration-success="etat == 'cloturee'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_cloture_form" model="ir.ui.view">
+        <field name="name">coproerp.cloture.form</field>
+        <field name="model">coproerp.cloture</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_imprimer_annexes" type="object" string="Imprimer les annexes"
+                            class="oe_highlight"/>
+                    <button name="action_cloturer" type="object" string="Clôturer l'exercice"
+                            invisible="etat != 'brouillon'"
+                            confirm="Les écritures de l'exercice seront verrouillées : plus aucune écriture ne pourra être passée à une date antérieure ou égale à la fin de l'exercice. Continuer ?"/>
+                    <field name="etat" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group string="Exercice">
+                            <field name="budget_id" readonly="etat != 'brouillon'"/>
+                            <field name="copropriete_id"/>
+                            <label for="date_debut" string="Période"/>
+                            <div>du <field name="date_debut" class="oe_inline"/> au <field name="date_fin" class="oe_inline"/></div>
+                            <field name="date_cloture" invisible="not date_cloture"/>
+                        </group>
+                        <group string="Colonnes des annexes">
+                            <field name="budget_precedent_id" readonly="etat != 'brouillon'"/>
+                            <field name="budget_en_cours_id" readonly="etat != 'brouillon'"/>
+                            <field name="budget_a_voter_id" readonly="etat != 'brouillon'"/>
+                        </group>
+                    </group>
+                    <field name="controles_ok" invisible="1"/>
+                    <div invisible="etat != 'brouillon'">
+                        <div class="alert alert-success" role="alert" invisible="not controles_ok">
+                            <field name="controles"/>
+                        </div>
+                        <div class="alert alert-warning" role="alert" invisible="controles_ok">
+                            <b>Avant de clôturer :</b><br/>
+                            <field name="controles"/>
+                        </div>
+                    </div>
+                    <div class="text-muted">
+                        Les annexes peuvent être imprimées à tout moment : tant que l'exercice n'est pas
+                        clôturé, elles portent la mention « PROJET ». Ordre conseillé : comptabiliser les
+                        appels et les factures, mettre en réserve le fonds de travaux, comptabiliser la
+                        régularisation des charges, puis clôturer.
+                    </div>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_cloture" model="ir.actions.act_window">
+        <field name="name">Clôtures et annexes comptables</field>
+        <field name="res_model">coproerp.cloture</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p>La clôture se lance depuis le budget de l'exercice
+            (bouton « Clôture et annexes »).</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_clotures" name="Clôtures et annexes"
+              parent="coproerp_comptabilite.menu_comptabilite_root" action="action_cloture" sequence="45"/>
+
+    <record id="view_budget_annuel_form_cloture" model="ir.ui.view">
+        <field name="name">coproerp.budget.annuel.form.cloture</field>
+        <field name="model">coproerp.budget.annuel</field>
+        <field name="inherit_id" ref="coproerp_regularisation.view_budget_annuel_form_regularisation"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_regularisation']" position="after">
+                <button name="action_cloture" type="object" string="Clôture et annexes"
+                        class="btn-secondary"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

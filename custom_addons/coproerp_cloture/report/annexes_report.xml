@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="paperformat_annexes" model="report.paperformat">
+        <field name="name">CoproERP – A4 paysage (annexes comptables)</field>
+        <field name="format">A4</field>
+        <field name="orientation">Landscape</field>
+        <field name="margin_top">40</field>
+        <field name="margin_bottom">18</field>
+        <field name="margin_left">10</field>
+        <field name="margin_right">10</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">35</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="action_report_annexes" model="ir.actions.report">
+        <field name="name">Annexes comptables</field>
+        <field name="model">coproerp.cloture</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">coproerp_cloture.report_annexes</field>
+        <field name="report_file">coproerp_cloture.report_annexes</field>
+        <field name="print_report_name">'Annexes comptables %s - %s' % (object.budget_id.exercice or '', object.copropriete_id.name or '')</field>
+        <field name="paperformat_id" ref="paperformat_annexes"/>
+        <field name="binding_model_id" ref="model_coproerp_cloture"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

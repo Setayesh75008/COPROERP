@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="report_annexes">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-set="d" t-value="o.donnees_annexes()"/>
+                <t t-call="coproerp_cloture.report_annexes_document"/>
+            </t>
+        </t>
+    </template>
+
+    <!-- En-tête commun à chaque annexe -->
+    <template id="annexe_entete">
+        <div class="text-center mb-3" style="margin-top: 2mm;">
+            <h4 class="mb-1" style="letter-spacing: 1px;"><b t-out="titre"/></h4>
+            <div style="font-size: 11.5pt;">
+                <b t-out="d['copro'].name"/> – exercice du <t t-out="o.date_debut.strftime('%d/%m/%Y')"/>
+                au <t t-out="o.date_fin.strftime('%d/%m/%Y')"/>
+            </div>
+            <div t-if="sous_titre" style="font-size: 11pt;" t-out="sous_titre"/>
+            <div t-if="d['projet']" class="text-danger fw-bold">PROJET – comptes non approuvés</div>
+        </div>
+    </template>
+
+    <template id="report_annexes_document">
+        <t t-set="b" t-value="d['budgets']"/>
+        <t t-set="a1" t-value="d['annexe1']"/>
+        <t t-set="a2" t-value="d['annexe2']"/>
+        <t t-set="lib_n1" t-value="('Exercice précédent approuvé %s' % b['n1'].exercice) if b['n1'] else 'Exercice précédent'"/>
+        <t t-set="lib_bn" t-value="'Budget voté %s' % (b['n'].exercice or '')"/>
+        <t t-set="lib_rn" t-value="'Réalisé %s (exercice clos)' % (b['n'].exercice or '')"/>
+        <t t-set="lib_bc" t-value="('Budget voté %s' % b['en_cours'].exercice) if b['en_cours'] else 'Budget en cours'"/>
+        <t t-set="lib_bv" t-value="('Budget à voter %s' % b['a_voter'].exercice) if b['a_voter'] else 'Budget à voter'"/>
+        <t t-call="web.external_layout">
+            <div class="page o_copro_doc" style="font-size: 11.5pt;">
+                <t t-call="coproerp_appel_edition.style_documents"/>
+
+                <!-- ============ ANNEXE 1 ============ -->
+                <t t-call="coproerp_cloture.annexe_entete">
+                    <t t-set="titre">ANNEXE 1 – ÉTAT FINANCIER APRÈS RÉPARTITION AU <t t-out="o.date_fin.strftime('%d/%m/%Y')"/></t>
+                    <t t-set="sous_titre" t-value="'Montants en euros'"/>
+                </t>
+                <t t-foreach="a1['sections']" t-as="s">
+                    <table class="table table-sm mb-3" style="font-size: 11pt;">
+                        <thead>
+                            <tr class="o_cd_entete">
+                                <th colspan="6" t-out="s['titre']"/>
+                            </tr>
+                            <tr class="o_cd_section">
+                                <th style="width: 30%;" t-out="s['titre_g']"/>
+                                <th class="text-end" style="width: 10%;">Exercice précédent approuvé</th>
+                                <th class="text-end" style="width: 10%;">Exercice clos</th>
+                                <th style="width: 30%;" t-out="s['titre_d']"/>
+                                <th class="text-end" style="width: 10%;">Exercice précédent approuvé</th>
+                                <th class="text-end" style="width: 10%;">Exercice clos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="s['lignes']" t-as="l" t-att-class="'o_cd_alt' if l_index % 2 else ''">
+                                <td t-out="l['g'] or ''"/>
+                                <td class="text-end" t-out="o.fmt(l['g_n1']) if l['g'] else ''"/>
+                                <td class="text-end" t-out="o.fmt(l['g_n']) if l['g'] else ''"/>
+                                <td t-out="l['d'] or ''"/>
+                                <td class="text-end" t-out="o.fmt(l['d_n1']) if l['d'] else ''"/>
+                                <td class="text-end" t-out="o.fmt(l['d_n']) if l['d'] else ''"/>
+                            </tr>
+                            <tr class="o_cd_total">
+                                <td t-out="s['total']['g']"/>
+                                <td class="text-end" t-out="o.fmt(s['total']['g_n1'])"/>
+                                <td class="text-end" t-out="o.fmt(s['total']['g_n'])"/>
+                                <td t-out="s['total']['d']"/>
+                                <td class="text-end" t-out="o.fmt(s['total']['d_n1'])"/>
+                                <td class="text-end" t-out="o.fmt(s['total']['d_n'])"/>
+                            </tr>
+                        </tbody>
+                    </table>
+                </t>
+                <table class="table table-sm" style="font-size: 11pt;">
+                    <tr class="o_cd_total">
+                        <td style="width: 30%;">Total général (I) + (II)</td>
+                        <td class="text-end" style="width: 10%;" t-out="o.fmt(a1['totaux_n1']['actif']) if a1['n1'] else ''"/>
+                        <td class="text-end" style="width: 10%;" t-out="o.fmt(a1['totaux_n']['actif'])"/>
+                        <td style="width: 30%;">Total général (I) + (II)</td>
+                        <td class="text-end" style="width: 10%;" t-out="o.fmt(a1['totaux_n1']['passif']) if a1['n1'] else ''"/>
+                        <td class="text-end" style="width: 10%;" t-out="o.fmt(a1['totaux_n']['passif'])"/>
+                    </tr>
+                </table>
+
+                <!-- ============ ANNEXE 2 ============ -->
+                <p style="page-break-before: always;"/>
+                <t t-call="coproerp_cloture.annexe_entete">
+                    <t t-set="titre" t-value="'ANNEXE 2 – COMPTE DE GESTION GÉNÉRAL DE L\'EXERCICE CLOS RÉALISÉ ET BUDGET PRÉVISIONNEL'"/>
+                    <t t-set="sous_titre" t-value="'Montants en euros – le budget prévisionnel est voté par clé de répartition : il figure sur les lignes de total'"/>
+                </t>
+                <t t-foreach="[('courant', 'I – OPÉRATIONS COURANTES (budget prévisionnel)'), ('travaux', 'II – TRAVAUX DE L\'ARTICLE 14-2 ET OPÉRATIONS EXCEPTIONNELLES')]" t-as="partie">
+                    <t t-set="p" t-value="a2[partie[0]]"/>
+                    <t t-set="avec_budget" t-value="partie[0] == 'courant'"/>
+                    <table class="table table-sm mb-3" style="font-size: 11pt;">
+                        <thead>
+                            <tr class="o_cd_entete"><th t-att-colspan="6 if avec_budget else 3" t-out="partie[1]"/></tr>
+                            <tr class="o_cd_section">
+                                <th>Charges et produits</th>
+                                <th class="text-end" style="width: 12%;" t-out="lib_n1"/>
+                                <th t-if="avec_budget" class="text-end" style="width: 12%;" t-out="lib_bn"/>
+                                <th class="text-end" style="width: 12%;" t-out="lib_rn"/>
+                                <th t-if="avec_budget" class="text-end" style="width: 12%;" t-out="lib_bc"/>
+                                <th t-if="avec_budget" class="text-end" style="width: 12%;" t-out="lib_bv"/>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-if="not p['charges']"><td t-att-colspan="6 if avec_budget else 3" class="text-muted">Aucune charge</td></tr>
+                            <t t-foreach="p['charges']" t-as="g">
+                                <tr class="o_cd_alt">
+                                    <td><b><t t-out="g['classe']"/> <t t-out="g['libelle']"/></b></td>
+                                    <td class="text-end"><b t-out="o.fmt(g['n1'])"/></td>
+                                    <td t-if="avec_budget"/>
+                                    <td class="text-end"><b t-out="o.fmt(g['n'])"/></td>
+                                    <td t-if="avec_budget"/><td t-if="avec_budget"/>
+                                </tr>
+                                <tr t-foreach="g['lignes']" t-as="l">
+                                    <td style="padding-left: 6mm;"><t t-out="l['code']"/> <t t-out="l['libelle']"/></td>
+                                    <td class="text-end" t-out="o.fmt(l['n1'])"/>
+                                    <td t-if="avec_budget"/>
+                                    <td class="text-end" t-out="o.fmt(l['n'])"/>
+                                    <td t-if="avec_budget"/><td t-if="avec_budget"/>
+                                </tr>
+                            </t>
+                            <tr class="o_cd_total">
+                                <td>Total des charges</td>
+                                <td class="text-end" t-out="o.fmt(p['total_charges']['n1'])"/>
+                                <td t-if="avec_budget" class="text-end" t-out="o.fmt(a2['budget']['n'])"/>
+                                <td class="text-end" t-out="o.fmt(p['total_charges']['n'])"/>
+                                <td t-if="avec_budget" class="text-end" t-out="o.fmt(a2['budget']['en_cours'])"/>
+                                <td t-if="avec_budget" class="text-end" t-out="o.fmt(a2['budget']['a_voter'])"/>
+                            </tr>
+                            <tr t-foreach="p['produits']" t-as="l">
+                                <td><t t-out="l['code']"/> <t t-out="l['libelle']"/></td>
+                                <td class="text-end" t-out="o.fmt(l['n1'])"/>
+                                <td t-if="avec_budget"/>
+                                <td class="text-end" t-out="o.fmt(l['n'])"/>
+                                <td t-if="avec_budget"/><td t-if="avec_budget"/>
+                            </tr>
+                            <tr class="o_cd_total">
+                                <td>Total des produits (provisions et autres produits)</td>
+                                <td class="text-end" t-out="o.fmt(p['total_produits']['n1'])"/>
+                                <td t-if="avec_budget" class="text-end" t-out="o.fmt(a2['budget']['n'])"/>
+                                <td class="text-end" t-out="o.fmt(p['total_produits']['n'])"/>
+                                <td t-if="avec_budget" class="text-end" t-out="o.fmt(a2['budget']['en_cours'])"/>
+                                <td t-if="avec_budget" class="text-end" t-out="o.fmt(a2['budget']['a_voter'])"/>
+                            </tr>
+                            <tr class="o_cd_section">
+                                <td>
+                                    <t t-if="avec_budget">Solde : insuffisance (+) ou excédent (–) réparti entre les copropriétaires</t>
+                                    <t t-else="">Solde : dépenses (+) ou appels (–) en attente, porté au compte 12</t>
+                                </td>
+                                <td class="text-end" t-out="o.fmt(p['solde']['n1'])"/>
+                                <td t-if="avec_budget"/>
+                                <td class="text-end" t-out="o.fmt(p['solde']['n'])"/>
+                                <td t-if="avec_budget"/><td t-if="avec_budget"/>
+                            </tr>
+                        </tbody>
+                    </table>
+                </t>
+
+                <!-- ============ ANNEXE 3 ============ -->
+                <p style="page-break-before: always;"/>
+                <t t-call="coproerp_cloture.annexe_entete">
+                    <t t-set="titre" t-value="'ANNEXE 3 – COMPTE DE GESTION POUR OPÉRATIONS COURANTES DE L\'EXERCICE CLOS RÉALISÉ ET BUDGET PRÉVISIONNEL'"/>
+                    <t t-set="sous_titre" t-value="'Charges par clé de répartition – montants en euros'"/>
+                </t>
+                <table class="table table-sm" style="font-size: 11pt;">
+                    <thead>
+                        <tr class="o_cd_entete">
+                            <th>Clé de répartition / nature des charges</th>
+                            <th class="text-end" style="width: 12%;" t-out="lib_n1"/>
+                            <th class="text-end" style="width: 12%;" t-out="lib_bn"/>
+                            <th class="text-end" style="width: 12%;" t-out="lib_rn"/>
+                            <th class="text-end" style="width: 12%;" t-out="lib_bc"/>
+                            <th class="text-end" style="width: 12%;" t-out="lib_bv"/>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="d['annexe3']['cles']" t-as="c">
+                            <tr class="o_cd_section"><td colspan="6"><b t-out="c['libelle']"/></td></tr>
+                            <tr t-foreach="c['lignes']" t-as="l">
+                                <td style="padding-left: 6mm;"><t t-out="l['code']"/> <t t-out="l['libelle']"/></td>
+                                <td class="text-end" t-out="o.fmt(l['n1'])"/>
+                                <td/>
+                                <td class="text-end" t-out="o.fmt(l['n'])"/>
+                                <td/><td/>
+                            </tr>
+                            <tr class="o_cd_alt">
+                                <td><b>Total <t t-out="c['libelle']"/></b></td>
+                                <td class="text-end"><b t-out="o.fmt(c['n1'])"/></td>
+                                <td class="text-end"><b t-out="o.fmt(c['budget']['n'])"/></td>
+                                <td class="text-end"><b t-out="o.fmt(c['n'])"/></td>
+                                <td class="text-end"><b t-out="o.fmt(c['budget']['en_cours'])"/></td>
+                                <td class="text-end"><b t-out="o.fmt(c['budget']['a_voter'])"/></td>
+                            </tr>
+                        </t>
+                        <tr class="o_cd_total">
+                            <td>Total des charges pour opérations courantes</td>
+                            <td class="text-end" t-out="o.fmt(d['annexe3']['total']['n1'])"/>
+                            <td class="text-end" t-out="o.fmt(d['annexe3']['total']['budget']['n'])"/>
+                            <td class="text-end" t-out="o.fmt(d['annexe3']['total']['n'])"/>
+                            <td class="text-end" t-out="o.fmt(d['annexe3']['total']['budget']['en_cours'])"/>
+                            <td class="text-end" t-out="o.fmt(d['annexe3']['total']['budget']['a_voter'])"/>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- ============ ANNEXE 4 ============ -->
+                <p style="page-break-before: always;"/>
+                <t t-call="coproerp_cloture.annexe_entete">
+                    <t t-set="titre" t-value="'ANNEXE 4 – COMPTE DE GESTION POUR TRAVAUX DE L\'ARTICLE 14-2 ET OPÉRATIONS EXCEPTIONNELLES HORS BUDGET PRÉVISIONNEL'"/>
+                    <t t-set="sous_titre" t-value="'Par opération – montants en euros'"/>
+                </t>
+                <p t-if="not d['annexe4']" class="text-muted">Aucuns travaux ni opération exceptionnelle sur l'exercice clos et l'exercice précédent.</p>
+                <table t-if="d['annexe4']" class="table table-sm" style="font-size: 11pt;">
+                    <thead>
+                        <tr class="o_cd_entete">
+                            <th>Opération / nature</th>
+                            <th class="text-end" style="width: 15%;" t-out="lib_n1"/>
+                            <th class="text-end" style="width: 15%;" t-out="lib_rn"/>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="d['annexe4']" t-as="op">
+                            <tr class="o_cd_section"><td colspan="3"><b t-out="op['libelle']"/></td></tr>
+                            <tr t-foreach="op['charges']" t-as="l">
+                                <td style="padding-left: 6mm;">Charges : <t t-out="l['code']"/> <t t-out="l['libelle']"/></td>
+                                <td class="text-end" t-out="o.fmt(l['n1'])"/>
+                                <td class="text-end" t-out="o.fmt(l['n'])"/>
+                            </tr>
+                            <tr t-foreach="op['produits']" t-as="l">
+                                <td style="padding-left: 6mm;">Produits : <t t-out="l['code']"/> <t t-out="l['libelle']"/></td>
+                                <td class="text-end" t-out="o.fmt(l['n1'])"/>
+                                <td class="text-end" t-out="o.fmt(l['n'])"/>
+                            </tr>
+                            <tr class="o_cd_alt">
+                                <td><b>Total charges / total produits</b></td>
+                                <td class="text-end"><b><t t-out="o.fmt(op['total_charges']['n1'])"/> / <t t-out="o.fmt(op['total_produits']['n1'])"/></b></td>
+                                <td class="text-end"><b><t t-out="o.fmt(op['total_charges']['n'])"/> / <t t-out="o.fmt(op['total_produits']['n'])"/></b></td>
+                            </tr>
+                        </t>
+                        <tr class="o_cd_total">
+                            <td>Total des charges</td>
+                            <td class="text-end" t-out="o.fmt(a2['travaux']['total_charges']['n1'])"/>
+                            <td class="text-end" t-out="o.fmt(a2['travaux']['total_charges']['n'])"/>
+                        </tr>
+                        <tr class="o_cd_total">
+                            <td>Total des produits</td>
+                            <td class="text-end" t-out="o.fmt(a2['travaux']['total_produits']['n1'])"/>
+                            <td class="text-end" t-out="o.fmt(a2['travaux']['total_produits']['n'])"/>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- ============ ANNEXE 5 ============ -->
+                <p style="page-break-before: always;"/>
+                <t t-call="coproerp_cloture.annexe_entete">
+                    <t t-set="titre" t-value="'ANNEXE 5 – ÉTAT DES TRAVAUX DE L\'ARTICLE 14-2 ET OPÉRATIONS EXCEPTIONNELLES VOTÉS NON ENCORE CLÔTURÉS À LA FIN DE L\'EXERCICE'"/>
+                    <t t-set="sous_titre">Montants cumulés depuis le vote, au <t t-out="o.date_fin.strftime('%d/%m/%Y')"/> – en euros</t>
+                </t>
+                <p t-if="not d['annexe5']['lignes']" class="text-muted">Aucuns travaux votés en cours à la fin de l'exercice.</p>
+                <table t-if="d['annexe5']['lignes']" class="table table-sm" style="font-size: 11pt;">
+                    <thead>
+                        <tr class="o_cd_entete">
+                            <th style="width: 10%;">Référence</th>
+                            <th>Désignation</th>
+                            <th style="width: 10%;">Date du vote</th>
+                            <th class="text-end" style="width: 12%;">Montant voté</th>
+                            <th class="text-end" style="width: 12%;">Travaux payés ou dus (A)</th>
+                            <th class="text-end" style="width: 12%;">Sommes appelées (B)</th>
+                            <th class="text-end" style="width: 12%;">Solde (B) – (A)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="d['annexe5']['lignes']" t-as="l" t-att-class="'o_cd_alt' if l_index % 2 else ''">
+                            <td t-out="l['travaux'].reference"/>
+                            <td t-out="l['travaux'].name"/>
+                            <td t-out="l['travaux'].date_vote.strftime('%d/%m/%Y')"/>
+                            <td class="text-end" t-out="o.fmt(l['montant_vote'])"/>
+                            <td class="text-end" t-out="o.fmt(l['depenses'])"/>
+                            <td class="text-end" t-out="o.fmt(l['appels'])"/>
+                            <td class="text-end" t-out="o.fmt(l['solde'])"/>
+                        </tr>
+                        <tr class="o_cd_total">
+                            <td colspan="3">Total</td>
+                            <td class="text-end" t-out="o.fmt(d['annexe5']['total']['montant_vote'])"/>
+                            <td class="text-end" t-out="o.fmt(d['annexe5']['total']['depenses'])"/>
+                            <td class="text-end" t-out="o.fmt(d['annexe5']['total']['appels'])"/>
+                            <td class="text-end" t-out="o.fmt(d['annexe5']['total']['solde'])"/>
+                        </tr>
+                    </tbody>
+                </table>
+                <p style="font-size: 10.5pt;" class="text-muted">
+                    Le solde de ces opérations figure à la ligne « 12 Solde en attente sur travaux et opérations
+                    exceptionnelles » de l'annexe 1 (<t t-out="o.fmt(a1['n'].get('attente_12', 0.0))"/> €).
+                </p>
+            </div>
+        </t>
+    </template>
+</odoo>
