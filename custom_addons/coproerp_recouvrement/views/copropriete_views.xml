@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_copropriete_form_recouvrement" model="ir.ui.view">
+        <field name="name">coproerp.copropriete.form.recouvrement</field>
+        <field name="model">coproerp.copropriete</field>
+        <field name="inherit_id" ref="coproerp_comptabilite.view_copropriete_form_comptabilite"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='comptabilite']" position="after">
+                <page string="Recouvrement" name="recouvrement">
+                    <group>
+                        <group string="Calendrier des relances">
+                            <field name="recouvrement_seuil"/>
+                            <field name="recouvrement_jours_avant_relance"/>
+                            <field name="recouvrement_jours_avant_mise_en_demeure"/>
+                            <field name="recouvrement_delai_mise_en_demeure"/>
+                        </group>
+                        <group string="Frais (art. 10-1 de la loi du 10 juillet 1965)">
+                            <field name="recouvrement_frais_mise_en_demeure"/>
+                            <field name="recouvrement_cle_frais_id"/>
+                        </group>
+                    </group>
+                    <div class="text-muted">
+                        La relance simple ne donne lieu à aucuns frais : seuls les frais nécessaires exposés à
+                        compter de la mise en demeure sont imputables au copropriétaire défaillant. Saisissez la
+                        facture d'honoraires du syndic sur la clé indiquée ci-dessus : les frais refacturés (compte
+                        714) viennent en déduction de cette clé lors de la régularisation.
+                    </div>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="report_relance">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="r">
+                <t t-set="d" t-value="r.donnees_lettre()"/>
+                <t t-call="coproerp_recouvrement.report_relance_document" t-lang="d['personne'].lang"/>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_relance_document">
+        <t t-set="copro" t-value="d['copro']"/>
+        <t t-set="personne" t-value="d['personne']"/>
+        <t t-set="releve" t-value="d['releve']"/>
+        <t t-set="gestionnaire" t-value="copro.gestionnaire_id"/>
+        <t t-set="med" t-value="d['mise_en_demeure']"/>
+        <t t-set="montant" t-value="{'widget': 'float', 'precision': 2}"/>
+        <t t-set="reference" t-value="' '.join(x for x in [copro.reference or '', personne.ref or '', r.name if r.name != '/' else ''] if x)"/>
+        <t t-call="web.external_layout">
+            <div class="page o_copro_doc" style="font-size: 11.5pt;">
+                <t t-call="coproerp_appel_edition.style_documents"/>
+                <div class="row">
+                    <div class="col-6">
+                        <h4 style="letter-spacing: 1px;">
+                            <b t-if="med">MISE EN DEMEURE</b>
+                            <b t-else="">LETTRE DE RELANCE</b>
+                        </h4>
+                        <div t-if="d['recommande']" class="fw-bold mb-1" t-out="d['mode_libelle']"/>
+                        <div t-if="d['projet']" class="text-danger fw-bold mb-1">PROJET – non envoyée</div>
+                        <table class="table table-sm table-borderless mb-0 o_cd_refs" style="font-size: 11pt;">
+                            <tr><td class="p-0 pe-2">En date du :</td>
+                                <td class="p-0"><t t-out="r.date.strftime('%d/%m/%Y')"/></td></tr>
+                            <tr><td class="p-0 pe-2">Immeuble :</td>
+                                <td class="p-0"><t t-out="copro.name"/><br/>
+                                    <t t-out="copro.street or ''"/> <t t-out="copro.zip or ''"/> <t t-out="copro.city or ''"/></td></tr>
+                            <tr t-if="reference"><td class="p-0 pe-2">Référence :</td>
+                                <td class="p-0" t-out="reference"/></tr>
+                        </table>
+                    </div>
+                    <div class="col-5 offset-1" style="margin-top: 12mm;">
+                        <div><b t-out="personne.name"/></div>
+                        <div t-if="personne.street" t-out="personne.street"/>
+                        <div t-if="personne.street2" t-out="personne.street2"/>
+                        <div><t t-out="personne.zip or ''"/> <t t-out="personne.city or ''"/></div>
+                        <div t-if="personne.country_id" t-out="personne.country_id.name.upper()"/>
+                    </div>
+                </div>
+
+                <!-- Corps de la lettre -->
+                <div class="mt-4">
+                    <p>Madame, Monsieur,</p>
+                    <t t-if="not med">
+                        <p>À la vérification de votre compte à la date indiquée en référence, nous constatons que vous
+                            restez redevable envers le syndicat des copropriétaires de la somme de
+                            <b><t t-out="d['montant']" t-options="montant"/> €</b>, dont le détail figure ci-dessous.
+                            Nous vous remercions de bien vouloir procéder à son règlement dans les meilleurs délais.</p>
+                        <p>Si vous avez effectué ce paiement très récemment, nous vous prions de ne pas tenir compte du
+                            présent rappel.</p>
+                        <p>Nous vous rappelons la possibilité de régler vos charges par prélèvement automatique : il vous
+                            suffit d'en faire la demande à votre gestionnaire.</p>
+                    </t>
+                    <t t-else="">
+                        <p>
+                            <t t-if="d['precedente']">Malgré notre relance du <t t-out="d['precedente'].date.strftime('%d/%m/%Y')"/>,
+                                vous restez</t><t t-else="">Vous restez</t>
+                            redevable envers le syndicat des copropriétaires de la somme de
+                            <b><t t-out="d['montant']" t-options="montant"/> €</b>, dont le détail figure dans le relevé
+                            de compte ci-dessous.</p>
+                        <p>En conséquence, nous vous <b>mettons en demeure</b> de régler cette somme dans un délai de
+                            <b><t t-out="d['delai']"/> jours</b> à compter de la réception de la présente.</p>
+                        <p>Nous attirons votre attention sur les points suivants :</p>
+                        <ul>
+                            <li>les sommes dues portent intérêt au taux légal à compter de la présente mise en demeure
+                                (article 36 du décret n° 67-223 du 17 mars 1967) ;</li>
+                            <li>à défaut de règlement dans un délai de trente jours, les autres provisions prévues au budget
+                                prévisionnel et, le cas échéant, pour travaux, non encore échues, deviendront immédiatement
+                                exigibles, et le syndic pourra saisir le président du tribunal judiciaire statuant selon la
+                                procédure accélérée au fond (article 19-2 de la loi n° 65-557 du 10 juillet 1965) ;</li>
+                            <li>les frais nécessaires exposés par le syndicat à compter de la mise en demeure pour le
+                                recouvrement de sa créance sont imputables à vous seul (article 10-1 de la même loi)<t t-if="r.frais">
+                                ; à ce titre, la somme de <t t-out="r.frais" t-options="montant"/> € a été portée au débit de votre compte</t>.</li>
+                        </ul>
+                        <p>Nous restons disposés à examiner avec vous une solution amiable, notamment un échelonnement du
+                            règlement de votre dette, sous réserve que vous preniez contact avec nous sans délai.</p>
+                    </t>
+                    <p>Nous vous prions d'agréer, Madame, Monsieur, l'expression de nos salutations distinguées.</p>
+                    <div class="text-end">
+                        <div>Le syndic</div>
+                        <div t-if="gestionnaire"><b t-out="gestionnaire.name"/></div>
+                    </div>
+                </div>
+
+                <!-- Relevé de compte -->
+                <table class="table table-sm mt-3" style="font-size: 11pt;">
+                    <thead>
+                        <tr class="o_cd_entete">
+                            <th style="width: 12%;">Date</th>
+                            <th>Libellé</th>
+                            <th class="text-end" style="width: 13%;">Débit</th>
+                            <th class="text-end" style="width: 13%;">Crédit</th>
+                            <th class="text-end" style="width: 16%;">Solde</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="o_cd_section">
+                            <td/>
+                            <td class="text-center">SOLDE AU <t t-out="releve['date_solde_initial'].strftime('%d/%m/%Y')"/></td>
+                            <td/><td/>
+                            <td class="text-end">
+                                <t t-out="abs(releve['solde_initial'])" t-options="montant"/>
+                                <t t-if="releve['solde_initial'] &gt; 0">DB</t><t t-elif="releve['solde_initial'] &lt; 0">CR</t>
+                            </td>
+                        </tr>
+                        <tr t-foreach="releve['lignes']" t-as="l" t-att-class="'o_cd_alt' if l_index % 2 else None">
+                            <td t-out="l['date'].strftime('%d/%m/%Y')"/>
+                            <td t-out="l['libelle'] or ''"/>
+                            <td class="text-end"><t t-if="l['debit']" t-out="l['debit']" t-options="montant"/></td>
+                            <td class="text-end"><t t-if="l['credit']" t-out="l['credit']" t-options="montant"/></td>
+                            <td class="text-end">
+                                <t t-out="abs(l['solde'])" t-options="montant"/>
+                                <t t-if="l['solde'] &gt; 0">DB</t><t t-elif="l['solde'] &lt; 0">CR</t>
+                            </td>
+                        </tr>
+                        <tr class="o_cd_total">
+                            <td/>
+                            <td class="text-center"><b>SOLDE AU <t t-out="releve['date_fin'].strftime('%d/%m/%Y')"/></b></td>
+                            <td class="text-end"><t t-out="releve['total_debit']" t-options="montant"/></td>
+                            <td class="text-end"><t t-out="releve['total_credit']" t-options="montant"/></td>
+                            <td class="text-end"><b>
+                                <t t-out="abs(releve['solde_final'])" t-options="montant"/>
+                                <t t-if="releve['solde_final'] &gt; 0">DB</t><t t-elif="releve['solde_final'] &lt; 0">CR</t>
+                            </b></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="row" style="font-size: 11pt;">
+                    <div class="col-7">
+                        <div>FONDS DE ROULEMENT : <t t-out="releve['fonds']['fonds_roulement']" t-options="montant"/> CR</div>
+                        <div>FONDS DE TRAVAUX : <t t-out="releve['fonds']['fonds_travaux']" t-options="montant"/> CR</div>
+                    </div>
+                    <div class="col-5 text-end">
+                        <div style="font-size: 13pt;"><b>TOTAL À PAYER : <t t-out="d['montant']" t-options="montant"/> €</b></div>
+                        <t t-if="gestionnaire">
+                            <div>Affaire suivie par : <t t-out="gestionnaire.name"/></div>
+                            <div t-if="gestionnaire.partner_id.phone">Tél. : <t t-out="gestionnaire.partner_id.phone"/></div>
+                        </t>
+                    </div>
+                </div>
+
+                <div class="mt-2 text-muted" style="font-size: 9pt;">
+                    <t t-out="r.env['coproerp.notification.mode'].mention_voie_postale()"/>
+                </div>
+
+                <!-- Papillon -->
+                <div style="margin-top: 8mm; border-top: 1px dashed #555; padding-top: 3mm; font-size: 11pt;">
+                    <div class="text-center fst-italic mb-1">Joindre ce papillon à votre règlement</div>
+                    <div class="row">
+                        <div class="col-8">
+                            <div><b t-out="personne.name"/></div>
+                            <div t-out="copro.name"/>
+                            <div t-if="reference">Réf. <t t-out="reference"/></div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div>Montant</div>
+                            <div style="font-size: 13.5pt;"><b t-out="d['montant']" t-options="montant"/> €</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <t t-call="coproerp_appel_edition.informations_paiement">
+                <t t-set="ref_paiement" t-value="reference"/>
+            </t>
+        </t>
+    </template>
+</odoo>

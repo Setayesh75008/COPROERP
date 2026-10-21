@@ -137,14 +137,15 @@ class Regularisation(models.Model):
         self.ensure_one()
         budget = self.budget_id
         company = self.copropriete_id._verifier_dossier()
-        lignes = self.env["account.move.line"].sudo().search([
+        MoveLine = self.env["account.move.line"].sudo()
+        commun = [
             ("company_id", "=", company.id),
             ("parent_state", "=", "posted"),
-            ("account_id.account_type", "in", ("expense", "expense_other")),
             ("coproerp_hors_budget", "=", False),
             ("date", ">=", budget.date_debut),
             ("date", "<=", budget.date_fin),
-        ])
+        ]
+        lignes = MoveLine.search(commun + [("account_id.account_type", "in", ("expense", "expense_other"))])
         sans_cle = lignes.filtered(lambda l: not l.coproerp_repartition_id)
         if sans_cle:
             raise UserError(
@@ -153,6 +154,12 @@ class Regularisation(models.Model):
                 % (len(sans_cle), sans_cle[0].name or sans_cle[0].move_id.ref or "",
                    sans_cle[0].date.strftime("%d/%m/%Y"))
             )
+        # Produits venant en déduction des charges d'une clé : notamment les frais
+        # de recouvrement refacturés au copropriétaire défaillant (714, art. 10-1).
+        lignes |= MoveLine.search(commun + [
+            ("account_id.account_type", "=", "income_other"),
+            ("coproerp_repartition_id", "!=", False),
+        ])
         resultat = defaultdict(dict)
         for ligne in lignes:
             compte = ligne.account_id.with_company(company)

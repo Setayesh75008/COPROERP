@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_relance_user,relance.user,model_coproerp_relance,base.group_user,1,1,1,1
+access_relance_preparation_user,relance.preparation.user,model_coproerp_relance_preparation,base.group_user,1,1,1,1
+access_relance_preparation_ligne_user,relance.preparation.ligne.user,model_coproerp_relance_preparation_ligne,base.group_user,1,1,1,1

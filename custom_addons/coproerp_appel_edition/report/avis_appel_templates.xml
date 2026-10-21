@@ -201,6 +201,10 @@
                     </div>
                 </div>
             </div>
+            <!-- Verso : moyens de paiement -->
+            <t t-call="coproerp_appel_edition.informations_paiement">
+                <t t-set="ref_paiement" t-value="avis['reference']"/>
+            </t>
         </t>
     </template>
 

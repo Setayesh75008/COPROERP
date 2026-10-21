@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Verso des avis et lettres : moyens de paiement.
+         Variables attendues : copro (sudo), personne, ref_paiement (référence à rappeler). -->
+    <template id="informations_paiement">
+        <div style="page-break-before: always;"/>
+        <div class="o_copro_doc" style="font-size: 11.5pt;">
+            <h5 class="text-center mb-4" style="letter-spacing: 1px;">
+                <b><u>INFORMATIONS POUR LE PAIEMENT DE VOTRE RÈGLEMENT</u></b>
+            </h5>
+            <t t-set="titulaire" t-value="copro.banque_titulaire or ('Syndicat des copropriétaires ' + (copro.name or ''))"/>
+
+            <div class="mb-3">
+                <div><b><u>Paiement par virement</u></b></div>
+                <t t-if="copro.banque_iban">
+                    <div>Le virement est à effectuer sur le compte bancaire séparé du syndicat :</div>
+                    <table class="table table-sm table-borderless mb-1 o_cd_refs" style="width: auto; font-size: 11pt;">
+                        <tr><td class="pe-3">Titulaire</td><td t-out="titulaire"/></tr>
+                        <tr t-if="copro.banque_nom"><td class="pe-3">Banque</td><td t-out="copro.banque_nom"/></tr>
+                        <tr><td class="pe-3">IBAN</td><td style="font-family: monospace;" t-out="copro.banque_iban"/></tr>
+                        <tr t-if="copro.banque_bic"><td class="pe-3">BIC</td><td style="font-family: monospace;" t-out="copro.banque_bic"/></tr>
+                    </table>
+                </t>
+                <div t-else="">Les coordonnées bancaires du syndicat vous sont communiquées sur simple demande auprès du gestionnaire.</div>
+                <div>Pour que votre paiement soit bien identifié, indiquez dans le libellé du virement
+                    <t t-if="ref_paiement">la référence <b t-out="ref_paiement"/>, ainsi que</t>
+                    vos nom et prénom et l'adresse de l'immeuble.</div>
+            </div>
+
+            <div class="mb-3">
+                <div><b><u>Paiement par prélèvement automatique</u></b></div>
+                <div>Pour y souscrire, adressez un relevé d'identité bancaire (RIB) au gestionnaire de votre immeuble,
+                    qui vous fera parvenir un mandat de prélèvement SEPA, révocable à tout moment.
+                    Le prélèvement est un moyen de paiement gratuit, simple et sûr.</div>
+            </div>
+
+            <div class="mb-3">
+                <div><b><u>Paiement par chèque</u></b></div>
+                <div>Libellez votre chèque à l'ordre du <b t-out="titulaire"/> et joignez-y le papillon détachable
+                    figurant au recto. Ne joignez aucune autre correspondance et n'utilisez ni agrafes ni trombones.</div>
+            </div>
+
+            <div class="mb-3" t-if="copro.extranet_actif">
+                <div><b><u>Votre espace en ligne</u></b></div>
+                <div>Votre situation de compte, vos relevés et les documents de la copropriété sont consultables
+                    à tout moment dans votre espace en ligne
+                    (<t t-out="copro.env['ir.config_parameter'].sudo().get_param('web.base.url')"/>/extranet).</div>
+            </div>
+
+            <div class="mt-4 text-muted" style="font-size: 10pt;">
+                En cas de difficulté de paiement, prenez contact sans attendre avec votre gestionnaire : un échéancier
+                peut être examiné. À défaut de paiement à l'échéance, une relance vous sera adressée, puis, le cas
+                échéant, une mise en demeure ; seuls les frais exposés à compter de la mise en demeure peuvent être
+                mis à votre charge (art. 10-1 de la loi du 10 juillet 1965).
+            </div>
+        </div>
+    </template>
+</odoo>

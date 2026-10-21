@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="seq_relance" model="ir.sequence">
+            <field name="name">Lettres de relance</field>
+            <field name="code">coproerp.relance.simple</field>
+            <field name="prefix">REL/%(year)s/</field>
+            <field name="padding">5</field>
+        </record>
+        <record id="seq_mise_en_demeure" model="ir.sequence">
+            <field name="name">Mises en demeure</field>
+            <field name="code">coproerp.relance.mise_en_demeure</field>
+            <field name="prefix">MED/%(year)s/</field>
+            <field name="padding">5</field>
+        </record>
+    </data>
+</odoo>

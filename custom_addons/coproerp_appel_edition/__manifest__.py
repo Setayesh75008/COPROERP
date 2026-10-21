@@ -17,7 +17,7 @@ Génération et édition des appels de fonds :
     "author": "SSB AVOCAT",
     "website": "https://www.ssb-avocat.fr",
     "category": "Real Estate",
-    "version": "19.0.1.0.6",
+    "version": "19.0.1.0.7",
     "license": "LGPL-3",
     "depends": [
         "coproerp_lot",
@@ -34,6 +34,7 @@ Génération et édition des appels de fonds :
         "views/budget_views.xml",
         "views/travaux_views.xml",
         "report/style_documents.xml",
+        "report/informations_paiement.xml",
         "report/avis_appel_report.xml",
         "report/avis_appel_templates.xml",
         "views/appel_views.xml",

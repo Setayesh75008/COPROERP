@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_relance_list" model="ir.ui.view">
+        <field name="name">coproerp.relance.list</field>
+        <field name="model">coproerp.relance</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="etat == 'annulee'" decoration-info="etat == 'brouillon'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="copropriete_id"/>
+                <field name="personne_id"/>
+                <field name="type_relance" widget="badge"
+                       decoration-warning="type_relance == 'relance'" decoration-danger="type_relance == 'mise_en_demeure'"/>
+                <field name="mode_envoi" optional="show"/>
+                <field name="montant_du" sum="Total"/>
+                <field name="date_limite" optional="show"/>
+                <field name="solde_actuel"/>
+                <field name="exigibilite_anticipee" optional="show"/>
+                <field name="etat" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_relance_form" model="ir.ui.view">
+        <field name="name">coproerp.relance.form</field>
+        <field name="model">coproerp.relance</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_imprimer" type="object" string="Aperçu / imprimer"/>
+                    <button name="action_envoyer" type="object" string="Valider l'envoi" class="oe_highlight"
+                            invisible="etat != 'brouillon'"
+                            confirm="La lettre sera numérotée et, pour une mise en demeure avec frais, les frais seront portés au compte du copropriétaire. Un envoi par courrier électronique part immédiatement. Continuer ?"/>
+                    <button name="action_annuler" type="object" string="Annuler"
+                            invisible="etat != 'envoyee'"
+                            confirm="Les frais éventuels seront contre-passés. Continuer ?"/>
+                    <field name="etat" widget="statusbar" statusbar_visible="brouillon,envoyee"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <div class="alert alert-danger" role="alert" invisible="not exigibilite_anticipee">
+                        Mise en demeure restée sans effet plus de trente jours : les provisions non encore
+                        échues de l'exercice sont exigibles (art. 19-2 de la loi du 10 juillet 1965). Le dossier
+                        peut être transmis à l'avocat du syndicat (procédure accélérée au fond).
+                    </div>
+                    <group>
+                        <group>
+                            <field name="type_relance" readonly="etat != 'brouillon'"/>
+                            <field name="copropriete_id" readonly="etat != 'brouillon'"/>
+                            <field name="personne_id" readonly="etat != 'brouillon'"/>
+                            <field name="date" readonly="etat != 'brouillon'"/>
+                            <field name="date_debut_releve" readonly="etat != 'brouillon'"/>
+                        </group>
+                        <group>
+                            <field name="mode_envoi" readonly="etat != 'brouillon'"/>
+                            <field name="adresse_email" invisible="mode_envoi not in ('email', 'lre')"
+                                   readonly="etat != 'brouillon'"/>
+                            <field name="frais" invisible="type_relance != 'mise_en_demeure'"
+                                   readonly="etat != 'brouillon'"/>
+                            <field name="delai_jours" invisible="type_relance != 'mise_en_demeure'"
+                                   readonly="etat != 'brouillon'"/>
+                            <field name="numero_envoi" invisible="mode_envoi not in ('lrar', 'lre')"/>
+                            <field name="date_presentation" invisible="mode_envoi not in ('lrar', 'lre')"/>
+                            <field name="date_limite" invisible="type_relance != 'mise_en_demeure'"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Situation">
+                            <field name="montant_du" invisible="etat == 'brouillon'"/>
+                            <field name="solde_actuel"/>
+                            <field name="regle"/>
+                            <field name="exigibilite_anticipee" invisible="type_relance != 'mise_en_demeure'"/>
+                        </group>
+                        <group string="Comptabilité" invisible="not move_frais_id">
+                            <field name="move_frais_id"/>
+                            <field name="move_frais_annulation_id" invisible="not move_frais_annulation_id"/>
+                        </group>
+                    </group>
+                    <div class="text-muted" invisible="type_relance != 'mise_en_demeure'">
+                        La mise en demeure s'adresse par lettre recommandée : électronique par défaut, postale si le
+                        copropriétaire l'a demandé (art. 42-1 de la loi et 64 du décret). Après le dépôt, saisissez
+                        le numéro de recommandé et la date de première présentation : le délai de trente jours de
+                        l'article 19-2 court à partir de cette date.
+                    </div>
+                    <field name="note" placeholder="Observations (échéancier proposé, échanges…)"/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_relance_search" model="ir.ui.view">
+        <field name="name">coproerp.relance.search</field>
+        <field name="model">coproerp.relance</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="personne_id"/>
+                <field name="copropriete_id"/>
+                <filter name="brouillons" string="À envoyer" domain="[('etat', '=', 'brouillon')]"/>
+                <filter name="envoyees" string="Envoyées" domain="[('etat', '=', 'envoyee')]"/>
+                <separator/>
+                <filter name="relances" string="Relances" domain="[('type_relance', '=', 'relance')]"/>
+                <filter name="med" string="Mises en demeure" domain="[('type_relance', '=', 'mise_en_demeure')]"/>
+                <group>
+                    <filter name="par_copro" string="Copropriété" context="{'group_by': 'copropriete_id'}"/>
+                    <filter name="par_etat" string="État" context="{'group_by': 'etat'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_relance" model="ir.actions.act_window">
+        <field name="name">Relances et mises en demeure</field>
+        <field name="res_model">coproerp.relance</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p>Utilisez « Suivi des impayés » pour repérer les débiteurs et préparer les lettres.</p>
+        </field>
+    </record>
+</odoo>
