@@ -5,6 +5,31 @@
         <span style="display: inline-block; width: 3.5mm; height: 3.5mm; border: 1px solid #000; vertical-align: middle;"/>
     </template>
 
+    <!-- Page de garde du dossier de convocation -->
+    <template id="page_de_garde">
+        <div class="text-center" style="margin-top: 8mm;">
+            <div style="font-size: 16pt;"><b>SYNDICAT DES COPROPRIÉTAIRES</b></div>
+            <div style="font-size: 15pt;"><t t-out="copro.name"/></div>
+            <div style="font-size: 14pt;"><t t-out="copro.street or ''"/></div>
+            <div style="font-size: 14pt;"><t t-out="copro.zip or ''"/> <t t-out="copro.city or ''"/></div>
+        </div>
+        <div style="margin: 10mm auto 0 auto; width: 62%; border: 3px double #000; box-shadow: 4px 4px 0 #555; padding: 6mm 4mm;"
+             class="text-center">
+            <div style="font-size: 18pt; line-height: 1.25;"><b>Assemblée Générale<br/>
+                <t t-out="'Ordinaire' if ag.type_ag == 'ordinaire' else 'Extraordinaire'"/></b></div>
+            <div class="mt-2" style="font-size: 16pt;"><b>du <t t-out="ag.date_longue()"/></b></div>
+            <div style="font-size: 15pt;"><b t-out="ag.heure_texte()"/></div>
+            <div class="mt-2" style="font-size: 14pt;"><b t-out="ag.lieu_nom or ''"/></div>
+            <div t-if="ag.lieu_adresse" style="font-size: 13pt; white-space: pre-line;" t-out="ag.lieu_adresse"/>
+            <div t-if="ag.visioconference" class="mt-1" style="font-size: 11pt;">Participation à distance possible</div>
+        </div>
+        <div t-if="ag.documents_liste()" class="text-center" style="margin-top: 12mm; font-size: 12.5pt; line-height: 1.6;">
+            <div t-foreach="ag.documents_liste()" t-as="doc">
+                <span style="font-family: 'DejaVu Sans', sans-serif;">&#10003;</span> <b t-out="doc"/>
+            </div>
+        </div>
+    </template>
+
     <!-- ============ Projet de résolutions ============ -->
     <template id="report_projet_resolutions">
         <t t-call="web.html_container">
@@ -90,6 +115,10 @@
         <t t-call="web.external_layout">
             <div class="page o_copro_doc" style="font-size: 11.5pt;">
                 <t t-call="coproerp_appel_edition.style_documents"/>
+
+                <!-- ===== Page de garde ===== -->
+                <t t-call="coproerp_ag.page_de_garde"/>
+                <div style="page-break-before: always;"/>
 
                 <!-- ===== Lettre de convocation ===== -->
                 <div class="row">

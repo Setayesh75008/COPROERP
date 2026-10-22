@@ -171,7 +171,7 @@ class TestAssembleeGenerale(TransactionCase):
         Report = self.env["ir.actions.report"]
         html = Report._render_qweb_html("coproerp_ag.report_dossier_convocation", ag.convocation_ids.ids)[0]
         html = html.decode() if isinstance(html, bytes) else html
-        for texte in ("CONVOCATION", "PROJET DE RÉSOLUTIONS", "FORMULAIRE DE VOTE PAR CORRESPONDANCE", "POUVOIR",
+        for texte in ("SYNDICAT DES COPROPRIÉTAIRES", "Assemblée Générale", "CONVOCATION", "PROJET DE RÉSOLUTIONS", "FORMULAIRE DE VOTE PAR CORRESPONDANCE", "POUVOIR",
                       "mercredi 28 avril 2027", "samedi 24 avril 2027", "10 %", "750", "ag@syndic.example",
                       "au cabinet, le 15 avril", "Bon pour pouvoir", "article 42-1"):
             self.assertIn(texte, html)
