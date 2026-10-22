@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Case à cocher dessinée (s'imprime sur toutes les polices) -->
+    <template id="case">
+        <span style="display: inline-block; width: 3.5mm; height: 3.5mm; border: 1px solid #000; vertical-align: middle;"/>
+    </template>
+
+    <!-- ============ Projet de résolutions ============ -->
+    <template id="report_projet_resolutions">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="ag">
+                <t t-set="copro" t-value="ag.copropriete_id.sudo()"/>
+                <t t-call="web.external_layout">
+                    <div class="page o_copro_doc" style="font-size: 11.5pt;">
+                        <t t-call="coproerp_appel_edition.style_documents"/>
+                        <t t-call="coproerp_ag.projet_resolutions_corps"/>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <template id="projet_resolutions_corps">
+        <div class="text-center mb-3">
+            <h4 class="mb-1" style="letter-spacing: 1px;"><b>PROJET DE RÉSOLUTIONS</b></h4>
+            <div><t t-out="ag.name"/></div>
+            <div><t t-out="ag.date_longue()"/> à <t t-out="ag.heure_texte()"/><t t-if="ag.lieu_nom"> – <t t-out="ag.lieu_nom"/></t></div>
+            <div class="fst-italic" style="font-size: 10.5pt;">Le texte des résolutions peut être amendé au cours de l'assemblée.</div>
+        </div>
+        <table class="table table-sm mb-4" style="font-size: 10.5pt;">
+            <thead>
+                <tr class="o_cd_entete"><th colspan="3" class="text-center">RAPPEL DES MAJORITÉS</th></tr>
+                <tr class="o_cd_section">
+                    <th style="width: 33%;">Article 24</th>
+                    <th style="width: 34%;">Articles 25 et 25-1</th>
+                    <th style="width: 33%;">Article 26</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Majorité des voix exprimées des copropriétaires présents, représentés ou ayant voté par correspondance.</td>
+                    <td>Majorité des voix de tous les copropriétaires. À défaut, si le projet a recueilli au moins le tiers
+                        de ces voix, second vote immédiat à la majorité de l'article 24.</td>
+                    <td>Majorité des membres du syndicat représentant au moins les deux tiers des voix. À défaut, si le
+                        projet a recueilli la moitié des membres et le tiers des voix, second vote immédiat à la
+                        majorité de l'article 25.</td>
+                </tr>
+            </tbody>
+        </table>
+        <t t-foreach="ag.resolution_ids" t-as="res">
+            <t t-if="res.majorite == 'rubrique'">
+                <div class="mt-3 mb-2 p-1 o_cd_refs"><b t-out="res.titre.upper()"/></div>
+            </t>
+            <t t-else="">
+                <div class="mt-3" style="page-break-inside: avoid;">
+                    <div><b><t t-out="res.numero or ''"/> – <t t-out="res.titre.upper()"/></b>
+                        <span style="font-size: 10pt;">(<t t-out="res.abrege_majorite()"/>)</span></div>
+                    <div t-if="res.demande_par_id" class="fst-italic" style="font-size: 10.5pt;">
+                        Question inscrite à la demande de <t t-out="res.demande_par_id.name"/> (art. 10 du décret du 17 mars 1967).
+                    </div>
+                    <div t-if="res.majorite != 'information'" class="mt-1"><b><u>Résolution n° <t t-out="res.numero or ''"/></u></b></div>
+                    <div class="mt-1" style="white-space: pre-line;" t-out="res.texte or ''"/>
+                    <div t-if="res.documents" class="fst-italic" style="font-size: 10.5pt;">Document(s) joint(s) : <t t-out="res.documents"/></div>
+                    <div t-if="res.majorite not in ('information', 'rubrique')" class="mt-1" style="font-size: 10.5pt;">
+                        <i>Majorité requise : <t t-out="res.libelle_majorite()"/>.</i>
+                    </div>
+                    <div t-if="res.majorite != 'information'" class="mt-1" style="font-size: 10.5pt;">
+                        Cette résolution est ADOPTÉE / REJETÉE.
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- ============ Dossier de convocation (un par copropriétaire) ============ -->
+    <template id="report_dossier_convocation">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="conv">
+                <t t-set="ag" t-value="conv.ag_id"/>
+                <t t-set="copro" t-value="ag.copropriete_id.sudo()"/>
+                <t t-set="personne" t-value="conv.personne_id"/>
+                <t t-call="coproerp_ag.dossier_convocation_document" t-lang="personne.lang"/>
+            </t>
+        </t>
+    </template>
+
+    <template id="dossier_convocation_document">
+        <t t-set="gestionnaire" t-value="copro.gestionnaire_id"/>
+        <t t-set="sigle" t-value="'ordinaire' if ag.type_ag == 'ordinaire' else 'extraordinaire'"/>
+        <t t-call="web.external_layout">
+            <div class="page o_copro_doc" style="font-size: 11.5pt;">
+                <t t-call="coproerp_appel_edition.style_documents"/>
+
+                <!-- ===== Lettre de convocation ===== -->
+                <div class="row">
+                    <div class="col-6">
+                        <h4 style="letter-spacing: 1px;"><b>CONVOCATION</b></h4>
+                        <div class="fw-bold mb-1"><t t-out="conv.mode_libelle()"/></div>
+                        <table class="table table-sm table-borderless mb-0 o_cd_refs" style="font-size: 11pt;">
+                            <tr><td class="p-0 pe-2">Date :</td>
+                                <td class="p-0" t-out="ag.date_longue('date_convocation', False) if ag.date_convocation else ''"/></tr>
+                            <tr><td class="p-0 pe-2">Immeuble :</td>
+                                <td class="p-0"><t t-out="copro.name"/><br/>
+                                    <t t-out="copro.street or ''"/> <t t-out="copro.zip or ''"/> <t t-out="copro.city or ''"/></td></tr>
+                            <tr t-if="gestionnaire"><td class="p-0 pe-2">Affaire suivie par :</td>
+                                <td class="p-0"><t t-out="gestionnaire.name"/><t t-if="gestionnaire.email"><br/><t t-out="gestionnaire.email"/></t></td></tr>
+                        </table>
+                    </div>
+                    <div class="col-5 offset-1" style="margin-top: 12mm;">
+                        <div><b t-out="personne.name"/></div>
+                        <div t-if="personne.street" t-out="personne.street"/>
+                        <div t-if="personne.street2" t-out="personne.street2"/>
+                        <div><t t-out="personne.zip or ''"/> <t t-out="personne.city or ''"/></div>
+                        <div t-if="personne.country_id" t-out="personne.country_id.name.upper()"/>
+                    </div>
+                </div>
+
+                <div class="mt-4"><b><u>Objet</u> : convocation à l'assemblée générale <t t-out="sigle"/> des copropriétaires</b></div>
+                <p class="mt-3">Madame, Monsieur,</p>
+                <p>Nous vous prions de bien vouloir assister à l'assemblée générale <t t-out="sigle"/> du syndicat des
+                    copropriétaires de l'immeuble ci-dessus référencé, qui se tiendra le</p>
+                <div class="text-center mb-2" style="font-size: 13pt;">
+                    <b><t t-out="ag.date_longue()"/> à <t t-out="ag.heure_texte()"/></b>
+                </div>
+                <div class="text-center mb-3">
+                    <b>Lieu : <t t-out="ag.lieu_nom or ''"/></b>
+                    <div t-if="ag.lieu_adresse" style="white-space: pre-line;" t-out="ag.lieu_adresse"/>
+                </div>
+                <p>afin de délibérer sur l'ordre du jour suivant :</p>
+
+                <table class="table table-sm table-borderless" style="font-size: 11pt;">
+                    <t t-foreach="ag.resolution_ids" t-as="res">
+                        <tr t-if="res.majorite == 'rubrique'" class="o_cd_section">
+                            <td colspan="3"><b t-out="res.titre.upper()"/></td>
+                        </tr>
+                        <tr t-else="">
+                            <td style="width: 8%;" class="text-end pe-2"><b t-out="res.numero or ''"/></td>
+                            <td><t t-out="res.titre"/></td>
+                            <td style="width: 22%; font-size: 10pt;" class="text-end fst-italic" t-out="res.abrege_majorite()"/>
+                        </tr>
+                    </t>
+                </table>
+
+                <div t-if="ag.documents_liste()" class="mt-2">
+                    <div><b>Documents joints à la présente convocation :</b></div>
+                    <ul class="mb-2">
+                        <li t-foreach="ag.documents_liste()" t-as="doc" t-out="doc"/>
+                    </ul>
+                </div>
+
+                <div class="mt-2 p-2 o_cd_refs">
+                    Vous disposez de <b><t t-out="conv.voix"/></b> voix sur <t t-out="ag.total_voix"/>
+                    <t t-if="conv.lot_ids"> (<t t-out="conv.lots_texte()"/>)</t>.
+                </div>
+
+                <div style="page-break-inside: avoid;">
+                    <div class="mt-3"><b>Comment participer à l'assemblée ?</b></div>
+                    <ul class="mb-1">
+                        <li>en y assistant personnellement<t t-if="ag.visioconference"> ou à distance (visioconférence) :
+                            <t t-out="ag.modalites_visio or 'modalités communiquées par le syndic'"/></t> ;</li>
+                        <li>en vous faisant représenter au moyen du pouvoir joint ;</li>
+                        <li>en votant par correspondance au moyen du formulaire joint, qui doit être <b>reçu par le syndic
+                            au plus tard le <t t-out="ag.date_longue('date_limite_vpc')"/></b> (trois jours francs avant la
+                            réunion, art. 9 bis du décret du 17 mars 1967)<t t-if="ag.adresse_vpc">, à l'adresse :
+                            <t t-out="ag.adresse_vpc_ligne()"/></t><t t-if="ag.email_vpc">, ou par voie
+                            électronique à <t t-out="ag.email_vpc"/> (le formulaire est alors présumé reçu le jour de son
+                            envoi)</t>.</li>
+                    </ul>
+                </div>
+
+                <div class="mt-3" style="font-size: 10pt; page-break-inside: avoid;">
+                    <div><b>Mandats</b> (article 22 de la loi du 10 juillet 1965) – Tout copropriétaire peut déléguer son
+                        droit de vote à un mandataire, copropriétaire ou non. Chaque mandataire ne peut recevoir plus de trois
+                        délégations de vote, sauf si le total des voix dont il dispose lui-même et de celles de ses mandants
+                        n'excède pas 10 % des voix du syndicat. Le syndic, son conjoint, le partenaire lié à lui par un pacte
+                        civil de solidarité, son concubin, ses ascendants ou descendants et ses préposés ne peuvent recevoir
+                        de mandat. Sauf interdiction expresse du mandant, le mandataire peut subdéléguer son mandat.</div>
+                    <div class="mt-1"><b>Vote par correspondance</b> (article 17-1 A de la loi) – Le vote par correspondance
+                        n'est pas pris en compte si vous êtes présent ou représenté lors du vote. Si une résolution est amendée
+                        en cours d'assemblée, le copropriétaire qui a voté favorablement par correspondance sur cette
+                        résolution est assimilé à un défaillant pour celle-ci.</div>
+                    <div class="mt-1"><b>Pièces justificatives</b> (article 18-1 de la loi) – Les pièces justificatives des
+                        charges sont tenues à votre disposition entre la réception de la présente convocation et la tenue de
+                        l'assemblée<t t-if="ag.consultation_pieces"> : <t t-out="ag.consultation_pieces"/></t>.</div>
+                    <div class="mt-1"><b>Questions à inscrire</b> (article 10 du décret) – Tout copropriétaire peut, à tout
+                        moment, notifier au syndic les questions dont il demande l'inscription à l'ordre du jour d'une
+                        prochaine assemblée, accompagnées le cas échéant d'un projet de résolution.</div>
+                    <div class="mt-1 text-muted">
+                        <t t-out="ag.env['coproerp.notification.mode'].mention_voie_postale()"/>
+                    </div>
+                </div>
+
+                <p class="mt-3">Nous vous prions d'agréer, Madame, Monsieur, l'expression de nos salutations distinguées.</p>
+                <div class="text-end">
+                    <div>Le syndic</div>
+                    <div t-if="gestionnaire"><b t-out="gestionnaire.name"/></div>
+                </div>
+
+                <!-- ===== Projet de résolutions ===== -->
+                <div style="page-break-before: always;"/>
+                <t t-call="coproerp_ag.projet_resolutions_corps"/>
+
+                <!-- ===== Formulaire de vote par correspondance ===== -->
+                <div style="page-break-before: always;"/>
+                <t t-call="coproerp_ag.formulaire_vpc"/>
+
+                <!-- ===== Pouvoir ===== -->
+                <div style="page-break-before: always;"/>
+                <t t-call="coproerp_ag.pouvoir"/>
+            </div>
+        </t>
+    </template>
+
+    <template id="identification_votant">
+        <table class="table table-sm table-borderless mb-2 o_cd_refs" style="font-size: 11pt;">
+            <tr><td class="pe-2" style="width: 28%;">Copropriétaire :</td><td><b t-out="personne.name"/>
+                <div style="font-size: 9.5pt;" class="fst-italic">(en cas d'indivision ou de démembrement, le mandataire commun)</div></td></tr>
+            <tr><td class="pe-2">Adresse :</td><td><t t-out="personne.street or ''"/> <t t-out="personne.zip or ''"/> <t t-out="personne.city or ''"/></td></tr>
+            <tr><td class="pe-2">Lots :</td><td t-out="conv.lots_texte()"/></tr>
+            <tr><td class="pe-2">Nombre de voix :</td><td><b t-out="conv.voix"/> / <t t-out="ag.total_voix"/></td></tr>
+        </table>
+    </template>
+
+    <template id="formulaire_vpc">
+        <div class="text-center mb-2">
+            <h4 class="mb-1" style="letter-spacing: 1px;"><b>FORMULAIRE DE VOTE PAR CORRESPONDANCE</b></h4>
+            <div>Assemblée générale <t t-out="sigle"/> des copropriétaires de l'immeuble <t t-out="copro.name"/>,
+                <t t-out="copro.street or ''"/> <t t-out="copro.zip or ''"/> <t t-out="copro.city or ''"/></div>
+            <div><b><t t-out="ag.date_longue()"/> à <t t-out="ag.heure_texte()"/></b> – <t t-out="ag.lieu_nom or ''"/></div>
+        </div>
+        <div class="mb-2 p-2" style="border: 1px solid #000; font-size: 10.5pt;">
+            Formulaire à retourner au syndic, pour être <b>reçu au plus tard le <t t-out="ag.date_longue('date_limite_vpc')"/></b>
+            <t t-if="ag.adresse_vpc">, par courrier à : <t t-out="ag.adresse_vpc_ligne()"/></t>
+            <t t-if="ag.email_vpc">, ou par voie électronique à : <t t-out="ag.email_vpc"/></t>.
+            Un formulaire reçu après cette date n'est pas pris en compte (art. 9 bis du décret du 17 mars 1967).
+        </div>
+        <t t-call="coproerp_ag.identification_votant"/>
+        <p style="font-size: 10.5pt;">Après avoir pris connaissance de l'ordre du jour et des documents annexés à la convocation,
+            je vote par correspondance sur chacune des questions soumises à l'assemblée en cochant <b>une seule case par
+            résolution</b> :</p>
+        <table class="table table-sm table-bordered" style="font-size: 10pt;">
+            <thead>
+                <tr class="o_cd_entete">
+                    <th style="width: 8%;">N°</th>
+                    <th>Résolution</th>
+                    <th style="width: 15%;">Majorité</th>
+                    <th class="text-center" style="width: 8%;">Pour</th>
+                    <th class="text-center" style="width: 8%;">Contre</th>
+                    <th class="text-center" style="width: 10%;">Abstention</th>
+                </tr>
+            </thead>
+            <tbody>
+                <t t-foreach="ag.lignes_vote()" t-as="l">
+                    <tr t-if="l['rubrique']" class="o_cd_section"><td colspan="6"><b t-out="l['titre']"/></td></tr>
+                    <tr t-elif="not l['vote']">
+                        <td t-out="l['numero'] or ''"/>
+                        <td t-out="l['titre']"/>
+                        <td colspan="4" class="text-center fst-italic">Sans vote</td>
+                    </tr>
+                    <tr t-else="" style="page-break-inside: avoid;">
+                        <td t-out="l['numero'] or ''"/>
+                        <td t-out="l['titre']"/>
+                        <td style="font-size: 9pt;" t-out="l['majorite']"/>
+                        <td class="text-center"><t t-call="coproerp_ag.case"/></td>
+                        <td class="text-center"><t t-call="coproerp_ag.case"/></td>
+                        <td class="text-center"><t t-call="coproerp_ag.case"/></td>
+                    </tr>
+                </t>
+            </tbody>
+        </table>
+        <div style="font-size: 10pt;" class="mb-3">
+            Ce vote n'est pas pris en compte si je suis présent ou représenté lors du vote. Si une résolution est amendée en
+            cours d'assemblée, mon vote favorable par correspondance sur cette résolution m'assimile à un défaillant pour
+            celle-ci (art. 17-1 A de la loi du 10 juillet 1965).
+        </div>
+        <div class="row" style="page-break-inside: avoid;">
+            <div class="col-6">Fait à ____________________, le ____ / ____ / ________</div>
+            <div class="col-6">Signature du copropriétaire, de l'associé ou du mandataire commun :<br/><br/><br/></div>
+        </div>
+    </template>
+
+    <template id="pouvoir">
+        <div class="text-center mb-3">
+            <h4 class="mb-1" style="letter-spacing: 1px;"><b>POUVOIR</b></h4>
+            <div>Assemblée générale <t t-out="sigle"/> du <t t-out="ag.date_longue()"/> à <t t-out="ag.heure_texte()"/></div>
+            <div><t t-out="copro.name"/>, <t t-out="copro.street or ''"/> <t t-out="copro.zip or ''"/> <t t-out="copro.city or ''"/></div>
+        </div>
+        <t t-call="coproerp_ag.identification_votant"/>
+        <p class="mt-2">Je soussigné(e) <b t-out="personne.name"/>, donne pouvoir à :</p>
+        <p>M. / Mme _______________________________________________________________</p>
+        <p>demeurant _______________________________________________________________</p>
+        <p>de me représenter à l'assemblée générale ci-dessus, de prendre part en mon nom aux délibérations, de voter sur
+            toutes les questions inscrites à l'ordre du jour, de signer la feuille de présence et, plus généralement, de
+            faire le nécessaire.</p>
+        <p style="font-size: 10.5pt;"><t t-call="coproerp_ag.case"/> J'interdis à mon mandataire de subdéléguer ce mandat.</p>
+        <p style="font-size: 10.5pt;">Instructions de vote (facultatives) : si vous souhaitez donner des consignes à votre
+            mandataire, indiquez-les ci-dessous ou sur le formulaire de vote joint.</p>
+        <p>____________________________________________________________________________<br/>
+           ____________________________________________________________________________</p>
+        <div class="mt-3" style="font-size: 10pt;">
+            Rappel (article 22 de la loi du 10 juillet 1965) : un mandataire ne peut recevoir plus de trois délégations de
+            vote, sauf si le total des voix dont il dispose lui-même et de celles de ses mandants n'excède pas 10 % des voix
+            du syndicat. Ne peuvent recevoir de mandat : le syndic, son conjoint, le partenaire lié à lui par un pacte civil
+            de solidarité, son concubin, ses ascendants ou descendants et ses préposés.
+        </div>
+        <div class="row mt-4" style="page-break-inside: avoid;">
+            <div class="col-6">Fait à ____________________, le ____ / ____ / ________</div>
+            <div class="col-6">Signature du mandant, précédée de la mention manuscrite « Bon pour pouvoir » :<br/><br/><br/></div>
+        </div>
+    </template>
+</odoo>

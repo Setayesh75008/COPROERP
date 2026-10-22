@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ag_user,ag.user,model_coproerp_ag,base.group_user,1,1,1,1
+access_ag_resolution_user,ag.resolution.user,model_coproerp_ag_resolution,base.group_user,1,1,1,1
+access_ag_convocation_user,ag.convocation.user,model_coproerp_ag_convocation,base.group_user,1,1,1,1

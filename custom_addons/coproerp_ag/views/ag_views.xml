@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_ag_list" model="ir.ui.view">
+        <field name="name">coproerp.ag.list</field>
+        <field name="model">coproerp.ag</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="etat == 'annulee'" decoration-info="etat == 'preparation'">
+                <field name="date_ag"/>
+                <field name="copropriete_id"/>
+                <field name="type_ag"/>
+                <field name="lieu_nom"/>
+                <field name="etat" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ag_form" model="ir.ui.view">
+        <field name="name">coproerp.ag.form</field>
+        <field name="model">coproerp.ag</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_ordre_du_jour_type" type="object" string="Charger l'ordre du jour type"
+                            invisible="etat != 'preparation' or resolution_ids"/>
+                    <button name="action_preparer_convocations" type="object" string="Préparer les convocations"
+                            class="oe_highlight" invisible="etat != 'preparation'"/>
+                    <button name="action_imprimer_projet" type="object" string="Projet de résolutions"/>
+                    <button name="action_imprimer_dossiers" type="object" string="Dossiers de convocation"
+                            invisible="not nombre_convocations"/>
+                    <button name="action_marquer_convoquee" type="object" string="Marquer comme convoquée"
+                            invisible="etat != 'preparation' or not nombre_convocations"/>
+                    <button name="action_remettre_en_preparation" type="object" string="Remettre en préparation"
+                            invisible="etat != 'convoquee'"/>
+                    <button name="action_annuler" type="object" string="Annuler l'assemblée"
+                            invisible="etat in ('tenue', 'annulee')"
+                            confirm="Annuler cette assemblée ?"/>
+                    <field name="etat" widget="statusbar" statusbar_visible="preparation,convoquee,tenue"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_voir_convocations" type="object" class="oe_stat_button" icon="fa-envelope">
+                            <field name="nombre_convocations" widget="statinfo" string="Convocations"/>
+                        </button>
+                    </div>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group string="Réunion">
+                            <field name="copropriete_id" readonly="etat != 'preparation'"/>
+                            <field name="type_ag" readonly="etat != 'preparation'"/>
+                            <field name="date_ag" readonly="etat != 'preparation'"/>
+                            <field name="heure" widget="float_time" readonly="etat != 'preparation'"/>
+                            <field name="lieu_nom" readonly="etat != 'preparation'"/>
+                            <field name="lieu_adresse" readonly="etat != 'preparation'"/>
+                            <field name="visioconference" readonly="etat != 'preparation'"/>
+                            <field name="modalites_visio" invisible="not visioconference" readonly="etat != 'preparation'"/>
+                        </group>
+                        <group string="Délais légaux">
+                            <field name="date_convocation" readonly="etat != 'preparation'"/>
+                            <field name="date_limite_presentation"/>
+                            <field name="date_limite_vpc"/>
+                            <field name="adresse_vpc" readonly="etat != 'preparation'"/>
+                            <field name="email_vpc" readonly="etat != 'preparation'"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Voix">
+                            <field name="cle_voix_id" readonly="etat != 'preparation'"/>
+                            <field name="total_voix"/>
+                        </group>
+                        <group string="Comptes">
+                            <field name="cloture_id" readonly="etat != 'preparation'"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Ordre du jour et résolutions" name="resolutions">
+                            <button name="action_renumeroter" type="object" string="Renuméroter"
+                                    class="btn-link" invisible="etat != 'preparation'"/>
+                            <field name="resolution_ids" readonly="etat != 'preparation'">
+                                <list decoration-bf="majorite == 'rubrique'" decoration-muted="majorite == 'information'">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="numero"/>
+                                    <field name="titre"/>
+                                    <field name="majorite"/>
+                                    <field name="documents" optional="show"/>
+                                    <field name="demande_par_id" optional="hide"/>
+                                </list>
+                                <form>
+                                    <group>
+                                        <group>
+                                            <field name="numero"/>
+                                            <field name="titre"/>
+                                            <field name="majorite"/>
+                                        </group>
+                                        <group>
+                                            <field name="documents"/>
+                                            <field name="demande_par_id"/>
+                                        </group>
+                                    </group>
+                                    <field name="texte" placeholder="Texte du projet de résolution" invisible="majorite == 'rubrique'"/>
+                                </form>
+                            </field>
+                        </page>
+                        <page string="Documents et mentions" name="documents">
+                            <group>
+                                <field name="documents_joints" placeholder="Un document par ligne"/>
+                                <field name="consultation_pieces"
+                                       placeholder="Ex. : au cabinet du syndic, le mardi 15 avril de 9 h à 12 h et de 14 h à 17 h, sur rendez-vous"/>
+                            </group>
+                        </page>
+                        <page string="Convocations" name="convocations">
+                            <field name="convocation_ids">
+                                <list editable="bottom" decoration-danger="date_presentation and not delai_respecte">
+                                    <field name="personne_id"/>
+                                    <field name="voix" sum="Total"/>
+                                    <field name="mode_envoi"/>
+                                    <field name="adresse_email" optional="show"/>
+                                    <field name="numero_envoi"/>
+                                    <field name="date_presentation"/>
+                                    <field name="delai_respecte"/>
+                                    <field name="etat"/>
+                                </list>
+                            </field>
+                            <div class="text-muted">
+                                La convocation est notifiée par lettre recommandée électronique, sauf pour les
+                                copropriétaires ayant demandé la voie postale (art. 42-1 de la loi). Elle doit être
+                                présentée au plus tard à la date indiquée dans « Délais légaux » : le délai de 21 jours
+                                court à partir du lendemain de la première présentation. Une ligne en rouge signale un
+                                délai non respecté.
+                            </div>
+                        </page>
+                    </notebook>
+                    <field name="note" placeholder="Observations"/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_ag_convocation_list" model="ir.ui.view">
+        <field name="name">coproerp.ag.convocation.list</field>
+        <field name="model">coproerp.ag.convocation</field>
+        <field name="arch" type="xml">
+            <list editable="bottom" decoration-danger="date_presentation and not delai_respecte">
+                <field name="ag_id" column_invisible="context.get('default_ag_id')"/>
+                <field name="personne_id"/>
+                <field name="voix" sum="Total"/>
+                <field name="mode_envoi"/>
+                <field name="adresse_email"/>
+                <field name="numero_envoi"/>
+                <field name="date_presentation"/>
+                <field name="delai_respecte"/>
+                <field name="etat"/>
+                <button name="action_marquer_envoyee" type="object" string="Envoyée" invisible="etat != 'a_envoyer'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_ag" model="ir.actions.act_window">
+        <field name="name">Assemblées générales</field>
+        <field name="res_model">coproerp.ag</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_ag" name="Assemblées générales"
+              parent="coproerp_copropriete.menu_coproerp_root" action="action_ag" sequence="60"/>
+</odoo>

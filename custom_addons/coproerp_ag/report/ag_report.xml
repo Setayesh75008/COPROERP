@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_report_projet_resolutions" model="ir.actions.report">
+        <field name="name">Projet de résolutions</field>
+        <field name="model">coproerp.ag</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">coproerp_ag.report_projet_resolutions</field>
+        <field name="report_file">coproerp_ag.report_projet_resolutions</field>
+        <field name="print_report_name">'Projet de resolutions - %s' % (object.name or '')</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+        <field name="binding_model_id" ref="model_coproerp_ag"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_dossier_convocation" model="ir.actions.report">
+        <field name="name">Dossier de convocation (lettre, résolutions, vote par correspondance, pouvoir)</field>
+        <field name="model">coproerp.ag.convocation</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">coproerp_ag.report_dossier_convocation</field>
+        <field name="report_file">coproerp_ag.report_dossier_convocation</field>
+        <field name="print_report_name">'Convocation AG - %s' % (object.personne_id.name or '')</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+        <field name="binding_model_id" ref="model_coproerp_ag_convocation"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>
