@@ -153,6 +153,19 @@ class TestSeance(TransactionCase):
         with self.assertRaises(UserError):
             self.ag.action_cloturer_seance()
 
+    def test_vote_sans_participant_et_tous_presents(self):
+        with self.assertRaises(UserError):
+            self.r1.action_initialiser_vote()
+        self.ag.action_tous_presents()
+        self.assertEqual(set(self.ag.presence_ids.mapped("statut")), {"present"})
+        self.r1.action_initialiser_vote()
+        self.assertEqual(self.r1.pour, 1000)
+
+    def test_action_saisir_votes(self):
+        action = self.ag.action_saisir_votes()
+        resolutions = self.env["coproerp.ag.resolution"].search(action["domain"])
+        self.assertEqual(resolutions, self.r1 | self.r2 | self.r3)
+
     def test_reduction_des_voix_majoritaires(self):
         self._presence("Anne").voix = 700
         self.assertEqual(self._presence("Anne").voix_effectives, 600)

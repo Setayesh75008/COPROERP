@@ -23,6 +23,10 @@
                     <span class="text-muted ms-2">Présents et représentés : « pour » par défaut ; indiquez les votes
                         contre et les abstentions. Votes par correspondance : repris du formulaire.</span>
                 </div>
+                <div class="alert alert-info" role="alert" invisible="vote1_ids">
+                    Cliquez sur « Initialiser le vote » : la liste des votants (présents, représentés et votes par
+                    correspondance de la feuille de présence) s'affiche, puis modifiez le sens des votes contre et abstentions.
+                </div>
                 <field name="vote1_ids" context="{'default_tour': 1}">
                     <list editable="bottom" create="0" decoration-muted="sens == 'defaillant'"
                           decoration-danger="sens == 'contre'" decoration-warning="sens == 'abstention'">
@@ -85,6 +89,28 @@
         </field>
     </record>
 
+    <!-- Liste des résolutions à voter : un clic ouvre la fenêtre de vote -->
+    <record id="view_ag_resolution_vote_list" model="ir.ui.view">
+        <field name="name">coproerp.ag.resolution.vote.list</field>
+        <field name="model">coproerp.ag.resolution</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <list create="0" delete="0" decoration-success="resultat == 'adoptee' or resultat2 == 'adoptee'"
+                  decoration-danger="resultat == 'rejetee' or resultat2 == 'rejetee'"
+                  decoration-warning="resultat == 'second_vote' and not resultat2">
+                <field name="numero"/>
+                <field name="titre"/>
+                <field name="majorite"/>
+                <field name="pour"/>
+                <field name="contre"/>
+                <field name="abstention"/>
+                <field name="resultat" widget="badge"/>
+                <field name="resultat2" string="2nd vote"/>
+                <button name="action_ouvrir_vote" type="object" string="Voter" class="btn-primary"/>
+            </list>
+        </field>
+    </record>
+
     <record id="view_ag_form_seance" model="ir.ui.view">
         <field name="name">coproerp.ag.form.seance</field>
         <field name="model">coproerp.ag</field>
@@ -95,6 +121,8 @@
                         class="oe_highlight" invisible="etat != 'convoquee' or presence_ids"/>
                 <button name="action_imprimer_feuille_presence" type="object" string="Feuille de présence"
                         invisible="not presence_ids"/>
+                <button name="action_saisir_votes" type="object" string="Saisir les votes"
+                        class="oe_highlight" invisible="etat != 'convoquee' or not presence_ids"/>
                 <button name="action_cloturer_seance" type="object" string="Clôturer la séance"
                         class="oe_highlight" invisible="etat != 'convoquee' or not presence_ids"/>
                 <button name="action_rouvrir_seance" type="object" string="Rouvrir la séance"
@@ -109,7 +137,7 @@
                        decoration-success="resultat == 'adoptee'" decoration-danger="resultat == 'rejetee'"
                        decoration-warning="resultat == 'second_vote'"/>
                 <field name="resultat2" optional="show" string="2nd vote"/>
-                <button name="action_ouvrir_vote" type="object" string="Voter" icon="fa-check-square-o"
+                <button name="action_ouvrir_vote" type="object" string="Voter" class="btn-link"
                         invisible="majorite in ('rubrique', 'information')"/>
             </xpath>
             <xpath expr="//field[@name='resolution_ids']/form//field[@name='texte']" position="after">
@@ -117,6 +145,11 @@
             </xpath>
             <xpath expr="//page[@name='convocations']" position="after">
                 <page string="Séance" name="seance" invisible="etat in ('preparation', 'annulee')">
+                    <div class="mb-2" invisible="etat != 'convoquee'">
+                        <button name="action_tous_presents" type="object" string="Marquer tous présents"
+                                class="btn-secondary"
+                                confirm="Tous les copropriétaires notés absents seront marqués présents. Vous ajusterez ensuite les représentés, votes par correspondance et absents. Continuer ?"/>
+                    </div>
                     <group>
                         <group string="Bureau">
                             <field name="president" readonly="etat == 'tenue'"/>

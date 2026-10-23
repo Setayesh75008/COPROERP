@@ -204,6 +204,27 @@ class AssembleeGenerale(models.Model):
             raise UserError("Aucun opposant ni défaillant : le procès-verbal n'a pas à être notifié.")
         return self.env.ref("coproerp_ag.action_report_pv_notification").report_action(lignes)
 
+    def action_tous_presents(self):
+        """Marque présents tous les copropriétaires encore notés absents (à ajuster ensuite)."""
+        for ag in self:
+            if ag.etat != "convoquee":
+                raise UserError("La feuille de présence se modifie pendant la séance.")
+            ag.presence_ids.filtered(lambda p: p.statut == "absent").write({"statut": "present"})
+        return True
+
+    def action_saisir_votes(self):
+        """Liste des résolutions soumises au vote ; un clic sur une ligne ouvre la saisie du vote."""
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": "Votes – %s" % self.name,
+            "res_model": "coproerp.ag.resolution",
+            "view_mode": "list,form",
+            "views": [(self.env.ref("coproerp_ag.view_ag_resolution_vote_list").id, "list"),
+                      (self.env.ref("coproerp_ag.view_ag_resolution_vote_form").id, "form")],
+            "domain": [("ag_id", "=", self.id), ("majorite", "not in", ("rubrique", "information"))],
+        }
+
     def action_suivi_notifications_pv(self):
         self.ensure_one()
         return {
@@ -461,6 +482,11 @@ class Resolution(models.Model):
                 raise UserError("Le second vote n'est possible que si la passerelle est ouverte.")
             if not ag.presence_ids:
                 raise UserError("Ouvrez d'abord la feuille de présence.")
+            if not ag.presence_ids.filtered(lambda p: p.statut != "absent"):
+                raise UserError(
+                    "Aucun copropriétaire n'est indiqué comme présent, représenté ou votant par correspondance.\n"
+                    "Complétez d'abord la feuille de présence (onglet « Séance » de l'assemblée) : par défaut, "
+                    "chacun est noté absent.")
             resolution.vote_ids.filtered(lambda v: v.tour == tour).unlink()
             commandes = []
             for presence in ag.presence_ids.filtered(lambda p: p.statut != "absent"):
