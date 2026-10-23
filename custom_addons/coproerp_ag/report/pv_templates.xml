@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Liste « NOM (voix), NOM (voix) » -->
+    <template id="liste_noms">
+        <t t-foreach="lignes" t-as="l"><t t-out="(l.personne_id.name or '').upper()"/> (<t t-out="l.voix"/>)<t t-if="not l_last">, </t></t>
+    </template>
+
+    <!-- ============ Feuille de présence ============ -->
+    <template id="report_feuille_presence">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="ag">
+                <t t-set="copro" t-value="ag.copropriete_id.sudo()"/>
+                <t t-call="web.external_layout">
+                    <div class="page o_copro_doc" style="font-size: 11pt;">
+                        <t t-call="coproerp_appel_edition.style_documents"/>
+                        <div class="text-center mb-3">
+                            <h4 class="mb-1" style="letter-spacing: 1px;"><b>FEUILLE DE PRÉSENCE</b></h4>
+                            <div><t t-out="ag.name"/> – <t t-out="ag.date_longue()"/> à <t t-out="ag.heure_texte()"/></div>
+                            <div><t t-out="ag.lieu_nom or ''"/></div>
+                        </div>
+                        <table class="table table-sm table-bordered" style="font-size: 10pt;">
+                            <thead>
+                                <tr class="o_cd_entete">
+                                    <th>Copropriétaire</th>
+                                    <th style="width: 10%;">Lots</th>
+                                    <th class="text-end" style="width: 8%;">Voix</th>
+                                    <th style="width: 16%;">Participation</th>
+                                    <th style="width: 18%;">Mandataire</th>
+                                    <th style="width: 20%;">Signature</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="ag.presence_ids.sorted(lambda l: l.personne_id.name or '')" t-as="l"
+                                    t-att-class="'o_cd_alt' if l_index % 2 else None" style="height: 9mm;">
+                                    <td><b t-out="l.personne_id.name"/><div style="font-size: 9pt;"><t t-out="l.personne_id.street or ''"/> <t t-out="l.personne_id.zip or ''"/> <t t-out="l.personne_id.city or ''"/></div></td>
+                                    <td t-out="l.lots_texte()"/>
+                                    <td class="text-end" t-out="l.voix"/>
+                                    <td t-out="l.statut_libelle()"/>
+                                    <td t-out="l.mandataire_id.name or ''"/>
+                                    <td/>
+                                </tr>
+                                <tr class="o_cd_total">
+                                    <td colspan="2">Total des voix du syndicat</td>
+                                    <td class="text-end" t-out="sum(ag.presence_ids.mapped('voix'))"/>
+                                    <td colspan="3"/>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="mt-2">
+                            <t t-out="ag.nombre_participants"/> copropriétaire(s) sur <t t-out="ag.nombre_membres"/>, représentant
+                            <t t-out="ag.voix_participants"/> voix sur <t t-out="ag.total_voix_effectif"/>, sont présents, représentés
+                            ou ont voté par correspondance.
+                        </div>
+                        <div class="row mt-4" style="page-break-inside: avoid;">
+                            <div class="col-6">Certifiée exacte par le président de séance :<br/><t t-out="ag.president or ''"/></div>
+                            <div class="col-6">Les membres du bureau :<br/><t t-out="ag.scrutateurs or ''"/></div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- ============ Procès-verbal ============ -->
+    <template id="report_pv">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="ag">
+                <t t-set="copro" t-value="ag.copropriete_id.sudo()"/>
+                <t t-call="web.external_layout">
+                    <div class="page o_copro_doc" style="font-size: 11.5pt;">
+                        <t t-call="coproerp_appel_edition.style_documents"/>
+                        <t t-call="coproerp_ag.pv_corps"/>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <template id="bloc_vote">
+        <t t-set="pour" t-value="res.pour if tour == 1 else res.pour2"/>
+        <t t-set="contre" t-value="res.contre if tour == 1 else res.contre2"/>
+        <t t-set="abstention" t-value="res.abstention if tour == 1 else res.abstention2"/>
+        <table class="table table-sm table-bordered mb-1" style="font-size: 10.5pt;">
+            <tr>
+                <td class="o_cd_refs" style="width: 12%;"><b>POUR</b></td>
+                <td style="width: 13%;" class="text-center"><b t-out="pour"/></td>
+                <td class="o_cd_refs" style="width: 12%;"><b>CONTRE</b></td>
+                <td style="width: 25%;"><b t-out="contre"/>
+                    <t t-set="lignes" t-value="res.votants(tour, 'contre')"/>
+                    <div t-if="lignes" style="font-size: 9pt;"><t t-call="coproerp_ag.liste_noms"/></div></td>
+                <td class="o_cd_refs" style="width: 13%;"><b>ABSTENTION(S)</b></td>
+                <td style="width: 25%;"><b t-out="abstention"/>
+                    <t t-set="lignes" t-value="res.votants(tour, 'abstention')"/>
+                    <div t-if="lignes" style="font-size: 9pt;"><t t-call="coproerp_ag.liste_noms"/></div></td>
+            </tr>
+        </table>
+        <t t-set="lignes" t-value="res.votants(tour, 'defaillant')"/>
+        <div t-if="lignes" style="font-size: 9.5pt;">Ne prennent pas part au vote (assimilés défaillants) :
+            <t t-call="coproerp_ag.liste_noms"/></div>
+        <div class="fst-italic mt-1"><b t-out="res.phrase_resultat(tour)"/></div>
+    </template>
+
+    <template id="pv_corps">
+        <div class="text-center p-2 mb-3 o_cd_refs" style="border: 1px solid #000;">
+            <div style="font-size: 16pt;"><b><i>SYNDICAT DES COPROPRIÉTAIRES</i></b></div>
+            <div style="font-size: 14pt;"><b><i>« <t t-out="copro.name"/>, <t t-out="copro.street or ''"/> <t t-out="copro.zip or ''"/> <t t-out="copro.city or ''"/> »</i></b></div>
+        </div>
+        <div class="text-center mb-3">
+            <h3 class="mb-0"><b><u>PROCÈS-VERBAL</u></b></h3>
+            <div style="font-size: 13pt;"><u>de l'assemblée générale <t t-out="'ordinaire' if ag.type_ag == 'ordinaire' else 'extraordinaire'"/>
+                du <t t-out="ag.date_longue()"/></u></div>
+        </div>
+        <p><b><t t-out="ag.preambule()"/></b>, les membres du syndicat des copropriétaires de l'ensemble immobilier
+            ci-dessus référencé, régulièrement convoqués par le syndic<t t-if="ag.urgence"> en délai d'urgence</t>, se sont
+            réunis en assemblée générale<t t-if="ag.lieu_nom">, <t t-out="ag.lieu_nom"/></t><t t-if="ag.lieu_adresse">,
+            <t t-out="ag.adresse_lieu_ligne()"/></t>, afin de délibérer sur l'ordre du jour suivant :</p>
+        <table class="table table-sm table-borderless" style="font-size: 10.5pt;">
+            <t t-foreach="ag.resolution_ids" t-as="res">
+                <tr t-if="res.majorite == 'rubrique'"><td colspan="2"><b t-out="res.titre"/></td></tr>
+                <tr t-else=""><td style="width: 7%;" class="text-end"><b t-out="res.numero or ''"/></td>
+                    <td><t t-out="res.titre"/> <span style="font-size: 9pt;">(<t t-out="res.abrege_majorite()"/>)</span></td></tr>
+            </t>
+        </table>
+
+        <p class="mt-2">Le bureau constate, à l'examen de la feuille de présence, dûment émargée par chaque copropriétaire en
+            entrant en séance, que <b><t t-out="ag.nombre_participants"/> copropriétaires sur <t t-out="ag.nombre_membres"/></b>
+            représentant <b><t t-out="ag.voix_participants"/> voix sur <t t-out="ag.total_voix_effectif"/></b> voix constituant le
+            syndicat des copropriétaires sont présents, représentés ou ont voté par correspondance.</p>
+        <t t-foreach="[('present', 'présents'), ('represente', 'représentés'), ('correspondance', 'ayant voté par correspondance'), ('absent', 'absents (défaillants)')]" t-as="groupe">
+            <t t-set="lignes" t-value="ag.presences_par_statut([groupe[0]])"/>
+            <div t-if="lignes" class="mb-2" style="page-break-inside: avoid;">
+                <div class="p-1 o_cd_refs"><b><t t-out="len(lignes)"/> copropriétaire(s) <t t-out="groupe[1]"/></b> –
+                    <t t-out="sum(lignes.mapped('voix_effectives'))"/> / <t t-out="ag.total_voix_effectif"/> voix</div>
+                <div style="font-size: 9.5pt;">
+                    <t t-foreach="lignes" t-as="l"><t t-out="(l.personne_id.name or '').upper()"/> (<t t-out="l.voix_effectives"/>)<t t-if="l.statut == 'represente' and l.mandataire_id"> représenté par <t t-out="l.mandataire_id.name"/></t><t t-if="not l_last">, </t></t>
+                </div>
+            </div>
+        </t>
+
+        <div style="page-break-before: always;"/>
+        <div class="text-center mb-3">
+            <div class="d-inline-block p-2" style="border: 3px double #000;">
+                <h4 class="mb-0"><b>Résolutions votées</b></h4>
+            </div>
+        </div>
+        <t t-foreach="ag.resolution_ids" t-as="res">
+            <div t-if="res.majorite == 'rubrique'" class="mt-3 mb-1 p-1 o_cd_refs"><b t-out="res.titre.upper()"/></div>
+            <div t-else="" class="mt-3" style="page-break-inside: avoid;">
+                <div><b><t t-out="res.numero or ''"/> – <t t-out="res.titre.upper()"/></b>
+                    <span style="font-size: 10pt;">(<t t-out="res.abrege_majorite()"/>)</span></div>
+                <t t-if="res.majorite == 'information'">
+                    <div class="mt-1" style="white-space: pre-line;" t-out="res.compte_rendu or res.texte or ''"/>
+                </t>
+                <t t-else="">
+                    <div class="mt-1"><b><u>Résolution n° <t t-out="res.numero or ''"/></u></b>
+                        <span t-if="res.amendee" class="fst-italic" style="font-size: 10pt;"> (amendée en séance)</span></div>
+                    <div class="mt-1 mb-2" style="white-space: pre-line;" t-out="res.texte_adopte or res.texte or ''"/>
+                    <t t-set="tour" t-value="1"/>
+                    <t t-call="coproerp_ag.bloc_vote"/>
+                    <t t-if="res.resultat == 'second_vote'">
+                        <div class="mt-2"><b>Second vote</b>
+                            (<t t-out="'article 24' if res.majorite == 'art25' else 'article 25'"/>)</div>
+                        <t t-set="tour" t-value="2"/>
+                        <t t-call="coproerp_ag.bloc_vote"/>
+                    </t>
+                    <div t-if="res.reserves" class="mt-1" style="font-size: 10pt;"><b>Réserves :</b> <t t-out="res.reserves"/></div>
+                </t>
+            </div>
+        </t>
+
+        <p class="mt-4"><b>L'ordre du jour étant épuisé et plus personne ne demandant la parole, le président lève la séance
+            à <t t-out="ag.heure_texte_champ('heure_cloture')"/>.</b></p>
+        <table class="table table-sm table-bordered text-center mt-2" style="page-break-inside: avoid;">
+            <tr class="o_cd_section"><th style="width: 34%;">Président</th><th style="width: 33%;">Scrutateur(s)</th><th style="width: 33%;">Secrétaire</th></tr>
+            <tr style="height: 25mm;">
+                <td t-out="ag.president or ''"/>
+                <td t-out="ag.scrutateurs or ''"/>
+                <td t-out="ag.secretaire or ''"/>
+            </tr>
+        </table>
+        <div class="mt-3 fst-italic" style="font-size: 10pt; page-break-inside: avoid;">
+            <div><b><u>Article 42 de la loi du 10 juillet 1965</u></b></div>
+            <div>« Les actions en contestation des décisions des assemblées générales doivent, à peine de déchéance, être
+                introduites par les copropriétaires opposants ou défaillants dans un délai de deux mois à compter de la
+                notification du procès-verbal d'assemblée, sans ses annexes. Cette notification est réalisée par le syndic dans
+                le délai d'un mois à compter de la tenue de l'assemblée générale. »</div>
+            <div class="mt-1">« Sauf urgence, l'exécution par le syndic des travaux décidés par l'assemblée générale en
+                application des articles 25 et 26 de la présente loi est suspendue jusqu'à l'expiration du délai de deux mois
+                mentionné au deuxième alinéa du présent article. »</div>
+        </div>
+    </template>
+
+    <!-- ============ Notification du procès-verbal (opposants et défaillants) ============ -->
+    <template id="report_pv_notification">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="presence">
+                <t t-set="ag" t-value="presence.ag_id"/>
+                <t t-set="copro" t-value="ag.copropriete_id.sudo()"/>
+                <t t-set="personne" t-value="presence.personne_id"/>
+                <t t-set="gestionnaire" t-value="copro.gestionnaire_id"/>
+                <t t-call="web.external_layout">
+                    <div class="page o_copro_doc" style="font-size: 11.5pt;">
+                        <t t-call="coproerp_appel_edition.style_documents"/>
+                        <div class="row">
+                            <div class="col-6">
+                                <h4 style="letter-spacing: 1px;"><b>NOTIFICATION DU PROCÈS-VERBAL</b></h4>
+                                <div class="fw-bold mb-1" t-if="presence.pv_mode_envoi"
+                                     t-out="{'lre': 'Lettre recommandée électronique', 'lrar': 'Lettre recommandée avec accusé de réception'}[presence.pv_mode_envoi]"/>
+                                <table class="table table-sm table-borderless mb-0 o_cd_refs" style="font-size: 11pt;">
+                                    <tr><td class="p-0 pe-2">Immeuble :</td>
+                                        <td class="p-0"><t t-out="copro.name"/><br/><t t-out="copro.street or ''"/> <t t-out="copro.zip or ''"/> <t t-out="copro.city or ''"/></td></tr>
+                                    <tr t-if="gestionnaire"><td class="p-0 pe-2">Affaire suivie par :</td>
+                                        <td class="p-0" t-out="gestionnaire.name"/></tr>
+                                </table>
+                            </div>
+                            <div class="col-5 offset-1" style="margin-top: 12mm;">
+                                <div><b t-out="personne.name"/></div>
+                                <div t-if="personne.street" t-out="personne.street"/>
+                                <div t-if="personne.street2" t-out="personne.street2"/>
+                                <div><t t-out="personne.zip or ''"/> <t t-out="personne.city or ''"/></div>
+                            </div>
+                        </div>
+                        <p class="mt-4">Madame, Monsieur,</p>
+                        <p>Nous vous prions de trouver ci-joint le procès-verbal de l'assemblée générale
+                            <t t-out="'ordinaire' if ag.type_ag == 'ordinaire' else 'extraordinaire'"/> des copropriétaires qui s'est
+                            tenue le <t t-out="ag.date_longue()"/>, qui vous est notifié en votre qualité de
+                            <b t-out="(presence.pv_qualite or 'copropriétaire').lower()"/>.</p>
+                        <p>Conformément à l'article 42, alinéa 2, de la loi du 10 juillet 1965, les actions en contestation des
+                            décisions de l'assemblée doivent, à peine de déchéance, être introduites par les copropriétaires
+                            opposants ou défaillants dans un délai de deux mois à compter de la notification du procès-verbal.</p>
+                        <p>Nous vous prions d'agréer, Madame, Monsieur, l'expression de nos salutations distinguées.</p>
+                        <div class="text-end"><div>Le syndic</div><div t-if="gestionnaire"><b t-out="gestionnaire.name"/></div></div>
+                        <div class="mt-3 text-muted" style="font-size: 9pt;">
+                            <t t-out="ag.env['coproerp.notification.mode'].mention_voie_postale()"/>
+                        </div>
+                        <div style="page-break-before: always;"/>
+                        <t t-call="coproerp_ag.pv_corps"/>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

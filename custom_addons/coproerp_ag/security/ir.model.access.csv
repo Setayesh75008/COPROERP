@@ -2,3 +2,6 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_ag_user,ag.user,model_coproerp_ag,base.group_user,1,1,1,1
 access_ag_resolution_user,ag.resolution.user,model_coproerp_ag_resolution,base.group_user,1,1,1,1
 access_ag_convocation_user,ag.convocation.user,model_coproerp_ag_convocation,base.group_user,1,1,1,1
+access_ag_presence_user,ag.presence.user,model_coproerp_ag_presence,base.group_user,1,1,1,1
+access_ag_vote_user,ag.vote.user,model_coproerp_ag_vote,base.group_user,1,1,1,1
+access_ag_vote_correspondance_user,ag.vote.correspondance.user,model_coproerp_ag_vote_correspondance,base.group_user,1,1,1,1

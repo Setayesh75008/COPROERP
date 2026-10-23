@@ -1,5 +1,5 @@
 {
-    "name": "CoproERP - Assemblées générales (préparation et convocation)",
+    "name": "CoproERP - Assemblées générales",
     "summary": "Ordre du jour, projets de résolution, convocations, vote par correspondance et pouvoir",
     "description": """
 Préparation de l'assemblée générale des copropriétaires :
@@ -16,12 +16,21 @@ Préparation de l'assemblée générale des copropriétaires :
 - dossier de convocation par copropriétaire : lettre et ordre du jour,
   mentions légales (mandats art. 22, vote par correspondance art. 17-1 A et
   9 bis du décret, pièces justificatives art. 18-1), projet de résolutions,
-  formulaire de vote par correspondance et pouvoir.
+  formulaire de vote par correspondance et pouvoir ;
+- tenue de l'assemblée : feuille de présence (présents, représentés, votes par
+  correspondance, absents), contrôle des mandats (art. 22), réduction des voix
+  d'un copropriétaire majoritaire ;
+- votes résolution par résolution, calcul des majorités des articles 24, 25,
+  26 et de l'unanimité, passerelles (art. 25-1 et 26), votes par
+  correspondance repris du formulaire (défaillants si résolution amendée) ;
+- procès-verbal (bureau, présents, résultats avec noms des opposants et
+  abstentionnistes, art. 17 du décret), notification aux opposants et
+  défaillants et suivi du délai de recours de deux mois (art. 42).
 """,
     "author": "SSB AVOCAT",
     "website": "https://www.ssb-avocat.fr",
     "category": "Real Estate",
-    "version": "19.0.1.0.1",
+    "version": "19.0.2.0.0",
     "license": "LGPL-3",
     "depends": [
         "coproerp_cloture",
@@ -29,8 +38,11 @@ Préparation de l'assemblée générale des copropriétaires :
     "data": [
         "security/ir.model.access.csv",
         "views/ag_views.xml",
+        "views/seance_views.xml",
         "report/ag_report.xml",
         "report/ag_templates.xml",
+        "report/pv_report.xml",
+        "report/pv_templates.xml",
     ],
     "installable": True,
     "application": False,

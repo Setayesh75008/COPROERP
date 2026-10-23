@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_report_feuille_presence" model="ir.actions.report">
+        <field name="name">Feuille de présence</field>
+        <field name="model">coproerp.ag</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">coproerp_ag.report_feuille_presence</field>
+        <field name="report_file">coproerp_ag.report_feuille_presence</field>
+        <field name="print_report_name">'Feuille de presence - %s' % (object.name or '')</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+        <field name="binding_model_id" ref="model_coproerp_ag"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_pv" model="ir.actions.report">
+        <field name="name">Procès-verbal de l'assemblée</field>
+        <field name="model">coproerp.ag</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">coproerp_ag.report_pv</field>
+        <field name="report_file">coproerp_ag.report_pv</field>
+        <field name="print_report_name">'Proces-verbal - %s' % (object.name or '')</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+        <field name="binding_model_id" ref="model_coproerp_ag"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_pv_notification" model="ir.actions.report">
+        <field name="name">Notification du procès-verbal</field>
+        <field name="model">coproerp.ag.presence</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">coproerp_ag.report_pv_notification</field>
+        <field name="report_file">coproerp_ag.report_pv_notification</field>
+        <field name="print_report_name">'Notification PV - %s' % (object.personne_id.name or '')</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+        <field name="binding_model_id" ref="model_coproerp_ag_presence"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

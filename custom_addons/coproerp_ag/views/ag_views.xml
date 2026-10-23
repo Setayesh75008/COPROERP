@@ -56,6 +56,7 @@
                         </group>
                         <group string="Délais légaux">
                             <field name="date_convocation" readonly="etat != 'preparation'"/>
+                            <field name="urgence" readonly="etat != 'preparation'"/>
                             <field name="date_limite_presentation"/>
                             <field name="date_limite_vpc"/>
                             <field name="adresse_vpc" readonly="etat != 'preparation'"/>

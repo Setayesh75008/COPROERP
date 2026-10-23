@@ -16,7 +16,7 @@
         <div style="margin: 10mm auto 0 auto; width: 62%; border: 3px double #000; box-shadow: 4px 4px 0 #555; padding: 6mm 4mm;"
              class="text-center">
             <div style="font-size: 18pt; line-height: 1.25;"><b>Assemblée Générale<br/>
-                <t t-out="'Ordinaire' if ag.type_ag == 'ordinaire' else 'Extraordinaire'"/></b></div>
+                <t t-out="'Ordinaire' if ag.type_ag == 'ordinaire' else 'Extraordinaire'"/><t t-if="ag.urgence"><br/>en délai d'urgence</t></b></div>
             <div class="mt-2" style="font-size: 16pt;"><b>du <t t-out="ag.date_longue()"/></b></div>
             <div style="font-size: 15pt;"><b t-out="ag.heure_texte()"/></div>
             <div class="mt-2" style="font-size: 14pt;"><b t-out="ag.lieu_nom or ''"/></div>
@@ -144,7 +144,7 @@
                     </div>
                 </div>
 
-                <div class="mt-4"><b><u>Objet</u> : convocation à l'assemblée générale <t t-out="sigle"/> des copropriétaires</b></div>
+                <div class="mt-4"><b><u>Objet</u> : convocation à l'assemblée générale <t t-out="sigle"/> des copropriétaires<t t-if="ag.urgence"> en délai d'urgence</t></b></div>
                 <p class="mt-3">Madame, Monsieur,</p>
                 <p>Nous vous prions de bien vouloir assister à l'assemblée générale <t t-out="sigle"/> du syndicat des
                     copropriétaires de l'immeuble ci-dessus référencé, qui se tiendra le</p>

@@ -57,6 +57,12 @@ class AssembleeGenerale(models.Model):
         string="Type", required=True, default="ordinaire", tracking=True,
     )
     date_ag = fields.Date(string="Date de l'assemblée", required=True, tracking=True)
+    urgence = fields.Boolean(
+        string="Convocation en délai d'urgence",
+        help="En cas d'urgence, le délai de 21 jours ne s'impose pas (art. 9 du décret du 17 mars 1967). "
+             "L'urgence doit être réelle et justifiée : à défaut, l'assemblée encourt l'annulation.",
+        tracking=True,
+    )
     heure = fields.Float(string="Heure", default=18.0, help="Heure de début (ex. 17:30).")
     lieu_nom = fields.Char(string="Lieu", help="Ex. : Cabinet du syndic, salle de l'immeuble…")
     lieu_adresse = fields.Text(string="Adresse du lieu")
@@ -372,11 +378,11 @@ class Convocation(models.Model):
         string="État", default="a_envoyer", required=True,
     )
 
-    @api.depends("date_presentation", "ag_id.date_ag")
+    @api.depends("date_presentation", "ag_id.date_ag", "ag_id.urgence")
     def _compute_delai(self):
         for convocation in self:
             date_ag = convocation.ag_id.date_ag
-            convocation.delai_respecte = bool(
+            convocation.delai_respecte = convocation.ag_id.urgence or bool(
                 convocation.date_presentation and date_ag
                 and (date_ag - convocation.date_presentation).days >= DELAI_CONVOCATION + 1)
 

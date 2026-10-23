@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Vote d'une résolution (fenêtre) -->
+    <record id="view_ag_resolution_vote_form" model="ir.ui.view">
+        <field name="name">coproerp.ag.resolution.vote.form</field>
+        <field name="model">coproerp.ag.resolution</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <form string="Vote">
+                <field name="ag_id" invisible="1"/>
+                <div class="oe_title">
+                    <h3><field name="numero" readonly="1" class="oe_inline"/> – <field name="titre" readonly="1" class="oe_inline"/></h3>
+                    <field name="majorite" readonly="1"/>
+                </div>
+                <group>
+                    <field name="texte_adopte" placeholder="Texte soumis au vote (repris du projet ; modifiez-le en cas d'amendement)"/>
+                    <field name="amendee"/>
+                </group>
+                <div class="mb-2">
+                    <button name="action_initialiser_vote" type="object" string="Initialiser le vote"
+                            class="btn-primary"
+                            confirm="Les votes déjà saisis pour ce tour seront remplacés. Continuer ?"/>
+                    <span class="text-muted ms-2">Présents et représentés : « pour » par défaut ; indiquez les votes
+                        contre et les abstentions. Votes par correspondance : repris du formulaire.</span>
+                </div>
+                <field name="vote1_ids" context="{'default_tour': 1}">
+                    <list editable="bottom" create="0" decoration-muted="sens == 'defaillant'"
+                          decoration-danger="sens == 'contre'" decoration-warning="sens == 'abstention'">
+                        <field name="personne_id" readonly="1"/>
+                        <field name="origine" readonly="1"/>
+                        <field name="voix" readonly="1" sum="Total"/>
+                        <field name="sens"/>
+                        <field name="note" optional="show"/>
+                    </list>
+                </field>
+                <group>
+                    <group>
+                        <field name="pour"/>
+                        <field name="contre"/>
+                        <field name="abstention"/>
+                    </group>
+                    <group>
+                        <field name="resultat" widget="badge"
+                               decoration-success="resultat == 'adoptee'" decoration-danger="resultat == 'rejetee'"
+                               decoration-warning="resultat == 'second_vote'"/>
+                    </group>
+                </group>
+                <div invisible="resultat != 'second_vote'">
+                    <div class="alert alert-warning" role="alert">
+                        Passerelle : l'assemblée procède immédiatement à un second vote
+                        (article 24 après un article 25, article 25 après un article 26).
+                    </div>
+                    <button name="action_initialiser_second_vote" type="object" string="Initialiser le second vote"
+                            class="btn-primary mb-2"/>
+                    <field name="vote2_ids" context="{'default_tour': 2}">
+                        <list editable="bottom" create="0" decoration-muted="sens == 'defaillant'"
+                              decoration-danger="sens == 'contre'" decoration-warning="sens == 'abstention'">
+                            <field name="personne_id" readonly="1"/>
+                            <field name="origine" readonly="1"/>
+                            <field name="voix" readonly="1" sum="Total"/>
+                            <field name="sens"/>
+                            <field name="note" optional="show"/>
+                        </list>
+                    </field>
+                    <group>
+                        <group>
+                            <field name="pour2"/>
+                            <field name="contre2"/>
+                            <field name="abstention2"/>
+                        </group>
+                        <group>
+                            <field name="resultat2" widget="badge"
+                                   decoration-success="resultat2 == 'adoptee'" decoration-danger="resultat2 == 'rejetee'"/>
+                        </group>
+                    </group>
+                </div>
+                <group>
+                    <field name="reserves"/>
+                </group>
+                <footer>
+                    <button string="Enregistrer et fermer" special="save" class="btn-primary"/>
+                    <button string="Annuler" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_ag_form_seance" model="ir.ui.view">
+        <field name="name">coproerp.ag.form.seance</field>
+        <field name="model">coproerp.ag</field>
+        <field name="inherit_id" ref="coproerp_ag.view_ag_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_annuler']" position="before">
+                <button name="action_ouvrir_feuille_presence" type="object" string="Ouvrir la feuille de présence"
+                        class="oe_highlight" invisible="etat != 'convoquee' or presence_ids"/>
+                <button name="action_imprimer_feuille_presence" type="object" string="Feuille de présence"
+                        invisible="not presence_ids"/>
+                <button name="action_cloturer_seance" type="object" string="Clôturer la séance"
+                        class="oe_highlight" invisible="etat != 'convoquee' or not presence_ids"/>
+                <button name="action_rouvrir_seance" type="object" string="Rouvrir la séance"
+                        invisible="etat != 'tenue'"/>
+                <button name="action_imprimer_pv" type="object" string="Procès-verbal"
+                        invisible="not presence_ids"/>
+                <button name="action_imprimer_pv_notifications" type="object" string="Notifications du PV"
+                        invisible="etat != 'tenue'"/>
+            </xpath>
+            <xpath expr="//field[@name='resolution_ids']/list/field[@name='demande_par_id']" position="after">
+                <field name="resultat" optional="show" widget="badge"
+                       decoration-success="resultat == 'adoptee'" decoration-danger="resultat == 'rejetee'"
+                       decoration-warning="resultat == 'second_vote'"/>
+                <field name="resultat2" optional="show" string="2nd vote"/>
+                <button name="action_ouvrir_vote" type="object" string="Voter" icon="fa-check-square-o"
+                        invisible="majorite in ('rubrique', 'information')"/>
+            </xpath>
+            <xpath expr="//field[@name='resolution_ids']/form//field[@name='texte']" position="after">
+                <field name="compte_rendu" placeholder="Compte rendu (points d'information, questions diverses)"/>
+            </xpath>
+            <xpath expr="//page[@name='convocations']" position="after">
+                <page string="Séance" name="seance" invisible="etat in ('preparation', 'annulee')">
+                    <group>
+                        <group string="Bureau">
+                            <field name="president" readonly="etat == 'tenue'"/>
+                            <field name="scrutateurs" readonly="etat == 'tenue'"/>
+                            <field name="secretaire" readonly="etat == 'tenue'"/>
+                            <field name="heure_ouverture" widget="float_time" readonly="etat == 'tenue'"/>
+                            <field name="heure_cloture" widget="float_time" readonly="etat == 'tenue'"/>
+                        </group>
+                        <group string="Quorum et voix">
+                            <field name="nombre_membres"/>
+                            <field name="nombre_participants"/>
+                            <field name="voix_participants"/>
+                            <field name="total_voix_effectif"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-danger" role="alert" invisible="not controle_mandats">
+                        <field name="controle_mandats"/>
+                    </div>
+                    <field name="presence_ids" readonly="etat == 'tenue'">
+                        <list editable="bottom" create="0"
+                              decoration-muted="statut == 'absent'" decoration-info="statut == 'correspondance'">
+                            <field name="personne_id" readonly="1"/>
+                            <field name="voix" readonly="1" sum="Total"/>
+                            <field name="voix_effectives" optional="hide"/>
+                            <field name="statut"/>
+                            <field name="mandataire_id" readonly="statut != 'represente'" required="statut == 'represente'"/>
+                            <field name="heure_arrivee" widget="float_time" optional="hide"/>
+                            <button name="action_saisir_formulaire_vpc" type="object" string="Formulaire"
+                                    icon="fa-pencil-square-o" invisible="statut != 'correspondance'"/>
+                        </list>
+                    </field>
+                    <div class="text-muted">
+                        Pour un vote par correspondance, le bouton « Formulaire » permet de reporter les votes du formulaire reçu. Un mandataire ne peut
+                        recevoir plus de trois mandats, sauf si ses voix et celles de ses mandants n'excèdent pas 10 % du total ;
+                        le syndic et ses préposés ne peuvent pas être mandataires (art. 22).
+                    </div>
+                </page>
+                <page string="Notification du PV" name="notification_pv" invisible="etat != 'tenue'">
+                    <group>
+                        <field name="date_limite_notification_pv"/>
+                    </group>
+                    <button name="action_suivi_notifications_pv" type="object" string="Suivi des notifications"
+                            class="btn-primary mb-2"/>
+                    <div class="text-muted">
+                        Le procès-verbal est notifié aux opposants et aux défaillants dans le mois qui suit l'assemblée ; ils
+                        disposent de deux mois à compter de cette notification pour contester les décisions (art. 42 de la loi).
+                        Seules les lignes avec une qualité (opposant ou défaillant) doivent recevoir la notification.
+                    </div>
+                </page>
+            </xpath>
+        </field>
+    </record>
+    <record id="view_ag_presence_vpc_form" model="ir.ui.view">
+        <field name="name">coproerp.ag.presence.vpc.form</field>
+        <field name="model">coproerp.ag.presence</field>
+        <field name="arch" type="xml">
+            <form string="Formulaire de vote par correspondance">
+                <group>
+                    <field name="ag_id" readonly="1"/>
+                    <field name="personne_id" readonly="1"/>
+                    <field name="voix" readonly="1"/>
+                </group>
+                <field name="vote_correspondance_ids">
+                    <list editable="bottom">
+                        <field name="ag_id" column_invisible="1"/>
+                        <field name="resolution_id"/>
+                        <field name="tour"/>
+                        <field name="sens"/>
+                    </list>
+                </field>
+                <div class="text-muted">
+                    Reportez le sens coché pour chaque résolution (« Second vote » : lignes « bis » du formulaire). Une
+                    résolution sans case cochée est laissée vide : le copropriétaire ne prend pas part à ce vote.
+                </div>
+                <footer>
+                    <button string="Enregistrer" special="save" class="btn-primary"/>
+                    <button string="Annuler" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_ag_presence_notification_list" model="ir.ui.view">
+        <field name="name">coproerp.ag.presence.notification.list</field>
+        <field name="model">coproerp.ag.presence</field>
+        <field name="arch" type="xml">
+            <list editable="bottom" create="0" delete="0">
+                <field name="personne_id" readonly="1"/>
+                <field name="pv_qualite" readonly="1"/>
+                <field name="pv_mode_envoi"/>
+                <field name="pv_numero_envoi"/>
+                <field name="pv_date_presentation"/>
+                <field name="pv_date_limite_recours" readonly="1"/>
+            </list>
+        </field>
+    </record>
+</odoo>
