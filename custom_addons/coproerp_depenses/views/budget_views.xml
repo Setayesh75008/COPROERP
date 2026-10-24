@@ -13,6 +13,32 @@
             <xpath expr="//field[@name='ecart_ventilation']" position="after">
                 <field name="total_realise"/>
             </xpath>
+            <xpath expr="//page[@name='repartition_budget']" position="after">
+                <page string="Budget par nature de charge" name="budget_nature">
+                    <div class="mb-2">
+                        <button name="action_preremplir_detail" type="object" class="btn-secondary"
+                                string="Pré-remplir avec le réalisé de l'exercice précédent"
+                                invisible="detail_ids"/>
+                    </div>
+                    <field name="detail_ids">
+                        <list editable="bottom">
+                            <field name="copropriete_id" column_invisible="True"/>
+                            <field name="repartition_id"/>
+                            <field name="nature_id"/>
+                            <field name="montant" sum="Total"/>
+                            <field name="montant_realise" sum="Total réalisé"/>
+                            <field name="ecart" sum="Écart"
+                                   decoration-danger="ecart &lt; 0" decoration-success="ecart &gt;= 0"/>
+                        </list>
+                    </field>
+                    <div class="text-muted">
+                        Facultatif : détaillez le budget de chaque clé par nature de charge (eau, électricité,
+                        entretien…). Le total des natures d'une clé est reporté automatiquement sur la répartition
+                        par clé, qui sert aux appels de fonds. Les annexes comptables 2 et 3 présentent alors le budget
+                        ligne par ligne. Pensez à ajuster le montant du budget prévisionnel si le total change.
+                    </div>
+                </page>
+            </xpath>
             <xpath expr="//button[@name='action_voir_appels_budget']" position="after">
                 <button name="action_voir_depenses" type="object" string="Voir les factures"
                         class="btn-secondary"/>

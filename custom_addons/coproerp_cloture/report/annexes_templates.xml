@@ -90,7 +90,7 @@
                 <p style="page-break-before: always;"/>
                 <t t-call="coproerp_cloture.annexe_entete">
                     <t t-set="titre" t-value="'ANNEXE 2 – COMPTE DE GESTION GÉNÉRAL DE L\'EXERCICE CLOS RÉALISÉ ET BUDGET PRÉVISIONNEL'"/>
-                    <t t-set="sous_titre" t-value="'Montants en euros – le budget prévisionnel est voté par clé de répartition : il figure sur les lignes de total'"/>
+                    <t t-set="sous_titre" t-value="'Montants en euros'"/>
                 </t>
                 <t t-foreach="[('courant', 'I – OPÉRATIONS COURANTES (budget prévisionnel)'), ('travaux', 'II – TRAVAUX DE L\'ARTICLE 14-2 ET OPÉRATIONS EXCEPTIONNELLES')]" t-as="partie">
                     <t t-set="p" t-value="a2[partie[0]]"/>
@@ -113,18 +113,29 @@
                                 <tr class="o_cd_alt">
                                     <td><b><t t-out="g['classe']"/> <t t-out="g['libelle']"/></b></td>
                                     <td class="text-end"><b t-out="o.fmt(g['n1'])"/></td>
-                                    <td t-if="avec_budget"/>
+                                    <td t-if="avec_budget" class="text-end"><b t-out="o.fmt(g['budget']['n'])"/></td>
                                     <td class="text-end"><b t-out="o.fmt(g['n'])"/></td>
-                                    <td t-if="avec_budget"/><td t-if="avec_budget"/>
+                                    <td t-if="avec_budget" class="text-end"><b t-out="o.fmt(g['budget']['en_cours'])"/></td>
+                                    <td t-if="avec_budget" class="text-end"><b t-out="o.fmt(g['budget']['a_voter'])"/></td>
                                 </tr>
                                 <tr t-foreach="g['lignes']" t-as="l">
                                     <td style="padding-left: 6mm;"><t t-out="l['code']"/> <t t-out="l['libelle']"/></td>
                                     <td class="text-end" t-out="o.fmt(l['n1'])"/>
-                                    <td t-if="avec_budget"/>
+                                    <td t-if="avec_budget" class="text-end" t-out="o.fmt(l['budget']['n'])"/>
                                     <td class="text-end" t-out="o.fmt(l['n'])"/>
-                                    <td t-if="avec_budget"/><td t-if="avec_budget"/>
+                                    <td t-if="avec_budget" class="text-end" t-out="o.fmt(l['budget']['en_cours'])"/>
+                                    <td t-if="avec_budget" class="text-end" t-out="o.fmt(l['budget']['a_voter'])"/>
                                 </tr>
                             </t>
+                            <t t-set="non_detaille" t-value="a2['budget_non_detaille']"/>
+                            <tr t-if="avec_budget and any(non_detaille[k] for k in ('n', 'en_cours', 'a_voter'))" class="fst-italic">
+                                <td style="padding-left: 6mm;">Budget non détaillé par nature</td>
+                                <td/>
+                                <td class="text-end" t-out="o.fmt(non_detaille['n'])"/>
+                                <td/>
+                                <td class="text-end" t-out="o.fmt(non_detaille['en_cours'])"/>
+                                <td class="text-end" t-out="o.fmt(non_detaille['a_voter'])"/>
+                            </tr>
                             <tr class="o_cd_total">
                                 <td>Total des charges</td>
                                 <td class="text-end" t-out="o.fmt(p['total_charges']['n1'])"/>
@@ -185,9 +196,10 @@
                             <tr t-foreach="c['lignes']" t-as="l">
                                 <td style="padding-left: 6mm;"><t t-out="l['code']"/> <t t-out="l['libelle']"/></td>
                                 <td class="text-end" t-out="o.fmt(l['n1'])"/>
-                                <td/>
+                                <td class="text-end" t-out="o.fmt(l['budget']['n'])"/>
                                 <td class="text-end" t-out="o.fmt(l['n'])"/>
-                                <td/><td/>
+                                <td class="text-end" t-out="o.fmt(l['budget']['en_cours'])"/>
+                                <td class="text-end" t-out="o.fmt(l['budget']['a_voter'])"/>
                             </tr>
                             <tr class="o_cd_alt">
                                 <td><b>Total <t t-out="c['libelle']"/></b></td>

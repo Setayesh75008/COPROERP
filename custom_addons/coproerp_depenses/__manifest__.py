@@ -15,7 +15,7 @@ Dépenses de la copropriété :
     "author": "SSB AVOCAT",
     "website": "https://www.ssb-avocat.fr",
     "category": "Real Estate",
-    "version": "19.0.1.0.2",
+    "version": "19.0.1.0.3",
     "license": "LGPL-3",
     "depends": [
         "coproerp_comptabilite",

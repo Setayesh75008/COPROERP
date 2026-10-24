@@ -411,15 +411,42 @@ class Cloture(models.Model):
             "a_voter": self.budget_a_voter_id,
         }
 
+        # Budget détaillé par nature (facultatif) : None si le budget n'est pas détaillé
+        details = {k: (b.budget_par_nature() if b and b.detail_ids else None) for k, b in budgets.items()}
+        libelles_natures = {nat.code: nat.name for nat in self.env["coproerp.nature.depense"].with_context(
+            active_test=False).search([])}
+
+        def budget_code(code, cle=None):
+            valeurs = {}
+            for k, detail in details.items():
+                if detail is None:
+                    valeurs[k] = None
+                elif cle is None:
+                    valeurs[k] = _arrondi(detail[1].get(code, 0.0))
+                else:
+                    valeurs[k] = _arrondi(detail[0].get((cle, code), 0.0))
+            return valeurs
+
+        def somme_budgets(lignes):
+            return {k: (_arrondi(sum(l["budget"][k] or 0.0 for l in lignes)) if details[k] is not None else None)
+                    for k in budgets}
+
         def tableau(cat, sens):
-            codes = sorted(set(n1[cat][sens]) | set(n[cat][sens]))
+            codes = set(n1[cat][sens]) | set(n[cat][sens])
+            if cat == "courant" and sens == "charges":
+                for detail in details.values():
+                    if detail is not None:
+                        codes |= set(detail[1])
             lignes = []
-            for code in codes:
-                libelle = (n[cat][sens].get(code) or n1[cat][sens].get(code))[0]
+            for code in sorted(codes):
+                trouve = n[cat][sens].get(code) or n1[cat][sens].get(code)
+                libelle = trouve[0] if trouve else libelles_natures.get(code, code)
                 lignes.append({
                     "code": code, "libelle": libelle,
                     "n1": _arrondi(n1[cat][sens].get(code, ("", 0.0))[1]),
                     "n": _arrondi(n[cat][sens].get(code, ("", 0.0))[1]),
+                    "budget": budget_code(code) if (cat, sens) == ("courant", "charges")
+                    else {k: None for k in budgets},
                 })
             return lignes
 
@@ -432,6 +459,7 @@ class Cloture(models.Model):
                     "lignes": membres,
                     "n1": _arrondi(sum(l["n1"] for l in membres)),
                     "n": _arrondi(sum(l["n"] for l in membres)),
+                    "budget": somme_budgets(membres),
                 })
             return groupes
 
@@ -459,6 +487,9 @@ class Cloture(models.Model):
                                    "n": self._total(n["travaux"]["produits"])},
             },
             "budget": budget_totaux,
+            "budget_non_detaille": {
+                k: (_arrondi((budget_totaux[k] or 0.0) - sum(details[k][1].values()))
+                    if details[k] is not None else None) for k in budgets},
             "regularisation": {"n1": _arrondi(n1["regularisation"]), "n": _arrondi(n["regularisation"])},
         }
         for partie in ("courant", "travaux"):
@@ -472,13 +503,20 @@ class Cloture(models.Model):
             cles |= set(valeurs)
         annexe3 = []
         for cle in sorted(cles, key=lambda c: (not c, c.name or "")):
-            codes = sorted(set(n1["par_cle"].get(cle, {})) | set(n["par_cle"].get(cle, {})))
-            lignes = [{
-                "code": code,
-                "libelle": (n["par_cle"].get(cle, {}).get(code) or n1["par_cle"].get(cle, {}).get(code))[0],
-                "n1": _arrondi(n1["par_cle"].get(cle, {}).get(code, ("", 0.0))[1]),
-                "n": _arrondi(n["par_cle"].get(cle, {}).get(code, ("", 0.0))[1]),
-            } for code in codes]
+            codes = set(n1["par_cle"].get(cle, {})) | set(n["par_cle"].get(cle, {}))
+            for detail in details.values():
+                if detail is not None:
+                    codes |= {code for (c, code) in detail[0] if c == cle}
+            lignes = []
+            for code in sorted(codes):
+                trouve = n["par_cle"].get(cle, {}).get(code) or n1["par_cle"].get(cle, {}).get(code)
+                lignes.append({
+                    "code": code,
+                    "libelle": trouve[0] if trouve else libelles_natures.get(code, code),
+                    "n1": _arrondi(n1["par_cle"].get(cle, {}).get(code, ("", 0.0))[1]),
+                    "n": _arrondi(n["par_cle"].get(cle, {}).get(code, ("", 0.0))[1]),
+                    "budget": budget_code(code, cle),
+                })
             annexe3.append({
                 "cle": cle,
                 "libelle": cle.name if cle else "Charges sans clé de répartition",

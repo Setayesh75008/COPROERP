@@ -128,6 +128,31 @@ class TestCloture(TransactionCase):
         self.assertAlmostEqual(cles[0]["n"], 9000.0)
         self.assertAlmostEqual(cles[0]["budget"]["n"], 8000.0)
 
+    def test_annexes_avec_budget_par_nature(self):
+        Nature = self.env["coproerp.nature.depense"]
+        self.env["coproerp.budget.detail"].create([
+            {"budget_id": self.budget.id, "repartition_id": self.cle.id, "nature_id": self.n615.id, "montant": 5000.0},
+            {"budget_id": self.budget.id, "repartition_id": self.cle.id,
+             "nature_id": Nature.search([("code", "=", "602000")]).id, "montant": 3000.0},
+        ])
+        cloture = self._preparer()
+        d = cloture.donnees_annexes()
+        classes = {g["classe"]: g for g in d["annexe2"]["courant"]["charges"]}
+        self.assertEqual(sorted(classes), ["60", "61"])
+        self.assertAlmostEqual(classes["60"]["budget"]["n"], 3000.0)
+        self.assertAlmostEqual(classes["60"]["n"], 0.0)
+        self.assertAlmostEqual(classes["61"]["budget"]["n"], 5000.0)
+        ligne_616 = [l for l in classes["61"]["lignes"] if l["code"] == "616000"][0]
+        self.assertAlmostEqual(ligne_616["budget"]["n"], 0.0)
+        self.assertIsNone(ligne_616["budget"]["n1"])
+        self.assertAlmostEqual(d["annexe2"]["budget_non_detaille"]["n"], 0.0)
+        lignes3 = {l["code"]: l for l in d["annexe3"]["cles"][0]["lignes"]}
+        self.assertAlmostEqual(lignes3["602000"]["budget"]["n"], 3000.0)
+        self.assertAlmostEqual(lignes3["615000"]["n"], 3000.0)
+        html = self.env["ir.actions.report"]._render_qweb_html("coproerp_cloture.report_annexes", cloture.ids)[0]
+        html = html.decode() if isinstance(html, bytes) else html
+        self.assertIn("5\u00a0000,00", html)
+
     def test_annexes_4_et_5(self):
         cloture = self._preparer()
         d = cloture.donnees_annexes()

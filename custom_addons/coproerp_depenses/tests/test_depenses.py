@@ -209,3 +209,49 @@ class TestDepenses(TransactionCase):
         paiement.action_valider()
         self.env.invalidate_all()
         self.assertTrue(facture.sudo().est_payee)
+
+    # ---------------------------------------------------------------
+    # Budget par nature de charge
+    # ---------------------------------------------------------------
+    def test_budget_par_nature_synchronise_la_cle(self):
+        Detail = self.env["coproerp.budget.detail"]
+        Detail.create([
+            {"budget_id": self.budget.id, "repartition_id": self.cle.id, "nature_id": self.n_entretien.id, "montant": 5000.0},
+            {"budget_id": self.budget.id, "repartition_id": self.cle.id, "nature_id": self.n_assurance.id, "montant": 3500.0},
+        ])
+        ligne = self.budget.ligne_ids.filtered(lambda l: l.repartition_id == self.cle)
+        self.assertAlmostEqual(ligne.montant_annuel, 8500.0)
+        # La clé ascenseur, non détaillée, est inchangée
+        self.assertAlmostEqual(self.budget.ligne_ids.filtered(lambda l: l.repartition_id == self.cle_asc).montant_annuel, 2000.0)
+        detail = self.budget.detail_ids.filtered(lambda d: d.nature_id == self.n_assurance)
+        detail.montant = 3000.0
+        self.assertAlmostEqual(ligne.montant_annuel, 8000.0)
+        # Réalisé par nature
+        self._facture().action_valider()
+        entretien = self.budget.detail_ids.filtered(lambda d: d.nature_id == self.n_entretien)
+        self.assertAlmostEqual(entretien.montant_realise, 300.0)
+        self.assertAlmostEqual(entretien.ecart, 4700.0)
+        # Nouvelle clé : la ligne du budget par clé est créée
+        Detail.create({"budget_id": self.budget.id, "repartition_id": self.cle_asc.id,
+                       "nature_id": self.n_maintenance.id, "montant": 2500.0})
+        self.assertAlmostEqual(self.budget.ligne_ids.filtered(lambda l: l.repartition_id == self.cle_asc).montant_annuel, 2500.0)
+        par_cle, par_code = self.budget.budget_par_nature()
+        self.assertAlmostEqual(par_code["615000"], 5000.0)
+        self.assertAlmostEqual(par_cle[(self.cle_asc, "614000")], 2500.0)
+        with self.assertRaises(Exception):
+            Detail.create({"budget_id": self.budget.id, "repartition_id": self.cle.id,
+                           "nature_id": self.n_entretien.id, "montant": 1.0})
+
+    def test_preremplir_avec_le_realise_precedent(self):
+        self._facture().action_valider()
+        suivant = self.env["coproerp.budget.annuel"].create({
+            "copropriete_id": self.copro.id, "exercice": 2027,
+            "date_debut": date(2027, 1, 1), "date_fin": date(2027, 12, 31),
+            "budget_previsionnel": 10000.0, "repartition_fonds_travaux_id": self.cle.id,
+        })
+        suivant.action_preremplir_detail()
+        self.assertEqual(len(suivant.detail_ids), 2)
+        self.assertAlmostEqual(sum(suivant.detail_ids.mapped("montant")), 1500.0)
+        self.assertAlmostEqual(suivant.ligne_ids.filtered(lambda l: l.repartition_id == self.cle).montant_annuel, 1500.0)
+        with self.assertRaises(UserError):
+            suivant.action_preremplir_detail()

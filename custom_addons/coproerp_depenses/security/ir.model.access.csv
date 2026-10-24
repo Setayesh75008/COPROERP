@@ -3,3 +3,4 @@ access_nature_depense_user,nature.depense.user,model_coproerp_nature_depense,bas
 access_depense_user,depense.user,model_coproerp_depense,base.group_user,1,1,1,1
 access_depense_ligne_user,depense.ligne.user,model_coproerp_depense_ligne,base.group_user,1,1,1,1
 access_depense_paiement_user,depense.paiement.user,model_coproerp_depense_paiement,base.group_user,1,1,1,1
+access_budget_detail_user,budget.detail.user,model_coproerp_budget_detail,base.group_user,1,1,1,1
