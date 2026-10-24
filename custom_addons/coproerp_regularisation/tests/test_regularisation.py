@@ -227,3 +227,38 @@ class TestRegularisation(TransactionCase):
         regul = self.env["coproerp.regularisation"].create({"budget_id": self.budget.id})
         with self.assertRaises(UserError):
             regul.action_calculer()
+
+    def test_releve_des_depenses(self):
+        self._facture([(self.n615, self.cle, 3000.0), (self.n616, self.cle, 6000.0)], "R-1")
+        facture = self.env["coproerp.depense"].create({
+            "copropriete_id": self.copro.id, "fournisseur_id": self.fournisseur.id,
+            "reference_fournisseur": "R-2", "date_facture": date(2026, 7, 1),
+            "ligne_ids": [Command.create({"nature_id": self.n615.id, "repartition_id": self.cle.id,
+                                          "montant": 1200.0, "montant_tva": 200.0, "designation": "Réparation porte"})],
+        })
+        facture.action_valider()
+        annulee = self._facture([(self.n615, self.cle, 999.0)], "R-3")
+        annulee.action_annuler()
+        travaux = self.env["coproerp.travaux"].create({
+            "copropriete_id": self.copro.id, "name": "Toiture", "date_vote": date(2026, 3, 1), "montant_vote": 30000.0})
+        self._facture([(self.n671, self.cle, 5000.0)], "R-T", travaux_id=travaux.id)
+        d = self.budget.donnees_releve_depenses()
+        self.assertEqual(len(d["courant"]), 1)
+        section = d["courant"][0]
+        self.assertEqual(section["cle"], self.cle)
+        self.assertAlmostEqual(section["montant"], 10200.0)  # facture annulée exclue
+        self.assertAlmostEqual(section["tva"], 200.0)
+        entretien = [n for n in section["natures"] if n["code"] == "615000"][0]
+        self.assertEqual(entretien["recuperable"], "R")
+        self.assertEqual(len(entretien["lignes"]), 2)
+        self.assertIn("Réparation porte", entretien["lignes"][1]["libelle"])
+        assurance = [n for n in section["natures"] if n["code"] == "616000"][0]
+        self.assertEqual(assurance["recuperable"], "NR")
+        self.assertAlmostEqual(section["recuperable"], 4200.0)  # 615 récupérable, 616 non
+        self.assertAlmostEqual(d["total"]["travaux"], 5000.0)
+        self.assertAlmostEqual(d["total"]["immeuble"], 15200.0)
+        html = self.env["ir.actions.report"]._render_qweb_html(
+            "coproerp_regularisation.report_releve_depenses", self.budget.ids)[0]
+        html = html.decode() if isinstance(html, bytes) else html
+        for texte in ("RELEVÉ GÉNÉRAL DES DÉPENSES", "TOTAL IMMEUBLE", "15\u00a0200,00", "TOITURE", "PROJET"):
+            self.assertIn(texte, html)

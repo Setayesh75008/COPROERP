@@ -185,6 +185,7 @@ class Depense(models.Model):
                     "coproerp_repartition_id": ligne.repartition_id.id,
                     "coproerp_hors_budget": bool(ligne.nature_id.travaux or depense.travaux_id),
                     "coproerp_travaux_id": depense.travaux_id.id or False,
+                    "coproerp_depense_ligne_id": ligne.id,
                 }))
             total = arrondi(total)
             libelle = "Facture %s %s" % (depense.reference_fournisseur or depense.name, depense.fournisseur_id.name)
@@ -268,6 +269,17 @@ class DepenseLigne(models.Model):
         domain="[('copropriete_id', '=', copropriete_id)]",
     )
     montant = fields.Float(string="Montant TTC", digits=(16, 2), required=True)
+    montant_tva = fields.Float(
+        string="Dont TVA", digits=(16, 2),
+        help="Montant de TVA compris dans le montant TTC (information du relevé des dépenses ; le syndicat "
+             "ne récupère pas la TVA).",
+    )
+
+    @api.constrains("montant", "montant_tva")
+    def _check_tva(self):
+        for ligne in self:
+            if ligne.montant_tva < 0 or ligne.montant_tva > ligne.montant:
+                raise ValidationError("La TVA doit être comprise entre 0 et le montant TTC de la ligne.")
 
     @api.constrains("repartition_id", "depense_id")
     def _check_cle(self):

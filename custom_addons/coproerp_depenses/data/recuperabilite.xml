@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Récupérabilité par défaut des natures (exécuté à chaque installation ou mise à jour,
+         sans écraser une valeur déjà renseignée). -->
+    <function model="coproerp.nature.depense" name="_initialiser_recuperabilite"/>
+</odoo>

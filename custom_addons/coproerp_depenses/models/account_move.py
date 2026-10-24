@@ -26,3 +26,6 @@ class AccountMoveLine(models.Model):
     coproerp_travaux_id = fields.Many2one(
         "coproerp.travaux", string="Opération de travaux", index="btree_not_null", copy=True
     )
+    coproerp_depense_ligne_id = fields.Many2one(
+        "coproerp.depense.ligne", string="Ligne de facture (CoproERP)", index="btree_not_null", copy=False
+    )

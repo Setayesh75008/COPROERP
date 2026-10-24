@@ -11,12 +11,14 @@ Régularisation des charges de l'exercice :
   de l'approbation des comptes, art. 6-2 du décret du 17 mars 1967) ;
 - écriture au journal des opérations diverses (450 / 701), lettrée avec les
   sommes dues ou versées d'avance ;
-- décompte individuel de charges (PDF).
+- décompte individuel de charges (PDF) ;
+- relevé général des dépenses de l'exercice par clé et par nature, avec la TVA
+  et l'indication des charges récupérables sur le locataire (PDF).
 """,
     "author": "SSB AVOCAT",
     "website": "https://www.ssb-avocat.fr",
     "category": "Real Estate",
-    "version": "19.0.1.0.4",
+    "version": "19.0.1.0.5",
     "license": "LGPL-3",
     "depends": [
         "coproerp_depenses",
@@ -27,6 +29,8 @@ Régularisation des charges de l'exercice :
         "views/budget_views.xml",
         "report/decompte_report.xml",
         "report/decompte_templates.xml",
+        "report/releve_depenses_report.xml",
+        "report/releve_depenses_templates.xml",
     ],
     "installable": True,
     "application": False,

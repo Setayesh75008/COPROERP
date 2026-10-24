@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="report_releve_depenses">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="budget">
+                <t t-set="d" t-value="budget.donnees_releve_depenses()"/>
+                <t t-call="coproerp_regularisation.report_releve_depenses_document"/>
+            </t>
+        </t>
+    </template>
+
+    <template id="releve_depenses_section">
+        <!-- variables : s (section), titre_total -->
+        <tr class="o_cd_section">
+            <td colspan="4" class="text-center"><b t-out="s['libelle'].upper()"/></td>
+        </tr>
+        <t t-foreach="s['natures']" t-as="n">
+            <tr>
+                <td><b><u><t t-out="n['libelle']"/></u></b> <span style="font-size: 9pt;" t-out="n['code']"/></td>
+                <td class="text-center"><b t-out="n['recuperable']"/></td>
+                <td/><td/>
+            </tr>
+            <tr t-foreach="n['lignes']" t-as="l" t-att-class="'o_cd_alt' if l_index % 2 else None">
+                <td style="padding-left: 5mm;"><t t-out="l['date'].strftime('%d/%m/%y')"/> <t t-out="l['libelle']"/></td>
+                <td/>
+                <td class="text-end"><t t-if="l['tva']" t-out="budget.fmt_montant(l['tva'])"/></td>
+                <td class="text-end" t-out="budget.fmt_montant(l['montant'])"/>
+            </tr>
+            <tr>
+                <td class="text-end"><i>Sous-total <t t-out="n['libelle']"/></i></td>
+                <td/>
+                <td class="text-end"><i t-out="budget.fmt_montant(n['tva']) if n['tva'] else ''"/></td>
+                <td class="text-end"><b><i t-out="budget.fmt_montant(n['montant'])"/></b></td>
+            </tr>
+        </t>
+        <tr class="o_cd_total">
+            <td>TOTAL <t t-out="s['libelle'].upper()"/></td>
+            <td/>
+            <td class="text-end" t-out="budget.fmt_montant(s['tva'])"/>
+            <td class="text-end" t-out="budget.fmt_montant(s['montant'])"/>
+        </tr>
+        <tr t-if="show_recuperable" style="font-size: 9.5pt;">
+            <td class="text-end fst-italic">dont charges récupérables sur le locataire (indicatif)</td>
+            <td/><td/>
+            <td class="text-end fst-italic" t-out="budget.fmt_montant(s['recuperable'])"/>
+        </tr>
+    </template>
+
+    <template id="report_releve_depenses_document">
+        <t t-set="copro" t-value="d['copro']"/>
+        <t t-call="web.external_layout">
+            <div class="page o_copro_doc" style="font-size: 10.5pt;">
+                <t t-call="coproerp_appel_edition.style_documents"/>
+                <div class="row mb-3">
+                    <div class="col-7">
+                        <h4 class="mb-1" style="letter-spacing: 1px;"><b>RELEVÉ GÉNÉRAL DES DÉPENSES</b></h4>
+                        <div t-if="d['projet']" class="text-danger fw-bold">PROJET – charges non encore régularisées</div>
+                        <table class="table table-sm table-borderless mb-0 o_cd_refs" style="font-size: 11pt;">
+                            <tr><td class="p-0 pe-2">Exercice :</td>
+                                <td class="p-0">du <t t-out="budget.date_debut.strftime('%d/%m/%Y')"/> au <t t-out="budget.date_fin.strftime('%d/%m/%Y')"/></td></tr>
+                            <tr><td class="p-0 pe-2">Immeuble :</td>
+                                <td class="p-0"><t t-out="copro.name"/><br/><t t-out="copro.street or ''"/> <t t-out="copro.zip or ''"/> <t t-out="copro.city or ''"/></td></tr>
+                        </table>
+                    </div>
+                </div>
+                <table class="table table-sm" style="font-size: 10pt;">
+                    <thead>
+                        <tr class="o_cd_entete">
+                            <th>Détail des opérations</th>
+                            <th class="text-center" style="width: 9%;">R / NR</th>
+                            <th class="text-end" style="width: 13%;">Dont TVA</th>
+                            <th class="text-end" style="width: 15%;">Montants</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="o_cd_entete"><td colspan="4"><b>I – BUDGET COURANT (opérations courantes)</b></td></tr>
+                        <tr t-if="not d['courant']"><td colspan="4" class="text-muted">Aucune dépense</td></tr>
+                        <t t-foreach="d['courant']" t-as="s">
+                            <t t-set="show_recuperable" t-value="True"/>
+                            <t t-call="coproerp_regularisation.releve_depenses_section"/>
+                        </t>
+                        <tr class="o_cd_total" style="font-size: 11pt;">
+                            <td>TOTAL BUDGET COURANT</td><td/>
+                            <td class="text-end" t-out="budget.fmt_montant(d['total']['courant_tva'])"/>
+                            <td class="text-end" t-out="budget.fmt_montant(d['total']['courant'])"/>
+                        </tr>
+                        <t t-if="d['travaux']">
+                            <tr class="o_cd_entete"><td colspan="4"><b>II – TRAVAUX DE L'ARTICLE 14-2 ET OPÉRATIONS EXCEPTIONNELLES</b></td></tr>
+                            <t t-foreach="d['travaux']" t-as="s">
+                                <t t-set="show_recuperable" t-value="False"/>
+                                <t t-call="coproerp_regularisation.releve_depenses_section"/>
+                            </t>
+                            <tr class="o_cd_total" style="font-size: 11pt;">
+                                <td>TOTAL TRAVAUX ET OPÉRATIONS EXCEPTIONNELLES</td><td/>
+                                <td class="text-end" t-out="budget.fmt_montant(d['total']['travaux_tva'])"/>
+                                <td class="text-end" t-out="budget.fmt_montant(d['total']['travaux'])"/>
+                            </tr>
+                        </t>
+                        <tr class="o_cd_total" style="font-size: 12pt;">
+                            <td>TOTAL IMMEUBLE</td><td/>
+                            <td class="text-end" t-out="budget.fmt_montant(d['total']['immeuble_tva'])"/>
+                            <td class="text-end" t-out="budget.fmt_montant(d['total']['immeuble'])"/>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="text-muted" style="font-size: 9pt;">
+                    Montants TTC, en euros. R : charge récupérable sur le locataire ; NR : non récupérable ; R xx % :
+                    partiellement récupérable (décret n° 87-713 du 26 août 1987). Indication donnée aux copropriétaires
+                    bailleurs, à vérifier selon la nature exacte de chaque dépense. Les pièces justificatives sont
+                    consultables dans les conditions prévues par l'article 18-1 de la loi du 10 juillet 1965.
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_report_releve_depenses" model="ir.actions.report">
+        <field name="name">Relevé général des dépenses</field>
+        <field name="model">coproerp.budget.annuel</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">coproerp_regularisation.report_releve_depenses</field>
+        <field name="report_file">coproerp_regularisation.report_releve_depenses</field>
+        <field name="print_report_name">'Releve des depenses %s - %s' % (object.exercice or '', object.copropriete_id.name or '')</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+        <field name="binding_model_id" ref="coproerp_budget.model_coproerp_budget_annuel"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

@@ -65,6 +65,7 @@
                                     <field name="designation"/>
                                     <field name="repartition_id"/>
                                     <field name="montant" sum="Total TTC"/>
+                                    <field name="montant_tva" sum="Total TVA" optional="show"/>
                                 </list>
                             </field>
                             <div class="text-muted">

@@ -8,6 +8,8 @@
             <xpath expr="//button[@name='action_voir_depenses']" position="after">
                 <button name="action_regularisation" type="object" string="Régularisation des charges"
                         class="btn-secondary"/>
+                <button name="action_imprimer_releve_depenses" type="object" string="Relevé des dépenses"
+                        class="btn-secondary"/>
             </xpath>
         </field>
     </record>

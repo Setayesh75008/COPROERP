@@ -8,6 +8,8 @@
                 <field name="code"/>
                 <field name="name"/>
                 <field name="travaux"/>
+                <field name="recuperable"/>
+                <field name="taux_recuperable" invisible="recuperable != 'partiel'"/>
                 <field name="active" widget="boolean_toggle"/>
             </list>
         </field>
