@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_reprise_list" model="ir.ui.view">
+        <field name="name">coproerp.reprise.list</field>
+        <field name="model">coproerp.reprise</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="etat == 'annulee'" decoration-info="etat == 'brouillon'">
+                <field name="copropriete_id"/>
+                <field name="date_reprise"/>
+                <field name="solde_banque"/>
+                <field name="ecart"/>
+                <field name="etat" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_reprise_form" model="ir.ui.view">
+        <field name="name">coproerp.reprise.form</field>
+        <field name="model">coproerp.reprise</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_charger_coproprietaires" type="object" string="Charger les copropriétaires"
+                            invisible="etat != 'brouillon'"/>
+                    <button name="action_comptabiliser" type="object" string="Comptabiliser la reprise"
+                            class="oe_highlight" invisible="etat != 'brouillon'"
+                            confirm="L'écriture d'à-nouveaux sera passée et les factures à payer seront créées. Continuer ?"/>
+                    <button name="action_voir_factures" type="object" string="Factures reprises"
+                            invisible="etat != 'validee' or not depense_ids"/>
+                    <button name="action_annuler" type="object" string="Annuler la reprise"
+                            invisible="etat != 'validee'"
+                            confirm="L'écriture d'à-nouveaux sera contre-passée et les factures reprises annulées. Continuer ?"/>
+                    <field name="etat" widget="statusbar" statusbar_visible="brouillon,validee"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="copropriete_id" readonly="etat != 'brouillon'"/>
+                            <field name="date_reprise" readonly="etat != 'brouillon'"/>
+                            <field name="origine"/>
+                            <field name="solde_banque" readonly="etat != 'brouillon'"/>
+                        </group>
+                        <group string="Contrôle">
+                            <field name="total_debit"/>
+                            <field name="total_credit"/>
+                            <field name="ecart" decoration-danger="ecart != 0" decoration-success="ecart == 0"/>
+                            <field name="move_id" invisible="not move_id"/>
+                            <field name="move_annulation_id" invisible="not move_annulation_id"/>
+                        </group>
+                    </group>
+                    <field name="depense_ids" invisible="1"/>
+                    <notebook>
+                        <page string="Copropriétaires" name="coproprietaires">
+                            <field name="coproprietaire_ids" readonly="etat != 'brouillon'">
+                                <list editable="bottom">
+                                    <field name="personne_id"/>
+                                    <field name="solde" sum="Total"
+                                           decoration-danger="solde &gt; 0" decoration-success="solde &lt; 0"/>
+                                    <field name="fonds_travaux" sum="Total"/>
+                                    <field name="avance" sum="Total"/>
+                                    <field name="note" optional="show"/>
+                                </list>
+                            </field>
+                            <div class="text-muted">
+                                Solde du compte : positif si le copropriétaire doit de l'argent, négatif s'il a payé
+                                d'avance. Fonds de travaux : total des cotisations versées attachées à ses lots. Avance de
+                                trésorerie : fonds de roulement versé. Ces montants figurent sur l'état des copropriétaires
+                                remis par le syndic précédent.
+                            </div>
+                        </page>
+                        <page string="Factures fournisseurs à payer" name="factures">
+                            <field name="facture_ids" readonly="etat != 'brouillon'">
+                                <list editable="bottom">
+                                    <field name="fournisseur_id"/>
+                                    <field name="reference"/>
+                                    <field name="date_facture"/>
+                                    <field name="date_echeance"/>
+                                    <field name="designation"/>
+                                    <field name="montant" sum="Total"/>
+                                </list>
+                            </field>
+                            <div class="text-muted">
+                                Factures reçues avant la reprise et non encore payées. Elles deviennent des factures CoproERP
+                                que vous paierez par le circuit habituel (bouton « Enregistrer un paiement »).
+                            </div>
+                        </page>
+                        <page string="Autres soldes" name="autres">
+                            <field name="autre_ids" readonly="etat != 'brouillon'">
+                                <list editable="bottom">
+                                    <field name="code_compte"/>
+                                    <field name="libelle"/>
+                                    <field name="partner_id"/>
+                                    <field name="debit" sum="Total"/>
+                                    <field name="credit" sum="Total"/>
+                                </list>
+                            </field>
+                            <div class="text-muted">
+                                Autres postes de l'état financier : par exemple 102000 provisions pour travaux décidés,
+                                120000 solde en attente sur travaux, 103200 avances travaux, 461000 débiteurs divers…
+                                L'écart doit être nul pour comptabiliser.
+                            </div>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_reprise" model="ir.actions.act_window">
+        <field name="name">Reprise des soldes</field>
+        <field name="res_model">coproerp.reprise</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p>Pour démarrer une copropriété reprise d'un autre syndic : saisissez, à la date de reprise, le solde
+            bancaire, le compte de chaque copropriétaire, les fonds de travaux et avances, et les factures restant à payer.</p>
+        </field>
+    </record>
+
+    <!-- Rubrique à part : dans le menu déroulant, un élément placé après une rubrique
+         (ex. « Recouvrement ») s'afficherait sous celle-ci. -->
+    <menuitem id="menu_demarrage" name="Démarrage"
+              parent="coproerp_comptabilite.menu_comptabilite_root" sequence="90"/>
+    <menuitem id="menu_reprise" name="Reprise des soldes"
+              parent="menu_demarrage" action="action_reprise" sequence="10"/>
+</odoo>

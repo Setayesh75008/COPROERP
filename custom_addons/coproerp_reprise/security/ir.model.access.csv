@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_reprise_user,reprise.user,model_coproerp_reprise,base.group_user,1,1,1,1
+access_reprise_copro_user,reprise.copro.user,model_coproerp_reprise_coproprietaire,base.group_user,1,1,1,1
+access_reprise_facture_user,reprise.facture.user,model_coproerp_reprise_facture,base.group_user,1,1,1,1
+access_reprise_autre_user,reprise.autre.user,model_coproerp_reprise_autre,base.group_user,1,1,1,1
