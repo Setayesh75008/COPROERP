@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- En-tête commun : références à gauche, destinataire (notaire, à défaut vendeur) à droite -->
+    <template id="entete_mutation">
+        <t t-set="dest" t-value="m.notaire_id or m.vendeur_id"/>
+        <div class="row">
+            <div class="col-6">
+                <h4 style="letter-spacing: 1px;"><b t-out="titre"/></h4>
+                <div t-if="projet" class="text-danger fw-bold mb-1">PROJET – non émis</div>
+                <table class="table table-sm table-borderless mb-0 o_cd_refs" style="font-size: 11pt;">
+                    <tr><td class="p-0 pe-2">Dossier :</td><td class="p-0" t-out="m.name"/></tr>
+                    <tr><td class="p-0 pe-2">Immeuble :</td>
+                        <td class="p-0"><t t-out="copro.name"/><br/><t t-out="copro.street or ''"/> <t t-out="copro.zip or ''"/> <t t-out="copro.city or ''"/></td></tr>
+                    <tr><td class="p-0 pe-2">Lot(s) :</td><td class="p-0" t-out="m.lots_texte()"/></tr>
+                    <tr><td class="p-0 pe-2">Vendeur :</td><td class="p-0" t-out="m.vendeur_id.name"/></tr>
+                    <tr t-if="m.acquereur_id"><td class="p-0 pe-2">Acquéreur :</td><td class="p-0" t-out="m.acquereur_id.name"/></tr>
+                    <tr t-if="m.reference_notaire"><td class="p-0 pe-2">Vos références :</td><td class="p-0" t-out="m.reference_notaire"/></tr>
+                </table>
+            </div>
+            <div class="col-5 offset-1" style="margin-top: 12mm;">
+                <div><b t-out="dest.name"/></div>
+                <div t-if="dest.street" t-out="dest.street"/>
+                <div t-if="dest.street2" t-out="dest.street2"/>
+                <div><t t-out="dest.zip or ''"/> <t t-out="dest.city or ''"/></div>
+            </div>
+        </div>
+    </template>
+
+    <template id="ligne_montant">
+        <tr t-att-class="classe or None">
+            <td t-out="libelle"/>
+            <td class="text-end" style="width: 20%;" t-out="m.fmt(montant)"/>
+        </tr>
+    </template>
+
+    <!-- ============ État daté ============ -->
+    <template id="report_etat_date">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="m">
+                <t t-set="copro" t-value="m.copropriete_id.sudo()"/>
+                <t t-set="d" t-value="m.donnees()"/>
+                <t t-set="p1" t-value="d['partie1']"/>
+                <t t-set="p2" t-value="d['partie2']"/>
+                <t t-set="p3" t-value="d['partie3']"/>
+                <t t-call="web.external_layout">
+                    <div class="page o_copro_doc" style="font-size: 11pt;">
+                        <t t-call="coproerp_appel_edition.style_documents"/>
+                        <t t-call="coproerp_mutation.entete_mutation">
+                            <t t-set="titre" t-value="'ÉTAT DATÉ'"/>
+                            <t t-set="projet" t-value="m.etat == 'brouillon'"/>
+                        </t>
+                        <p class="mt-3">Établi en application de l'article 5 du décret n° 67-223 du 17 mars 1967, en vue de la
+                            mutation à titre onéreux du ou des lots désignés ci-dessus. Sommes arrêtées au
+                            <b t-out="m.date_fr(m.date_etat)"/>.</p>
+
+                        <table class="table table-sm mt-2">
+                            <tr class="o_cd_entete"><th colspan="2">I – SOMMES DONT LE SYNDICAT POURRAIT ÊTRE CRÉANCIER DU VENDEUR</th></tr>
+                            <t t-call="coproerp_mutation.ligne_montant"><t t-set="libelle" t-value="'a) Provisions exigibles du budget prévisionnel de l\'exercice en cours, restant dues'"/><t t-set="montant" t-value="p1['budget']"/></t>
+                            <t t-call="coproerp_mutation.ligne_montant"><t t-set="libelle" t-value="'b) Provisions exigibles des dépenses non comprises dans le budget prévisionnel (travaux), restant dues'"/><t t-set="montant" t-value="p1['travaux']"/><t t-set="classe" t-value="'o_cd_alt'"/></t>
+                            <t t-call="coproerp_mutation.ligne_montant"><t t-set="libelle" t-value="'c) Charges impayées sur les exercices antérieurs'"/><t t-set="montant" t-value="p1['anterieur']"/><t t-set="classe" t-value="None"/></t>
+                            <t t-call="coproerp_mutation.ligne_montant"><t t-set="libelle" t-value="'d) Avances exigibles, restant dues'"/><t t-set="montant" t-value="p1['avances']"/><t t-set="classe" t-value="'o_cd_alt'"/></t>
+                            <t t-call="coproerp_mutation.ligne_montant"><t t-set="libelle" t-value="'e) Cotisations au fonds de travaux exigibles, restant dues'"/><t t-set="montant" t-value="p1['fonds']"/><t t-set="classe" t-value="None"/></t>
+                            <t t-call="coproerp_mutation.ligne_montant"><t t-set="libelle" t-value="'TOTAL DES SOMMES DUES PAR LE VENDEUR'"/><t t-set="montant" t-value="p1['total']"/><t t-set="classe" t-value="'o_cd_total'"/></t>
+                        </table>
+                        <div t-if="m.honoraires" style="font-size: 10pt;" class="mb-2 fst-italic">
+                            Ce montant comprend les honoraires d'établissement du présent état daté
+                            (<t t-out="m.fmt(m.honoraires)"/> € TTC), imputés au seul vendeur en application de l'article 10-1 de la loi
+                            du 10 juillet 1965.
+                        </div>
+
+                        <table class="table table-sm mt-2">
+                            <tr class="o_cd_entete"><th colspan="2">II – SOMMES DONT LE SYNDICAT POURRAIT ÊTRE DÉBITEUR ENVERS LE VENDEUR</th></tr>
+                            <t t-call="coproerp_mutation.ligne_montant"><t t-set="libelle" t-value="'a) Avances perçues (avance de trésorerie – fonds de roulement)'"/><t t-set="montant" t-value="p2['avances']"/><t t-set="classe" t-value="None"/></t>
+                            <t t-call="coproerp_mutation.ligne_montant"><t t-set="libelle" t-value="'b) Provisions des périodes postérieures rendues exigibles par anticipation (art. 19-2 de la loi)'"/><t t-set="montant" t-value="p2['provisions_19_2']"/><t t-set="classe" t-value="'o_cd_alt'"/></t>
+                            <t t-call="coproerp_mutation.ligne_montant"><t t-set="libelle" t-value="'c) Solde créditeur du compte du vendeur'"/><t t-set="montant" t-value="p2['crediteur']"/><t t-set="classe" t-value="None"/></t>
+                            <t t-call="coproerp_mutation.ligne_montant"><t t-set="libelle" t-value="'TOTAL DES SOMMES DUES AU VENDEUR'"/><t t-set="montant" t-value="p2['total']"/><t t-set="classe" t-value="'o_cd_total'"/></t>
+                        </table>
+
+                        <table class="table table-sm mt-2">
+                            <tr class="o_cd_entete"><th colspan="2">III – SOMMES QUI DEVRAIENT INCOMBER AU NOUVEAU COPROPRIÉTAIRE</th></tr>
+                            <t t-call="coproerp_mutation.ligne_montant"><t t-set="libelle" t-value="'a) Reconstitution des avances'"/><t t-set="montant" t-value="p3['avances']"/><t t-set="classe" t-value="None"/></t>
+                            <t t-call="coproerp_mutation.ligne_montant"><t t-set="libelle" t-value="'b) Provisions non encore exigibles du budget prévisionnel de l\'exercice en cours'"/><t t-set="montant" t-value="p3['budget']"/><t t-set="classe" t-value="'o_cd_alt'"/></t>
+                            <t t-call="coproerp_mutation.ligne_montant"><t t-set="libelle" t-value="'c) Cotisations au fonds de travaux non encore exigibles de l\'exercice en cours'"/><t t-set="montant" t-value="p3['fonds']"/><t t-set="classe" t-value="None"/></t>
+                            <t t-call="coproerp_mutation.ligne_montant"><t t-set="libelle" t-value="'d) Provisions non encore exigibles des travaux votés (hors budget prévisionnel)'"/><t t-set="montant" t-value="p3['travaux']"/><t t-set="classe" t-value="'o_cd_alt'"/></t>
+                            <t t-call="coproerp_mutation.ligne_montant"><t t-set="libelle" t-value="'TOTAL'"/><t t-set="montant" t-value="p3['total']"/><t t-set="classe" t-value="'o_cd_total'"/></t>
+                        </table>
+                        <table t-if="d['travaux']" class="table table-sm" style="font-size: 10pt;">
+                            <tr class="o_cd_section"><td colspan="3">Détail des échéances de travaux à venir</td></tr>
+                            <tr t-foreach="d['travaux']" t-as="t">
+                                <td t-out="t['libelle']"/>
+                                <td style="width: 15%;" t-out="m.date_fr(t['date'])"/>
+                                <td class="text-end" style="width: 20%;" t-out="m.fmt(t['montant'])"/>
+                            </tr>
+                        </table>
+
+                        <div class="mt-2" style="page-break-inside: avoid;">
+                            <div><b>Informations complémentaires</b></div>
+                            <ul style="font-size: 10.5pt;">
+                                <li>Quote-part du fonds de travaux attachée au(x) lot(s) vendu(s) : <b t-out="m.fmt(d['fonds_lot'])"/> €.
+                                    Ces sommes sont attachées aux lots et définitivement acquises au syndicat : elles ne donnent pas
+                                    lieu à remboursement au vendeur (art. 14-2-1 de la loi).</li>
+                                <li t-if="d['budget']">Budget prévisionnel de l'exercice <t t-out="d['budget']['exercice']"/> :
+                                    <t t-out="m.fmt(d['budget']['montant'])"/> € ; quote-part annuelle du ou des lots :
+                                    <t t-out="m.fmt(d['budget_annuel'])"/> €.</li>
+                                <li>Procédures en cours : <t t-out="m.procedures or 'néant'"/>.</li>
+                            </ul>
+                        </div>
+                        <div class="row mt-4" style="page-break-inside: avoid;">
+                            <div class="col-6">Fait le <t t-out="m.date_fr(m.date_etat)"/></div>
+                            <div class="col-6 text-end">Le syndic<br/><t t-out="copro.gestionnaire_id.name or ''"/></div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- ============ Pré-état daté ============ -->
+    <template id="report_pre_etat_date">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="m">
+                <t t-set="copro" t-value="m.copropriete_id.sudo()"/>
+                <t t-set="d" t-value="m.calculer()"/>
+                <t t-call="web.external_layout">
+                    <div class="page o_copro_doc" style="font-size: 11pt;">
+                        <t t-call="coproerp_appel_edition.style_documents"/>
+                        <t t-call="coproerp_mutation.entete_mutation">
+                            <t t-set="titre" t-value="'PRÉ-ÉTAT DATÉ'"/>
+                            <t t-set="projet" t-value="False"/>
+                        </t>
+                        <p class="mt-3">Informations financières relatives au(x) lot(s) mis en vente, à annexer à la promesse de vente
+                            (article L. 721-2 du code de la construction et de l'habitation). Situation au
+                            <b t-out="m.date_fr(m.date_etat)"/>.</p>
+
+                        <table class="table table-sm">
+                            <tr class="o_cd_entete"><th colspan="3">1 – QUOTES-PARTS DU OU DES LOTS</th></tr>
+                            <tr class="o_cd_section"><td>Clé de répartition</td><td class="text-end">Tantièmes</td><td class="text-end">Total</td></tr>
+                            <tr t-foreach="m.tantiemes_lots()" t-as="t">
+                                <td t-out="t[0]"/><td class="text-end" t-out="t[1]"/><td class="text-end" t-out="t[2]"/>
+                            </tr>
+                        </table>
+
+                        <table class="table table-sm">
+                            <tr class="o_cd_entete"><th colspan="3">2 – CHARGES DU OU DES LOTS</th></tr>
+                            <tr t-if="d['budget']"><td colspan="2">Budget prévisionnel de l'exercice <t t-out="d['budget']['exercice']"/> : quote-part annuelle</td>
+                                <td class="text-end" t-out="m.fmt(d['budget_annuel'])"/></tr>
+                            <tr t-if="d['fonds_annuel']"><td colspan="2">Cotisation annuelle au fonds de travaux : quote-part</td>
+                                <td class="text-end" t-out="m.fmt(d['fonds_annuel'])"/></tr>
+                            <tr class="o_cd_section" t-if="d['charges_passees']"><td>Charges courantes réelles des derniers exercices</td><td class="text-end">Provisions appelées</td><td class="text-end">Charges réelles</td></tr>
+                            <tr t-foreach="d['charges_passees']" t-as="c">
+                                <td>Exercice <t t-out="c['exercice']"/> (du <t t-out="m.date_fr(c['debut'])"/> au <t t-out="m.date_fr(c['fin'])"/>)</td>
+                                <td class="text-end" t-out="m.fmt(c['provisions'])"/>
+                                <td class="text-end" t-out="m.fmt(c['charges'])"/>
+                            </tr>
+                            <tr t-if="not d['charges_passees']"><td colspan="3" class="text-muted">Aucun exercice régularisé dans CoproERP.</td></tr>
+                        </table>
+
+                        <table class="table table-sm">
+                            <tr class="o_cd_entete"><th colspan="2">3 – SITUATION DU VENDEUR À L'ÉGARD DU SYNDICAT</th></tr>
+                            <t t-call="coproerp_mutation.ligne_montant"><t t-set="libelle" t-value="'Sommes exigibles restant dues par le vendeur'"/><t t-set="montant" t-value="d['partie1']['total']"/><t t-set="classe" t-value="None"/></t>
+                            <t t-call="coproerp_mutation.ligne_montant"><t t-set="libelle" t-value="'Sommes dont le syndicat pourrait être débiteur envers le vendeur'"/><t t-set="montant" t-value="d['partie2']['total']"/><t t-set="classe" t-value="'o_cd_alt'"/></t>
+                            <t t-call="coproerp_mutation.ligne_montant"><t t-set="libelle" t-value="'Quote-part du fonds de travaux attachée au(x) lot(s)'"/><t t-set="montant" t-value="d['fonds_lot']"/><t t-set="classe" t-value="None"/></t>
+                            <t t-call="coproerp_mutation.ligne_montant"><t t-set="libelle" t-value="'Provisions de travaux votés restant à appeler'"/><t t-set="montant" t-value="d['partie3']['travaux']"/><t t-set="classe" t-value="'o_cd_alt'"/></t>
+                        </table>
+                        <div style="font-size: 10.5pt;">Procédures en cours : <t t-out="m.procedures or 'néant'"/>.</div>
+                        <div class="mt-3 text-muted" style="font-size: 9.5pt;">
+                            Document d'information établi à la date indiquée, sous réserve des écritures postérieures. Il ne se
+                            substitue pas à l'état daté que le syndic délivre au notaire avant la vente (art. 5 du décret du
+                            17 mars 1967).
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- ============ Certificat de l'article 20 ============ -->
+    <template id="report_certificat_art20">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="m">
+                <t t-set="copro" t-value="m.copropriete_id.sudo()"/>
+                <t t-call="web.external_layout">
+                    <div class="page o_copro_doc" style="font-size: 12pt;">
+                        <t t-call="coproerp_appel_edition.style_documents"/>
+                        <div class="text-center mb-4 mt-4">
+                            <h4><b>CERTIFICAT</b></h4>
+                            <div>(article 20 de la loi n° 65-557 du 10 juillet 1965)</div>
+                        </div>
+                        <p>Le syndic du syndicat des copropriétaires de l'immeuble <b t-out="copro.name"/>,
+                            <t t-out="copro.street or ''"/> <t t-out="copro.zip or ''"/> <t t-out="copro.city or ''"/>,</p>
+                        <p>certifie que <b t-out="m.vendeur_id.name"/>, copropriétaire du ou des lots suivants :
+                            <t t-out="m.lots_texte()"/>, est libre de toute obligation à l'égard du syndicat à la date du
+                            <b t-out="m.date_fr(context_timestamp(datetime.datetime.now()).date())"/>.</p>
+                        <p>Ce certificat, valable un mois à compter de sa date, dispense le notaire de l'avis de mutation prévu à
+                            l'article 20 de la loi du 10 juillet 1965.</p>
+                        <div class="row mt-5">
+                            <div class="col-6">Fait le <t t-out="m.date_fr(context_timestamp(datetime.datetime.now()).date())"/></div>
+                            <div class="col-6 text-end">Le syndic<br/><t t-out="copro.gestionnaire_id.name or ''"/></div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

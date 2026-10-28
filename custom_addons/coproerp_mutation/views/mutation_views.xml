@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_mutation_list" model="ir.ui.view">
+        <field name="name">coproerp.mutation.list</field>
+        <field name="model">coproerp.mutation</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="etat == 'annule'" decoration-info="etat == 'brouillon'">
+                <field name="name"/>
+                <field name="copropriete_id"/>
+                <field name="lot_ids" widget="many2many_tags"/>
+                <field name="vendeur_id"/>
+                <field name="acquereur_id"/>
+                <field name="date_demande"/>
+                <field name="date_acte"/>
+                <field name="etat" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_mutation_form" model="ir.ui.view">
+        <field name="name">coproerp.mutation.form</field>
+        <field name="model">coproerp.mutation</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_imprimer_pre_etat_date" type="object" string="Pré-état daté"/>
+                    <button name="action_emettre_etat_date" type="object" string="Émettre l'état daté"
+                            class="oe_highlight" invisible="etat != 'brouillon'"
+                            confirm="Les sommes de l'état daté seront figées et les honoraires portés au compte du vendeur. Continuer ?"/>
+                    <button name="action_imprimer_etat_date" type="object" string="Imprimer l'état daté"
+                            invisible="etat == 'annule'"/>
+                    <button name="action_imprimer_certificat" type="object" string="Certificat article 20"
+                            invisible="etat == 'annule'"/>
+                    <button name="action_remettre_brouillon" type="object" string="Remettre en préparation"
+                            invisible="etat != 'emis'"
+                            confirm="Les honoraires seront contre-passés et l'état daté devra être émis de nouveau. Continuer ?"/>
+                    <button name="action_realiser_vente" type="object" string="Enregistrer la vente"
+                            class="oe_highlight" invisible="etat not in ('brouillon', 'emis')"
+                            confirm="L'acquéreur deviendra propriétaire des lots à la date de l'acte et le fonds de travaux attaché aux lots lui sera transféré. Continuer ?"/>
+                    <button name="action_annuler" type="object" string="Annuler le dossier"
+                            invisible="etat not in ('brouillon', 'emis')"/>
+                    <field name="etat" widget="statusbar" statusbar_visible="brouillon,emis,vendu"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group string="Vente">
+                            <field name="copropriete_id" readonly="etat != 'brouillon'"/>
+                            <field name="lot_ids" widget="many2many_tags" readonly="etat != 'brouillon'"/>
+                            <field name="vendeur_id" readonly="etat != 'brouillon'"/>
+                            <field name="solde_vendeur"/>
+                            <field name="acquereur_id" readonly="etat in ('vendu', 'annule')"/>
+                            <field name="notaire_id"/>
+                            <field name="reference_notaire"/>
+                        </group>
+                        <group string="Dates et honoraires">
+                            <field name="date_demande"/>
+                            <field name="date_etat" readonly="etat != 'brouillon'"/>
+                            <field name="date_acte" readonly="etat in ('vendu', 'annule')"/>
+                            <field name="honoraires" readonly="etat != 'brouillon'"/>
+                            <field name="provisions_19_2" readonly="etat != 'brouillon'"/>
+                            <field name="transferer_avance" readonly="etat in ('vendu', 'annule')"/>
+                            <field name="move_honoraires_id" invisible="not move_honoraires_id"/>
+                            <field name="move_transfert_id" invisible="not move_transfert_id"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="procedures" placeholder="Procédures en cours (néant si aucune)"/>
+                        <field name="observations"/>
+                    </group>
+                    <div class="text-muted">
+                        1. Pré-état daté : à remettre au vendeur ou à son notaire avant la promesse de vente.
+                        2. État daté : à la demande du notaire ; les sommes sont figées à l'émission et les honoraires
+                        (380 € TTC au plus) sont imputés au seul vendeur. 3. Certificat de l'article 20 : si le vendeur ne
+                        doit plus rien, il dispense le notaire de l'avis de mutation. 4. Après la signature de l'acte :
+                        « Enregistrer la vente » change le propriétaire et transfère le fonds de travaux attaché aux lots.
+                    </div>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_mutation" model="ir.actions.act_window">
+        <field name="name">Mutations (ventes de lots)</field>
+        <field name="res_model">coproerp.mutation</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_mutation" name="Mutations (ventes de lots)"
+              parent="coproerp_copropriete.menu_coproerp_root" action="action_mutation" sequence="65"/>
+
+    <record id="view_copropriete_form_mutation" model="ir.ui.view">
+        <field name="name">coproerp.copropriete.form.mutation</field>
+        <field name="model">coproerp.copropriete</field>
+        <field name="inherit_id" ref="coproerp_recouvrement.view_copropriete_form_recouvrement"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='recouvrement_cle_frais_id']" position="after">
+                <field name="mutation_honoraires_etat_date"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

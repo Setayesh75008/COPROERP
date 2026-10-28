@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_report_etat_date" model="ir.actions.report">
+        <field name="name">État daté</field>
+        <field name="model">coproerp.mutation</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">coproerp_mutation.report_etat_date</field>
+        <field name="report_file">coproerp_mutation.report_etat_date</field>
+        <field name="print_report_name">'Etat date - %s' % (object.name or '').replace('/', '-')</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+        <field name="binding_model_id" ref="model_coproerp_mutation"/>
+        <field name="binding_type">report</field>
+    </record>
+    <record id="action_report_pre_etat_date" model="ir.actions.report">
+        <field name="name">Pré-état daté</field>
+        <field name="model">coproerp.mutation</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">coproerp_mutation.report_pre_etat_date</field>
+        <field name="report_file">coproerp_mutation.report_pre_etat_date</field>
+        <field name="print_report_name">'Pre-etat date - %s' % (object.name or '').replace('/', '-')</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+        <field name="binding_model_id" ref="model_coproerp_mutation"/>
+        <field name="binding_type">report</field>
+    </record>
+    <record id="action_report_certificat_art20" model="ir.actions.report">
+        <field name="name">Certificat de l'article 20</field>
+        <field name="model">coproerp.mutation</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">coproerp_mutation.report_certificat_art20</field>
+        <field name="report_file">coproerp_mutation.report_certificat_art20</field>
+        <field name="print_report_name">'Certificat art 20 - %s' % (object.name or '').replace('/', '-')</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+        <field name="binding_model_id" ref="model_coproerp_mutation"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>
