@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_report_fiche_synthetique" model="ir.actions.report">
+        <field name="name">Fiche synthétique</field>
+        <field name="model">coproerp.fiche.synthetique</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">coproerp_fiche_synthetique.report_fiche</field>
+        <field name="report_file">coproerp_fiche_synthetique.report_fiche</field>
+        <field name="print_report_name">'Fiche synthetique - %s' % (object.copropriete_id.name or '')</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+        <field name="binding_model_id" ref="model_coproerp_fiche_synthetique"/>
+        <field name="binding_type">report</field>
+    </record>
+    <record id="action_report_declaration_registre" model="ir.actions.report">
+        <field name="name">Données de la déclaration au registre</field>
+        <field name="model">coproerp.fiche.synthetique</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">coproerp_fiche_synthetique.report_declaration_registre</field>
+        <field name="report_file">coproerp_fiche_synthetique.report_declaration_registre</field>
+        <field name="print_report_name">'Declaration registre - %s' % (object.copropriete_id.name or '')</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+        <field name="binding_model_id" ref="model_coproerp_fiche_synthetique"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

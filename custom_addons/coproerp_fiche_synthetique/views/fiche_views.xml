@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_fiche_synthetique_list" model="ir.ui.view">
+        <field name="name">coproerp.fiche.synthetique.list</field>
+        <field name="model">coproerp.fiche.synthetique</field>
+        <field name="arch" type="xml">
+            <list decoration-info="etat == 'brouillon'">
+                <field name="copropriete_id"/>
+                <field name="date_etablissement"/>
+                <field name="cloture_id"/>
+                <field name="etat" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_fiche_synthetique_form" model="ir.ui.view">
+        <field name="name">coproerp.fiche.synthetique.form</field>
+        <field name="model">coproerp.fiche.synthetique</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_calculer" type="object" string="Mettre à jour les données"
+                            invisible="etat != 'brouillon'"/>
+                    <button name="action_imprimer" type="object" string="Imprimer"/>
+                    <button name="action_imprimer_declaration" type="object" string="Données pour le registre"/>
+                    <button name="action_etablir" type="object" string="Établir la fiche" class="oe_highlight"
+                            invisible="etat != 'brouillon'"/>
+                    <button name="action_publier_extranet" type="object" string="Mettre à disposition sur l'extranet"
+                            class="oe_highlight" invisible="etat != 'etablie'"/>
+                    <button name="action_remettre_brouillon" type="object" string="Remettre en préparation"
+                            invisible="etat != 'etablie'"/>
+                    <field name="etat" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="copropriete_id" readonly="etat != 'brouillon'"/>
+                            <field name="date_etablissement" readonly="etat != 'brouillon'"/>
+                        </group>
+                        <group>
+                            <field name="cloture_id" readonly="etat != 'brouillon'"/>
+                            <field name="date_approbation" readonly="etat != 'brouillon'"/>
+                            <field name="document_id" invisible="not document_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Identification" name="identification">
+                            <group>
+                                <group string="1. Syndicat">
+                                    <field name="nom_usage" readonly="etat != 'brouillon'"/>
+                                    <field name="adresse" readonly="etat != 'brouillon'"/>
+                                    <field name="adresses_complementaires" readonly="etat != 'brouillon'"/>
+                                    <field name="numero_rnic" readonly="etat != 'brouillon'"/>
+                                    <field name="date_immatriculation" readonly="etat != 'brouillon'"/>
+                                    <field name="references_cadastrales" readonly="etat != 'brouillon'"/>
+                                    <field name="date_maj_rnic" readonly="etat != 'brouillon'"/>
+                                    <field name="date_reglement" readonly="etat != 'brouillon'"/>
+                                    <field name="siret_syndicat" readonly="etat != 'brouillon'"/>
+                                </group>
+                                <group string="2. Représentant légal">
+                                    <field name="representant" readonly="etat != 'brouillon'"/>
+                                    <field name="representant_adresse" readonly="etat != 'brouillon'"/>
+                                    <field name="representant_siret" readonly="etat != 'brouillon'"/>
+                                    <field name="representant_telephone" readonly="etat != 'brouillon'"/>
+                                    <field name="mandat_debut" readonly="etat != 'brouillon'"/>
+                                    <field name="mandat_fin" readonly="etat != 'brouillon'"/>
+                                    <field name="qualite_representant" readonly="etat != 'brouillon'"/>
+                                </group>
+                            </group>
+                            <group string="3. Organisation juridique">
+                                <field name="type_syndicat" readonly="etat != 'brouillon'"/>
+                                <field name="rnic_syndicat_principal" invisible="type_syndicat != 'secondaire'" readonly="etat != 'brouillon'"/>
+                                <field name="residence_services" readonly="etat != 'brouillon'"/>
+                                <field name="nombre_asl" readonly="etat != 'brouillon'"/>
+                                <field name="nombre_aful" readonly="etat != 'brouillon'"/>
+                                <field name="nombre_unions" readonly="etat != 'brouillon'"/>
+                            </group>
+                        </page>
+                        <page string="Technique" name="technique">
+                            <group>
+                                <group string="4. Caractéristiques techniques">
+                                    <field name="nombre_lots" readonly="etat != 'brouillon'"/>
+                                    <field name="lots_habitation" readonly="etat != 'brouillon'"/>
+                                    <field name="lots_commerces" readonly="etat != 'brouillon'"/>
+                                    <field name="lots_bureaux" readonly="etat != 'brouillon'"/>
+                                    <field name="lots_principaux" readonly="etat != 'brouillon'"/>
+                                    <field name="lots_stationnement" readonly="etat != 'brouillon'"/>
+                                    <field name="nombre_batiments" readonly="etat != 'brouillon'"/>
+                                    <field name="periode_construction" readonly="etat != 'brouillon'"/>
+                                    <field name="ppt_vote" readonly="etat != 'brouillon'"/>
+                                    <field name="ppt_ordre_du_jour" readonly="etat != 'brouillon'"/>
+                                </group>
+                                <group string="5. Équipements">
+                                    <field name="type_chauffage" readonly="etat != 'brouillon'"/>
+                                    <field name="chauffage_urbain" invisible="type_chauffage not in ('collectif', 'mixte')" readonly="etat != 'brouillon'"/>
+                                    <field name="energie" invisible="type_chauffage not in ('collectif', 'mixte') or chauffage_urbain" readonly="etat != 'brouillon'"/>
+                                    <field name="nombre_ascenseurs" readonly="etat != 'brouillon'"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Financier" name="financier">
+                            <group string="6. Caractéristiques financières">
+                                <field name="personnel_employe" readonly="etat != 'brouillon'"/>
+                                <label for="exercice_debut" string="Exercice"/>
+                                <div>du <field name="exercice_debut" class="oe_inline" readonly="etat != 'brouillon'"/> au
+                                    <field name="exercice_fin" class="oe_inline" readonly="etat != 'brouillon'"/></div>
+                                <field name="charges_courantes" readonly="etat != 'brouillon'"/>
+                                <field name="charges_travaux" readonly="etat != 'brouillon'"/>
+                                <field name="dettes" readonly="etat != 'brouillon'"/>
+                                <field name="dispense_impayes" readonly="etat != 'brouillon'"/>
+                                <field name="impayes" invisible="dispense_impayes" readonly="etat != 'brouillon'"/>
+                                <field name="debiteurs_300" invisible="dispense_impayes" readonly="etat != 'brouillon'"/>
+                                <field name="fonds_travaux" readonly="etat != 'brouillon'"/>
+                            </group>
+                        </page>
+                        <page string="Procédures et registre" name="registre">
+                            <group>
+                                <group string="Procédures administratives et judiciaires">
+                                    <field name="nombre_arretes" readonly="etat != 'brouillon'"/>
+                                    <field name="date_arrete" readonly="etat != 'brouillon'"/>
+                                    <field name="date_mainlevee" readonly="etat != 'brouillon'"/>
+                                    <field name="mandataire_ad_hoc" readonly="etat != 'brouillon'"/>
+                                    <field name="date_ordonnance_ad_hoc" invisible="not mandataire_ad_hoc" readonly="etat != 'brouillon'"/>
+                                    <field name="date_fin_ad_hoc" invisible="not mandataire_ad_hoc" readonly="etat != 'brouillon'"/>
+                                    <field name="ordonnance_carence" readonly="etat != 'brouillon'"/>
+                                    <field name="date_ordonnance_carence" invisible="not ordonnance_carence" readonly="etat != 'brouillon'"/>
+                                </group>
+                                <group string="Attestation du registre national">
+                                    <field name="attestation_fichier" filename="attestation_nom"/>
+                                    <field name="attestation_nom" invisible="1"/>
+                                    <field name="attestation_document_id" invisible="not attestation_document_id"/>
+                                    <button name="action_publier_attestation" type="object" colspan="2"
+                                            string="Mettre l'attestation à disposition sur l'extranet" class="btn-secondary"
+                                            invisible="not attestation_fichier or attestation_document_id"/>
+                                </group>
+                            </group>
+                            <div class="text-muted">
+                                Le bouton « Données pour le registre » imprime toutes les informations à reporter lors de la
+                                déclaration annuelle sur le site du registre national des copropriétés. Après la télédéclaration,
+                                joignez ici l'attestation de mise à jour délivrée par le registre : elle peut être mise à la
+                                disposition des copropriétaires sur l'extranet.
+                            </div>
+                        </page>
+                    </notebook>
+                    <div class="text-muted">
+                        Les données sont reprises de la fiche de la copropriété (onglet « Fiche synthétique ») et des comptes de
+                        l'exercice approuvé ; elles restent modifiables tant que la fiche est en préparation. La fiche est mise à
+                        jour chaque année, dans les deux mois de la notification du procès-verbal de l'assemblée qui a approuvé
+                        les comptes, et remise à tout copropriétaire qui la demande.
+                    </div>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_fiche_synthetique" model="ir.actions.act_window">
+        <field name="name">Fiches synthétiques</field>
+        <field name="res_model">coproerp.fiche.synthetique</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_obligations" name="Obligations légales"
+              parent="coproerp_copropriete.menu_coproerp_root" sequence="68"/>
+    <menuitem id="menu_fiche_synthetique" name="Fiche synthétique"
+              parent="menu_obligations" action="action_fiche_synthetique" sequence="10"/>
+
+    <record id="view_copropriete_form_fiche" model="ir.ui.view">
+        <field name="name">coproerp.copropriete.form.fiche</field>
+        <field name="model">coproerp.copropriete</field>
+        <field name="inherit_id" ref="coproerp_copropriete.view_copropriete_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Fiche synthétique" name="fiche_synthetique">
+                    <group>
+                        <group string="Identification et organisation">
+                            <field name="nom_usage"/>
+                            <field name="date_maj_rnic"/>
+                            <field name="type_syndicat"/>
+                            <field name="rnic_syndicat_principal" invisible="type_syndicat != 'secondaire'"/>
+                            <field name="residence_services"/>
+                            <field name="qualite_representant"/>
+                        </group>
+                        <group string="Technique et personnel">
+                            <field name="periode_construction"/>
+                            <field name="type_chauffage"/>
+                            <field name="chauffage_urbain" invisible="type_chauffage not in ('collectif', 'mixte')"/>
+                            <field name="energie_chauffage" invisible="type_chauffage not in ('collectif', 'mixte') or chauffage_urbain"/>
+                            <field name="personnel_employe"/>
+                            <field name="ppt_vote"/>
+                            <field name="ppt_ordre_du_jour"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Registre national">
+                            <field name="adresses_complementaires"/>
+                            <field name="references_cadastrales"/>
+                            <field name="nombre_asl"/>
+                            <field name="nombre_aful"/>
+                            <field name="nombre_unions"/>
+                        </group>
+                        <group string="Procédures">
+                            <field name="nombre_arretes"/>
+                            <field name="date_arrete"/>
+                            <field name="date_mainlevee"/>
+                            <field name="mandataire_ad_hoc"/>
+                            <field name="date_ordonnance_ad_hoc" invisible="not mandataire_ad_hoc"/>
+                            <field name="date_fin_ad_hoc" invisible="not mandataire_ad_hoc"/>
+                            <field name="ordonnance_carence"/>
+                            <field name="date_ordonnance_carence" invisible="not ordonnance_carence"/>
+                        </group>
+                    </group>
+                    <div class="text-muted">
+                        Informations reprises sur la fiche synthétique. Le nombre de lots par usage, de bâtiments et
+                        d'ascenseurs vient des fiches des lots et de l'onglet « Informations » ; les données financières
+                        viennent des comptes approuvés.
+                    </div>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_batiment_form_fiche" model="ir.ui.view">
+        <field name="name">coproerp.batiment.form.fiche</field>
+        <field name="model">coproerp.batiment</field>
+        <field name="inherit_id" ref="coproerp_batiment.view_batiment_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='nombre_locaux']" position="after">
+                <field name="etiquette_energie"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

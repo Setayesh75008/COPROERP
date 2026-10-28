@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Couleurs de la fiche (bleu nuit et framboise), imprimées telles quelles -->
+    <template id="style_fiche">
+        <style>
+            .o_fs, .o_fs * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            .o_fs { font-size: 10.5pt; color: #222; }
+            .o_fs .fs_bandeau { background-color: #2f3b55 !important; color: #fff !important; }
+            .o_fs .fs_bandeau td { padding: 4mm 5mm; vertical-align: middle; }
+            .o_fs .fs_bandeau .fs_adresse { background-color: #c2185b !important; color: #fff !important; width: 32%; font-weight: bold; font-size: 11.5pt; }
+            .o_fs .fs_titre { background-color: #c2185b !important; color: #fff !important; text-align: center;
+                font-weight: bold; font-size: 12pt; letter-spacing: 0.5px; padding: 1.5mm; margin-top: 4mm; text-transform: uppercase; }
+            .o_fs .fs_bloc { background-color: #e9ecf3 !important; padding: 3mm 4mm; }
+            .o_fs table.fs_table { width: 100%; border-collapse: collapse; background-color: #fff !important; }
+            .o_fs table.fs_table td { border: 1px solid #8a8f9c; padding: 1.4mm 2mm; background-color: #f4f4f4 !important; }
+            .o_fs table.fs_table td.fs_val { font-weight: bold; font-style: italic; }
+            .o_fs .fs_coche { font-family: 'DejaVu Sans', sans-serif; font-size: 11pt; }
+            .o_fs .fs_pied { background-color: #2f3b55 !important; color: #fff !important; text-align: center;
+                font-weight: bold; font-size: 11.5pt; padding: 4mm; margin-top: 5mm; }
+            .o_fs .fs_projet { color: #c2185b; font-weight: bold; text-align: center; font-size: 13pt; }
+        </style>
+    </template>
+
+    <template id="ligne_fiche">
+        <tr>
+            <td style="width: 45%;" t-out="libelle"/>
+            <td class="fs_val" t-att-colspan="colspan or None" t-out="valeur if valeur not in (False, None, '') else 'Non renseigné'"/>
+        </tr>
+    </template>
+
+    <template id="report_fiche">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="f">
+                <t t-call="web.basic_layout">
+                    <div class="page o_fs">
+                        <t t-call="coproerp_fiche_synthetique.style_fiche"/>
+                        <div t-if="f.etat == 'brouillon'" class="fs_projet mb-1">PROJET</div>
+                        <!-- Bandeau -->
+                        <table style="width: 100%; border-collapse: collapse;" class="fs_bandeau">
+                            <tr>
+                                <td class="text-center">
+                                    <div style="font-size: 14pt;"><b>FICHE SYNTHÉTIQUE DE LA COPROPRIÉTÉ<t t-if="f.numero_rnic"> <t t-out="f.numero_rnic"/></t></b></div>
+                                    <div style="font-size: 8.5pt;">(conforme aux dispositions de l'article 8-2 de la loi n° 65-557 du 10 juillet 1965
+                                        et du décret n° 2016-1822 du 21 décembre 2016)</div>
+                                    <div class="mt-2" style="font-size: 11pt;"><b>Établie le <t t-out="f.date_fr('date_etablissement')"/></b></div>
+                                </td>
+                                <td class="fs_adresse">
+                                    <div t-out="f.nom_usage"/>
+                                    <div style="white-space: pre-line;" t-out="f.adresse"/>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- 1 -->
+                        <div class="fs_titre">Identification de la copropriété</div>
+                        <div class="fs_bloc">
+                            <table class="fs_table">
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Nom d\'usage de la copropriété'"/><t t-set="valeur" t-value="f.nom_usage"/><t t-set="colspan" t-value="3"/></t>
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Adresse de référence de la copropriété'"/><t t-set="valeur" t-value="f.adresse"/><t t-set="colspan" t-value="3"/></t>
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Adresse(s) complémentaire(s)'"/><t t-set="valeur" t-value="f.adresses_complementaires or 'Néant'"/><t t-set="colspan" t-value="3"/></t>
+                                <tr>
+                                    <td>Date d'immatriculation</td><td class="fs_val" t-out="f.date_fr('date_immatriculation')"/>
+                                    <td>Numéro d'immatriculation</td><td class="fs_val" t-out="f.numero_rnic or 'Non renseigné'"/>
+                                </tr>
+                                <tr>
+                                    <td>Date du règlement de copropriété</td><td class="fs_val" t-out="f.date_fr('date_reglement')"/>
+                                    <td>N° SIRET du syndicat de copropriétaires</td><td class="fs_val" t-out="f.siret_syndicat or 'Sans objet'"/>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- 2 -->
+                        <div class="fs_titre">Identité du représentant légal</div>
+                        <div class="fs_bloc">
+                            <table class="fs_table">
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Représentant légal de la copropriété'"/><t t-set="valeur" t-value="(f.representant or '') + ((' – SIRET ' + f.representant_siret) if f.representant_siret else '')"/></t>
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Agissant dans le cadre'"/><t t-set="valeur" t-value="'d\'un mandat de syndic' if f.qualite_representant == 'mandat' else 'd\'une administration provisoire'"/></t>
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Adresse'"/><t t-set="valeur" t-value="f.representant_adresse"/></t>
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Numéro de téléphone'"/><t t-set="valeur" t-value="f.representant_telephone"/></t>
+                            </table>
+                        </div>
+
+                        <!-- 3 -->
+                        <div class="fs_titre">Organisation juridique</div>
+                        <div class="fs_bloc">
+                            <table class="fs_table">
+                                <tr><td style="width: 45%;">Type de syndicat</td><td class="fs_val" colspan="2" t-out="f.libelle('type_syndicat')"/></tr>
+                                <tr><td>Si le syndicat est un syndicat secondaire</td><td class="fs_val" colspan="2" t-out="f.rnic_syndicat_principal if f.type_syndicat == 'secondaire' else 'Sans objet'"/></tr>
+                                <tr><td>Spécificités</td>
+                                    <td><span class="fs_coche" t-out="f.coche(f.type_syndicat == 'cooperatif')"/> Syndicat coopératif</td>
+                                    <td><span class="fs_coche" t-out="f.coche(f.residence_services)"/> Résidence-services</td></tr>
+                            </table>
+                        </div>
+
+                        <!-- 4 -->
+                        <div class="fs_titre" style="page-break-before: always;">Caractéristiques techniques</div>
+                        <div class="fs_bloc">
+                            <table class="fs_table">
+                                <tr><td>Nombre de lots</td><td class="fs_val text-end" t-out="f.nombre_lots"/></tr>
+                                <tr><td>Nombre de lots à usage d'habitation, de commerces et de bureaux</td><td class="fs_val text-end" t-out="f.lots_principaux"/></tr>
+                                <tr><td style="padding-left: 6mm;">dont habitation / commerces / bureaux</td>
+                                    <td class="fs_val text-end"><t t-out="f.lots_habitation"/> / <t t-out="f.lots_commerces"/> / <t t-out="f.lots_bureaux"/></td></tr>
+                                <tr><td>Nombre de bâtiments</td><td class="fs_val text-end" t-out="f.nombre_batiments"/></tr>
+                                <tr><td>Période de construction des bâtiments</td><td class="fs_val text-end" t-out="f.libelle('periode_construction')"/></tr>
+                                <tr><td>Avez-vous voté l'adoption d'un plan pluriannuel de travaux (partiellement ou totalement) ?</td>
+                                    <td class="fs_val text-end" t-out="f.oui_non(f.ppt_vote)"/></tr>
+                                <tr><td>Le projet de plan pluriannuel de travaux a-t-il été inscrit à l'ordre du jour d'une assemblée générale ?</td>
+                                    <td class="fs_val text-end" t-out="f.oui_non(f.ppt_ordre_du_jour)"/></tr>
+                            </table>
+                        </div>
+
+                        <!-- 5 -->
+                        <div class="fs_titre">Équipements</div>
+                        <div class="fs_bloc">
+                            <table class="fs_table">
+                                <tr>
+                                    <td style="width: 45%;">Type de chauffage</td>
+                                    <td>
+                                        <div><span class="fs_coche" t-out="f.coche(f.type_chauffage == 'individuel')"/> individuel</div>
+                                        <div><span class="fs_coche" t-out="f.coche(f.type_chauffage == 'collectif' and f.chauffage_urbain)"/> collectif – chauffage urbain</div>
+                                        <div><span class="fs_coche" t-out="f.coche(f.type_chauffage == 'collectif' and not f.chauffage_urbain)"/> collectif hors chauffage urbain</div>
+                                        <div><span class="fs_coche" t-out="f.coche(f.type_chauffage == 'mixte' and f.chauffage_urbain)"/> mixte – chauffage urbain</div>
+                                        <div><span class="fs_coche" t-out="f.coche(f.type_chauffage == 'mixte' and not f.chauffage_urbain)"/> mixte hors chauffage urbain</div>
+                                        <div><span class="fs_coche" t-out="f.coche(f.type_chauffage == 'aucun')"/> sans chauffage</div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Type d'énergie utilisée (chauffage collectif ou mixte, non urbain)</td>
+                                    <td>
+                                        <div t-foreach="f.energies_liste()" t-as="e">
+                                            <span class="fs_coche" t-out="f.coche(f.energie == e[0] and f.type_chauffage in ('collectif', 'mixte') and not f.chauffage_urbain)"/>
+                                            <t t-out="e[1].lower()"/>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr><td>Nombre d'ascenseurs</td><td class="fs_val" t-out="f.nombre_ascenseurs"/></tr>
+                            </table>
+                        </div>
+
+                        <!-- 6 -->
+                        <div class="fs_titre">Caractéristiques financières</div>
+                        <div class="fs_bloc">
+                            <table class="fs_table">
+                                <tr><td style="width: 65%;">Approbation des comptes</td><td class="fs_val text-end" t-out="f.oui_non(f.date_approbation)"/></tr>
+                                <tr><td>Date de début de l'exercice clos</td><td class="fs_val text-end" t-out="f.date_fr('exercice_debut')"/></tr>
+                                <tr><td>Date de fin de l'exercice clos</td><td class="fs_val text-end" t-out="f.date_fr('exercice_fin')"/></tr>
+                                <tr><td>Date de l'assemblée générale ayant approuvé les comptes</td><td class="fs_val text-end" t-out="f.date_fr('date_approbation')"/></tr>
+                                <tr><td>Charges pour opérations courantes</td><td class="fs_val text-end" t-out="f.fmt(f.charges_courantes)"/></tr>
+                                <tr><td>Charges pour travaux et opérations exceptionnelles</td><td class="fs_val text-end" t-out="f.fmt(f.charges_travaux)"/></tr>
+                                <tr><td>Dettes fournisseurs, rémunérations et autres</td><td class="fs_val text-end" t-out="f.fmt(f.dettes)"/></tr>
+                                <t t-if="not f.dispense_impayes">
+                                    <tr><td>Montant des sommes restant dues par les copropriétaires</td><td class="fs_val text-end" t-out="f.fmt(f.impayes)"/></tr>
+                                    <tr><td>Nombre de copropriétaires débiteurs de plus de 300 €</td><td class="fs_val text-end" t-out="f.debiteurs_300"/></tr>
+                                </t>
+                                <tr><td>Montant du fonds de travaux</td><td class="fs_val text-end" t-out="f.fmt(f.fonds_travaux)"/></tr>
+                                <tr><td>Présence d'un gardien ou de personnel employé par le syndicat de copropriétaires</td>
+                                    <td class="fs_val text-end" t-out="f.oui_non(f.personnel_employe)"/></tr>
+                            </table>
+                            <div t-if="f.dispense_impayes" class="mt-1" style="font-size: 9pt;">
+                                Copropriété de moins de dix lots dont le budget prévisionnel moyen est inférieur à 15 000 € : les impayés et le
+                                nombre de copropriétaires débiteurs ne sont pas mentionnés.
+                            </div>
+                        </div>
+
+                        <div class="fs_pied">
+                            Fiche établie par le syndic <t t-out="f.representant or ''"/> le <t t-out="f.date_fr('date_etablissement')"/>,<br/>
+                            à partir des données de la copropriété et des comptes approuvés.
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- ============ Récapitulatif pour la déclaration annuelle au registre ============ -->
+    <template id="report_declaration_registre">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="f">
+                <t t-call="web.external_layout">
+                    <div class="page o_fs">
+                        <t t-call="coproerp_fiche_synthetique.style_fiche"/>
+                        <table style="width: 100%; border-collapse: collapse;" class="fs_bandeau">
+                            <tr><td class="text-center">
+                                <div style="font-size: 13pt;"><b>DONNÉES DE LA DÉCLARATION ANNUELLE DE MISE À JOUR</b></div>
+                                <div style="font-size: 9pt;">Registre national d'immatriculation des copropriétés – articles L. 711-1 à L. 711-7
+                                    et R. 711-1 à R. 711-21 du code de la construction et de l'habitation</div>
+                                <div style="font-size: 9pt;">Document de travail préparé par le syndic : à reporter sur le site du registre</div>
+                            </td></tr>
+                        </table>
+
+                        <div class="fs_titre">Copropriété et représentant légal</div>
+                        <div class="fs_bloc">
+                            <table class="fs_table">
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Copropriété (nom d\'usage)'"/><t t-set="valeur" t-value="f.nom_usage"/></t>
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Adresse'"/><t t-set="valeur" t-value="f.adresse"/></t>
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Numéro d\'immatriculation'"/><t t-set="valeur" t-value="f.numero_rnic"/></t>
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Représentant légal'"/><t t-set="valeur" t-value="(f.representant or '') + ((' – SIRET ' + f.representant_siret) if f.representant_siret else '')"/></t>
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Type de représentant légal'"/><t t-set="valeur" t-value="'Syndic' if f.qualite_representant == 'mandat' else 'Administrateur provisoire'"/></t>
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Début / fin du mandat ou de la mission'"/><t t-set="valeur" t-value="'%s – %s' % (f.date_fr('mandat_debut'), f.date_fr('mandat_fin'))"/></t>
+                            </table>
+                        </div>
+
+                        <div class="fs_titre">Identification</div>
+                        <div class="fs_bloc">
+                            <table class="fs_table">
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Date du règlement de copropriété'"/><t t-set="valeur" t-value="f.date_fr('date_reglement')"/></t>
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'SIRET de la copropriété'"/><t t-set="valeur" t-value="f.siret_syndicat or 'Sans objet'"/></t>
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Références cadastrales'"/><t t-set="valeur" t-value="f.references_cadastrales"/></t>
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Résidence-services / syndicat coopératif'"/><t t-set="valeur" t-value="'%s / %s' % (f.oui_non(f.residence_services), f.oui_non(f.type_syndicat == 'cooperatif'))"/></t>
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Type de syndicat'"/><t t-set="valeur" t-value="f.libelle('type_syndicat')"/></t>
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Rattachements : ASL / AFUL / unions de syndicats'"/><t t-set="valeur" t-value="'%s / %s / %s' % (f.nombre_asl, f.nombre_aful, f.nombre_unions)"/></t>
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Lots : total / principaux / habitation / stationnement'"/><t t-set="valeur" t-value="'%s / %s / %s / %s' % (f.nombre_lots, f.lots_principaux, f.lots_habitation, f.lots_stationnement)"/></t>
+                            </table>
+                        </div>
+
+                        <div class="fs_titre">Procédures administratives et judiciaires</div>
+                        <div class="fs_bloc">
+                            <table class="fs_table">
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Arrêtés de mise en sécurité ou de traitement de l\'insalubrité'"/><t t-set="valeur" t-value="'%s (arrêté : %s ; mainlevée : %s)' % (f.nombre_arretes, f.date_fr('date_arrete') if f.date_arrete else '-', f.date_fr('date_mainlevee') if f.date_mainlevee else '-')"/></t>
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Désignation d\'un mandataire ad hoc'"/><t t-set="valeur" t-value="f.oui_non(f.mandataire_ad_hoc) + ((' – ordonnance du %s, fin de mission %s' % (f.date_fr('date_ordonnance_ad_hoc'), f.date_fr('date_fin_ad_hoc'))) if f.mandataire_ad_hoc else '')"/></t>
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Ordonnance de carence'"/><t t-set="valeur" t-value="f.oui_non(f.ordonnance_carence) + ((' – du %s' % f.date_fr('date_ordonnance_carence')) if f.ordonnance_carence else '')"/></t>
+                            </table>
+                        </div>
+
+                        <div class="fs_titre">Données financières</div>
+                        <div class="fs_bloc">
+                            <table class="fs_table">
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Exercice comptable'"/><t t-set="valeur" t-value="'du %s au %s' % (f.date_fr('exercice_debut'), f.date_fr('exercice_fin'))"/></t>
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Assemblée ayant approuvé les comptes'"/><t t-set="valeur" t-value="f.date_fr('date_approbation')"/></t>
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Charges pour opérations courantes'"/><t t-set="valeur" t-value="f.fmt(f.charges_courantes)"/></t>
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Charges pour travaux et opérations exceptionnelles'"/><t t-set="valeur" t-value="f.fmt(f.charges_travaux)"/></t>
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Dettes fournisseurs, rémunérations et autres'"/><t t-set="valeur" t-value="f.fmt(f.dettes)"/></t>
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Sommes restant dues par les copropriétaires'"/><t t-set="valeur" t-value="f.fmt(f.impayes)"/></t>
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Copropriétaires débiteurs de plus de 300 €'"/><t t-set="valeur" t-value="str(f.debiteurs_300)"/></t>
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Montant du fonds de travaux'"/><t t-set="valeur" t-value="f.fmt(f.fonds_travaux)"/></t>
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Gardien ou personnel employé'"/><t t-set="valeur" t-value="f.oui_non(f.personnel_employe)"/></t>
+                            </table>
+                        </div>
+
+                        <div class="fs_titre">Données techniques</div>
+                        <div class="fs_bloc">
+                            <table class="fs_table">
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Nombre total de bâtiments'"/><t t-set="valeur" t-value="str(f.nombre_batiments)"/></t>
+                                <tr><td style="width: 45%;">Bâtiments par étiquette énergie</td>
+                                    <td class="fs_val"><t t-foreach="f.etiquettes_liste()" t-as="e"><t t-out="e[0]"/> : <t t-out="e[1]"/><t t-if="not e_last"> – </t></t></td></tr>
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Période de construction'"/><t t-set="valeur" t-value="f.libelle('periode_construction')"/></t>
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Plan pluriannuel de travaux adopté / inscrit à l\'ordre du jour'"/><t t-set="valeur" t-value="'%s / %s' % (f.oui_non(f.ppt_vote), f.oui_non(f.ppt_ordre_du_jour))"/></t>
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Chauffage'"/><t t-set="valeur" t-value="f.libelle('type_chauffage') + (' – urbain' if f.chauffage_urbain else '') + ((' – ' + f.libelle('energie')) if f.energie and not f.chauffage_urbain else '')"/></t>
+                                <t t-call="coproerp_fiche_synthetique.ligne_fiche"><t t-set="libelle" t-value="'Nombre d\'ascenseurs'"/><t t-set="valeur" t-value="str(f.nombre_ascenseurs)"/></t>
+                            </table>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>
