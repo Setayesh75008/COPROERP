@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_depense_form_avoir" model="ir.ui.view">
+        <field name="name">coproerp.depense.form.avoir</field>
+        <field name="model">coproerp.depense</field>
+        <field name="inherit_id" ref="coproerp_depenses.view_depense_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='fournisseur_id']" position="before">
+                <field name="type_piece" readonly="etat != 'brouillon'"/>
+            </xpath>
+            <xpath expr="//field[@name='fournisseur_id']" position="after">
+                <field name="facture_origine_id" invisible="type_piece != 'avoir'" readonly="etat != 'brouillon'"/>
+            </xpath>
+            <xpath expr="//button[@name='action_enregistrer_paiement']" position="attributes">
+                <attribute name="invisible">etat != 'validee' or est_payee or type_piece == 'avoir'</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_depense_list_avoir" model="ir.ui.view">
+        <field name="name">coproerp.depense.list.avoir</field>
+        <field name="model">coproerp.depense</field>
+        <field name="inherit_id" ref="coproerp_depenses.view_depense_list"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='fournisseur_id']" position="before">
+                <field name="type_piece" widget="badge" decoration-warning="type_piece == 'avoir'"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_paiement_groupe_list" model="ir.ui.view">
+        <field name="name">coproerp.paiement.groupe.list</field>
+        <field name="model">coproerp.paiement.groupe</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="etat == 'annule'" decoration-info="etat == 'brouillon'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="copropriete_id"/>
+                <field name="fournisseur_id"/>
+                <field name="montant" sum="Total"/>
+                <field name="etat" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_paiement_groupe_form" model="ir.ui.view">
+        <field name="name">coproerp.paiement.groupe.form</field>
+        <field name="model">coproerp.paiement.groupe</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_valider" type="object" string="Valider le paiement" class="oe_highlight"
+                            invisible="etat != 'brouillon'"
+                            confirm="Le paiement sera comptabilisé et lettré avec les factures et avoirs sélectionnés. Continuer ?"/>
+                    <button name="action_annuler" type="object" string="Annuler" invisible="etat != 'valide'"
+                            confirm="Une écriture inverse sera passée. Continuer ?"/>
+                    <field name="etat" widget="statusbar" statusbar_visible="brouillon,valide"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="copropriete_id" readonly="etat != 'brouillon'"/>
+                            <field name="fournisseur_id" readonly="etat != 'brouillon'"/>
+                            <field name="date" readonly="etat != 'brouillon'"/>
+                        </group>
+                        <group>
+                            <field name="mode" readonly="etat != 'brouillon'"/>
+                            <field name="reference" readonly="etat != 'brouillon'"/>
+                            <field name="montant"/>
+                            <field name="move_id" invisible="not move_id"/>
+                        </group>
+                    </group>
+                    <field name="depense_ids" readonly="etat != 'brouillon'">
+                        <list>
+                            <field name="type_piece" widget="badge" decoration-warning="type_piece == 'avoir'"/>
+                            <field name="name"/>
+                            <field name="reference_fournisseur"/>
+                            <field name="date_facture"/>
+                            <field name="montant_total"/>
+                            <field name="montant_restant" sum="Total à payer"/>
+                        </list>
+                    </field>
+                    <div class="text-muted">
+                        Sélectionnez les factures et, le cas échéant, les avoirs du fournisseur : le montant payé est le
+                        total des factures diminué des avoirs. Si les avoirs compensent exactement les factures, aucune
+                        sortie de banque n'est passée : factures et avoirs sont simplement lettrés.
+                    </div>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_paiement_groupe" model="ir.actions.act_window">
+        <field name="name">Paiements groupés</field>
+        <field name="res_model">coproerp.paiement.groupe</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <menuitem id="menu_paiement_groupe" name="Paiements groupés de factures"
+              parent="coproerp_comptabilite.menu_comptabilite_root" action="action_paiement_groupe" sequence="31"/>
+</odoo>

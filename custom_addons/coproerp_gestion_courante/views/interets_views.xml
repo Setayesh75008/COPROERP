@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_relance_form_interets" model="ir.ui.view">
+        <field name="name">coproerp.relance.form.interets</field>
+        <field name="model">coproerp.relance</field>
+        <field name="inherit_id" ref="coproerp_recouvrement.view_relance_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='move_frais_annulation_id']/../.." position="after">
+                <group string="Intérêts au taux légal (art. 36 du décret du 17 mars 1967)"
+                       invisible="type_relance != 'mise_en_demeure' or etat != 'envoyee'">
+                    <group>
+                        <field name="interets_au"/>
+                        <field name="interets"/>
+                        <field name="move_interets_id" invisible="not move_interets_id"/>
+                    </group>
+                    <group>
+                        <button name="action_calculer_interets" type="object" string="Calculer les intérêts"
+                                class="btn-secondary" colspan="2"/>
+                        <button name="action_imputer_interets" type="object" string="Porter les intérêts au compte"
+                                class="btn-secondary" colspan="2" invisible="not interets or move_interets_id"
+                                confirm="Les intérêts seront portés au débit du compte du copropriétaire. Continuer ?"/>
+                    </group>
+                    <field name="interets_detail" colspan="2" nolabel="1" invisible="not interets_detail"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_copropriete_form_interets" model="ir.ui.view">
+        <field name="name">coproerp.copropriete.form.interets</field>
+        <field name="model">coproerp.copropriete</field>
+        <field name="inherit_id" ref="coproerp_recouvrement.view_copropriete_form_recouvrement"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='recouvrement_cle_frais_id']" position="after">
+                <field name="interets_categorie"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

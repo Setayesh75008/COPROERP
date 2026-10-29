@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_releve_bancaire_list" model="ir.ui.view">
+        <field name="name">coproerp.releve.bancaire.list</field>
+        <field name="model">coproerp.releve.bancaire</field>
+        <field name="arch" type="xml">
+            <list decoration-info="etat == 'brouillon'">
+                <field name="name"/>
+                <field name="copropriete_id"/>
+                <field name="date_debut"/>
+                <field name="date_fin"/>
+                <field name="solde_final"/>
+                <field name="nombre_a_pointer"/>
+                <field name="etat" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_releve_bancaire_form" model="ir.ui.view">
+        <field name="name">coproerp.releve.bancaire.form</field>
+        <field name="model">coproerp.releve.bancaire</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_importer" type="object" string="Importer le fichier" class="oe_highlight"
+                            invisible="etat != 'brouillon' or not fichier"/>
+                    <button name="action_pointer_automatiquement" type="object" string="Pointer automatiquement"
+                            invisible="etat != 'brouillon'"/>
+                    <button name="action_imprimer_etat" type="object" string="État de rapprochement"/>
+                    <button name="action_marquer_rapproche" type="object" string="Marquer comme rapproché"
+                            invisible="etat != 'brouillon'"/>
+                    <button name="action_rouvrir" type="object" string="Rouvrir" invisible="etat != 'rapproche'"/>
+                    <field name="etat" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="copropriete_id" readonly="etat != 'brouillon'"/>
+                            <field name="fichier" filename="fichier_nom" readonly="etat != 'brouillon'"/>
+                            <field name="fichier_nom" invisible="1"/>
+                            <label for="date_debut" string="Période"/>
+                            <div>du <field name="date_debut" class="oe_inline"/> au <field name="date_fin" class="oe_inline"/></div>
+                        </group>
+                        <group>
+                            <field name="solde_final"/>
+                            <field name="solde_comptable"/>
+                            <field name="ecart" decoration-danger="ecart != 0" decoration-success="ecart == 0"/>
+                            <field name="nombre_a_pointer"/>
+                        </group>
+                    </group>
+                    <field name="ligne_ids" readonly="etat != 'brouillon'">
+                        <list editable="bottom" decoration-success="etat == 'pointe'" decoration-muted="etat == 'ignore'"
+                              decoration-bf="etat == 'a_pointer'">
+                            <field name="copropriete_id" column_invisible="True"/>
+                            <field name="date"/>
+                            <field name="libelle"/>
+                            <field name="montant" sum="Total"/>
+                            <field name="etat"/>
+                            <field name="move_line_id" optional="show"/>
+                            <field name="suggestion" optional="show"/>
+                            <field name="personne_id" invisible="montant &lt;= 0 or etat != 'a_pointer'"/>
+                            <field name="depense_id" invisible="montant &gt;= 0 or etat != 'a_pointer'"/>
+                            <button name="action_creer_reglement" type="object" string="Créer le règlement"
+                                    invisible="montant &lt;= 0 or etat != 'a_pointer'"/>
+                            <button name="action_creer_paiement" type="object" string="Créer le paiement"
+                                    invisible="montant &gt;= 0 or etat != 'a_pointer'"/>
+                            <button name="action_ignorer" type="object" string="Ignorer" invisible="etat != 'a_pointer'"/>
+                            <button name="action_depointer" type="object" string="Dépointer" invisible="etat == 'a_pointer'"/>
+                        </list>
+                    </field>
+                    <div class="text-muted">
+                        Exportez le relevé depuis l'espace en ligne de la banque au format CSV ou OFX, joignez-le puis cliquez
+                        sur « Importer le fichier » : chaque opération est pointée avec l'écriture de même montant (à 7 jours
+                        près). Pour un virement de copropriétaire non encore saisi, vérifiez le copropriétaire proposé puis
+                        « Créer le règlement » ; pour un prélèvement ou un virement fournisseur, choisissez la facture puis
+                        « Créer le paiement ».
+                    </div>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_releve_bancaire" model="ir.actions.act_window">
+        <field name="name">Rapprochement bancaire</field>
+        <field name="res_model">coproerp.releve.bancaire</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <menuitem id="menu_rapprochement" name="Rapprochement bancaire"
+              parent="coproerp_comptabilite.menu_comptabilite_root" action="action_releve_bancaire" sequence="15"/>
+</odoo>

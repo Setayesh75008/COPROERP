@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="report_etat_rapprochement">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="r">
+                <t t-set="copro" t-value="r.copropriete_id.sudo()"/>
+                <t t-set="d" t-value="r._donnees_etat()"/>
+                <t t-call="web.basic_layout">
+                    <div class="page o_fs">
+                        <t t-call="coproerp_fiche_synthetique.style_fiche"/>
+                        <table style="width: 100%; border-collapse: collapse;" class="fs_bandeau">
+                            <tr>
+                                <td class="text-center">
+                                    <div style="font-size: 15pt;"><b>ÉTAT DE RAPPROCHEMENT BANCAIRE</b></div>
+                                    <div style="font-size: 9pt;">Compte bancaire séparé du syndicat (article 18 de la loi du 10 juillet 1965)</div>
+                                    <div class="mt-2" style="font-size: 11pt;"><b>Au <t t-out="copro.date_fr(r.date_fin)"/></b>
+                                        – relevé <t t-out="r.name"/></div>
+                                </td>
+                                <td class="fs_adresse">
+                                    <div t-out="copro.name"/>
+                                    <div t-out="copro.street or ''"/>
+                                    <div><t t-out="copro.zip or ''"/> <t t-out="copro.city or ''"/></div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div class="fs_titre">Synthèse</div>
+                        <div class="fs_bloc">
+                            <table class="fs_table">
+                                <tr><td style="width: 65%;">Solde comptable du compte banque (512) au <t t-out="copro.date_fr(r.date_fin)"/></td>
+                                    <td class="text-end fs_val" t-out="copro.fmt_euros(d['solde_comptable'])"/></tr>
+                                <tr><td>– Écritures comptabilisées absentes du relevé</td>
+                                    <td class="text-end" t-out="copro.fmt_euros(-sum(d['compta_non_pointees'].mapped('balance')))"/></tr>
+                                <tr><td>+ Opérations du relevé non comptabilisées</td>
+                                    <td class="text-end" t-out="copro.fmt_euros(sum(d['releve_non_pointees'].mapped('montant')))"/></tr>
+                                <tr><td><b>= Solde reconstitué</b></td>
+                                    <td class="text-end fs_val" t-out="copro.fmt_euros(d['solde_reconstitue'])"/></tr>
+                                <tr><td>Solde final du relevé de banque</td>
+                                    <td class="text-end fs_val" t-out="copro.fmt_euros(r.solde_final)"/></tr>
+                                <tr><td><b>Écart non expliqué</b></td>
+                                    <td class="text-end">
+                                        <b t-att-style="'color: #b00020;' if d['ecart'] else 'color: #1b7f3a;'"
+                                           t-out="copro.fmt_euros(d['ecart'])"/></td></tr>
+                            </table>
+                        </div>
+
+                        <div class="fs_titre">Écritures comptabilisées non encore passées en banque</div>
+                        <div class="fs_bloc">
+                            <table class="fs_table">
+                                <tr class="o_cd_section"><td style="width: 15%;">Date</td><td>Libellé</td><td class="text-end">Montant</td></tr>
+                                <tr t-foreach="d['compta_non_pointees']" t-as="m">
+                                    <td t-out="copro.date_fr(m.date)"/>
+                                    <td><t t-out="m.name or m.move_id.ref or ''"/><t t-if="m.partner_id"> – <t t-out="m.partner_id.name"/></t></td>
+                                    <td class="text-end" t-out="copro.fmt_euros(m.balance)"/>
+                                </tr>
+                                <t t-if="not d['compta_non_pointees']" t-call="coproerp_carnet_entretien.vide"><t t-set="colonnes" t-value="3"/></t>
+                            </table>
+                        </div>
+
+                        <div class="fs_titre">Opérations du relevé non comptabilisées</div>
+                        <div class="fs_bloc">
+                            <table class="fs_table">
+                                <tr class="o_cd_section"><td style="width: 15%;">Date</td><td>Libellé</td><td class="text-end">Montant</td></tr>
+                                <tr t-foreach="d['releve_non_pointees']" t-as="l">
+                                    <td t-out="copro.date_fr(l.date)"/><td t-out="l.libelle or ''"/>
+                                    <td class="text-end" t-out="copro.fmt_euros(l.montant)"/>
+                                </tr>
+                                <t t-if="not d['releve_non_pointees']" t-call="coproerp_carnet_entretien.vide"><t t-set="colonnes" t-value="3"/></t>
+                            </table>
+                        </div>
+
+                        <div class="fs_pied">
+                            État établi par le syndic <t t-out="copro.syndic_id.name or ''"/>
+                            <t t-if="r.etat == 'rapproche'"> – relevé entièrement rapproché.</t>
+                            <t t-else=""> – <b>rapprochement en cours</b>.</t>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

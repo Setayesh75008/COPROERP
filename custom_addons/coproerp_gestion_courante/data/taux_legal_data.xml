@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Taux de l'intérêt légal (art. L. 313-2 du code monétaire et financier), fixés par arrêté chaque semestre.
+         À compléter chaque semestre. -->
+    <data noupdate="1">
+        <record id="taux_2024_s1" model="coproerp.taux.legal">
+            <field name="date_debut">2024-01-01</field><field name="date_fin">2024-06-30</field>
+            <field name="taux_particuliers">8.01</field><field name="taux_autres">5.07</field>
+        </record>
+        <record id="taux_2024_s2" model="coproerp.taux.legal">
+            <field name="date_debut">2024-07-01</field><field name="date_fin">2024-12-31</field>
+            <field name="taux_particuliers">8.16</field><field name="taux_autres">4.92</field>
+        </record>
+        <record id="taux_2025_s1" model="coproerp.taux.legal">
+            <field name="date_debut">2025-01-01</field><field name="date_fin">2025-06-30</field>
+            <field name="taux_particuliers">7.21</field><field name="taux_autres">3.71</field>
+        </record>
+        <record id="taux_2025_s2" model="coproerp.taux.legal">
+            <field name="date_debut">2025-07-01</field><field name="date_fin">2025-12-31</field>
+            <field name="taux_particuliers">6.65</field><field name="taux_autres">2.76</field>
+        </record>
+        <record id="taux_2026_s1" model="coproerp.taux.legal">
+            <field name="date_debut">2026-01-01</field><field name="date_fin">2026-06-30</field>
+            <field name="taux_particuliers">6.67</field><field name="taux_autres">2.62</field>
+        </record>
+        <record id="taux_2026_s2" model="coproerp.taux.legal">
+            <field name="date_debut">2026-07-01</field><field name="date_fin">2026-12-31</field>
+            <field name="taux_particuliers">6.84</field><field name="taux_autres">2.75</field>
+        </record>
+    </data>
+</odoo>

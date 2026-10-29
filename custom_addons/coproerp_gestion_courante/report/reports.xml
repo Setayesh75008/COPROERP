@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_report_declaration_sinistre" model="ir.actions.report">
+        <field name="name">Déclaration de sinistre à l'assureur</field>
+        <field name="model">coproerp.sinistre</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">coproerp_gestion_courante.report_declaration_sinistre</field>
+        <field name="report_file">coproerp_gestion_courante.report_declaration_sinistre</field>
+        <field name="print_report_name">'Declaration sinistre %s' % (object.name or '').replace('/', '-')</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+        <field name="binding_model_id" ref="model_coproerp_sinistre"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_etat_rapprochement" model="ir.actions.report">
+        <field name="name">État de rapprochement bancaire</field>
+        <field name="model">coproerp.releve.bancaire</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">coproerp_gestion_courante.report_etat_rapprochement</field>
+        <field name="report_file">coproerp_gestion_courante.report_etat_rapprochement</field>
+        <field name="print_report_name">'Etat de rapprochement %s' % (object.name or '').replace('/', '-')</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+        <field name="binding_model_id" ref="model_coproerp_releve_bancaire"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

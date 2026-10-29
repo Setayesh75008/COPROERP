@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="report_declaration_sinistre">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="s">
+                <t t-set="copro" t-value="s.copropriete_id.sudo()"/>
+                <t t-set="assureur" t-value="s.assureur_id"/>
+                <t t-call="web.external_layout">
+                    <div class="page o_copro_doc" style="font-size: 11.5pt;">
+                        <t t-call="coproerp_appel_edition.style_documents"/>
+                        <div class="row">
+                            <div class="col-6">
+                                <h4 style="letter-spacing: 1px;"><b>DÉCLARATION DE SINISTRE</b></h4>
+                                <table class="table table-sm table-borderless mb-0" style="font-size: 11pt;">
+                                    <tr><td class="p-0 pe-2">En date du :</td>
+                                        <td class="p-0" t-out="copro.date_fr(s.date_declaration)"/></tr>
+                                    <tr><td class="p-0 pe-2">Assuré :</td>
+                                        <td class="p-0">Syndicat des copropriétaires <t t-out="copro.name"/><br/>
+                                            <t t-out="copro.street or ''"/> <t t-out="copro.zip or ''"/> <t t-out="copro.city or ''"/></td></tr>
+                                    <tr><td class="p-0 pe-2">Contrat :</td>
+                                        <td class="p-0"><t t-out="s.contrat_id.name"/> – police n° <t t-out="s.contrat_id.reference or '…'"/></td></tr>
+                                    <tr t-if="s.numero_dossier"><td class="p-0 pe-2">Votre dossier :</td>
+                                        <td class="p-0" t-out="s.numero_dossier"/></tr>
+                                    <tr><td class="p-0 pe-2">Notre référence :</td><td class="p-0" t-out="s.name"/></tr>
+                                </table>
+                            </div>
+                            <div class="col-5 offset-1" style="margin-top: 12mm;">
+                                <div><b t-out="assureur.name or ''"/></div>
+                                <div t-if="assureur.street" t-out="assureur.street"/>
+                                <div t-if="assureur.street2" t-out="assureur.street2"/>
+                                <div><t t-out="assureur.zip or ''"/> <t t-out="assureur.city or ''"/></div>
+                                <div t-if="assureur.email" class="mt-1" style="font-size: 10pt;" t-out="assureur.email"/>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <p>Madame, Monsieur,</p>
+                            <p>En qualité de syndic du syndicat des copropriétaires de l'immeuble désigné ci-dessus, assuré
+                                auprès de votre compagnie au titre du contrat référencé, nous vous déclarons le sinistre
+                                suivant, conformément à l'article L. 113-2 du code des assurances.</p>
+
+                            <table class="table table-sm table-bordered" style="font-size: 11pt;">
+                                <tr><td style="width: 35%;">Nature du sinistre</td><td><b t-out="s.libelle_nature()"/></td></tr>
+                                <tr><td>Date de survenance</td><td t-out="copro.date_fr(s.date_sinistre)"/></tr>
+                                <tr t-if="s.date_connaissance and s.date_connaissance != s.date_sinistre">
+                                    <td>Date de connaissance par le syndic</td><td t-out="copro.date_fr(s.date_connaissance)"/></tr>
+                                <tr t-if="s.nature == 'catnat'"><td>Arrêté de catastrophe naturelle publié le</td>
+                                    <td t-out="copro.date_fr(s.date_arrete_catnat)"/></tr>
+                                <tr><td>Localisation</td>
+                                    <td><t t-out="copro.libelle_selection(s, 'localisation')"/>
+                                        <t t-if="s.lot_ids"> – lot(s) <t t-out="', '.join(s.lot_ids.mapped('numero'))"/></t></td></tr>
+                                <tr t-if="s.tiers_id"><td>Tiers concerné</td><td t-out="s.tiers_id.name"/></tr>
+                                <tr><td>Circonstances et dommages</td><td style="white-space: pre-line;" t-out="s.description"/></tr>
+                                <tr t-if="s.montant_dommages"><td>Estimation des dommages</td>
+                                    <td t-out="copro.fmt_euros(s.montant_dommages)"/></tr>
+                            </table>
+
+                            <p t-if="s.nature == 'vol'">Une plainte a été / sera déposée auprès des services de police ou de
+                                gendarmerie ; le récépissé vous sera transmis dès réception.</p>
+                            <p>Nous vous remercions de bien vouloir enregistrer cette déclaration, de nous indiquer la
+                                référence du dossier ouvert et, si nécessaire, de missionner un expert. Les devis et
+                                justificatifs vous seront adressés dès que possible. Les mesures conservatoires utiles ont
+                                été prises pour éviter l'aggravation des dommages.</p>
+                            <p>Nous vous prions d'agréer, Madame, Monsieur, l'expression de nos salutations distinguées.</p>
+                            <div class="mt-4" style="margin-left: 55%;">
+                                <div>Le syndic,</div>
+                                <div><b t-out="copro.syndic_id.name or ''"/></div>
+                                <div t-if="copro.gestionnaire_id" t-out="copro.gestionnaire_id.name"/>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

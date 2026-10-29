@@ -175,7 +175,10 @@ class Cloture(models.Model):
                 if code.startswith(PRODUITS_EXCLUS):
                     continue
                 montant = -ligne.balance
-                categorie = "courant" if code.startswith(PRODUITS_COURANTS) else "travaux"
+                # Indemnités d'assurance (713) : courantes sauf si elles financent des travaux hors budget
+                courant = code.startswith(PRODUITS_COURANTS) or (
+                    code.startswith("713") and not ligne.coproerp_hors_budget)
+                categorie = "courant" if courant else "travaux"
                 ajouter(res[categorie]["produits"], code, libelle, montant)
                 if categorie == "travaux":
                     travaux = ligne.move_id.coproerp_appel_id.travaux_id

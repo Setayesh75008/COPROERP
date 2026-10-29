@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_sinistre_list" model="ir.ui.view">
+        <field name="name">coproerp.sinistre.list</field>
+        <field name="model">coproerp.sinistre</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="retard and etat == 'a_declarer'" decoration-muted="etat in ('clos', 'refuse')">
+                <field name="name"/>
+                <field name="copropriete_id"/>
+                <field name="date_sinistre"/>
+                <field name="nature"/>
+                <field name="assureur_id"/>
+                <field name="date_limite_declaration"/>
+                <field name="numero_dossier"/>
+                <field name="indemnite_recue" sum="Total"/>
+                <field name="etat" widget="badge"/>
+                <field name="retard" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sinistre_form" model="ir.ui.view">
+        <field name="name">coproerp.sinistre.form</field>
+        <field name="model">coproerp.sinistre</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_declarer" type="object" string="Déclarer à l'assureur" class="oe_highlight"
+                            invisible="etat != 'a_declarer'"/>
+                    <button name="action_imprimer_declaration" type="object" string="Lettre de déclaration"
+                            invisible="etat == 'a_declarer'"/>
+                    <button name="action_encaisser_indemnite" type="object" string="Encaisser l'indemnité"
+                            class="oe_highlight" invisible="etat not in ('declare', 'expertise') or move_indemnite_id"
+                            confirm="L'indemnité attendue sera enregistrée en banque (crédit 713, sur la clé des réparations). Continuer ?"/>
+                    <field name="etat" widget="statusbar" options="{'clickable': '1'}"
+                           statusbar_visible="a_declarer,declare,expertise,indemnise,clos"/>
+                </header>
+                <sheet>
+                    <div class="alert alert-danger" role="alert" invisible="not retard or etat != 'a_declarer'">
+                        Le délai de déclaration est dépassé (<field name="date_limite_declaration" readonly="1" class="oe_inline"/>) :
+                        déclarez sans attendre ; l'assureur ne peut opposer la déchéance que s'il prouve un préjudice.
+                    </div>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group string="Sinistre">
+                            <field name="copropriete_id"/>
+                            <field name="nature"/>
+                            <field name="date_sinistre"/>
+                            <field name="date_connaissance"/>
+                            <field name="date_arrete_catnat" invisible="nature != 'catnat'"/>
+                            <field name="localisation"/>
+                            <field name="lot_ids" widget="many2many_tags" invisible="localisation == 'communes'"/>
+                            <field name="tiers_id"/>
+                        </group>
+                        <group string="Assurance">
+                            <field name="contrat_id"/>
+                            <field name="assureur_id"/>
+                            <field name="date_limite_declaration"/>
+                            <field name="date_declaration"/>
+                            <field name="numero_dossier"/>
+                            <field name="expert_id"/>
+                            <field name="date_expertise"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Indemnisation">
+                            <field name="montant_dommages"/>
+                            <field name="franchise"/>
+                            <field name="indemnite_attendue"/>
+                            <field name="repartition_id"/>
+                        </group>
+                        <group string="Encaissement">
+                            <field name="indemnite_recue"/>
+                            <field name="date_encaissement"/>
+                            <field name="move_indemnite_id" invisible="not move_indemnite_id"/>
+                        </group>
+                    </group>
+                    <field name="description" placeholder="Circonstances, dommages constatés, mesures conservatoires prises…"/>
+                    <field name="note" placeholder="Suivi du dossier"/>
+                    <field name="retard" invisible="1"/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_sinistre" model="ir.actions.act_window">
+        <field name="name">Sinistres</field>
+        <field name="res_model">coproerp.sinistre</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <menuitem id="menu_sinistres" name="Sinistres"
+              parent="coproerp_carnet_entretien.menu_carnet" action="action_sinistre" sequence="40"/>
+</odoo>

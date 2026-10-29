@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_taux_legal_user,taux.legal.user,model_coproerp_taux_legal,base.group_user,1,1,1,1
+access_paiement_groupe_user,paiement.groupe.user,model_coproerp_paiement_groupe,base.group_user,1,1,1,1
+access_sinistre_user,sinistre.user,model_coproerp_sinistre,base.group_user,1,1,1,1
+access_releve_bancaire_user,releve.bancaire.user,model_coproerp_releve_bancaire,base.group_user,1,1,1,1
+access_releve_bancaire_ligne_user,releve.bancaire.ligne.user,model_coproerp_releve_bancaire_ligne,base.group_user,1,1,1,1

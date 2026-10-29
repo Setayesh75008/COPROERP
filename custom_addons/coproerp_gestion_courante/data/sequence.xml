@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="seq_sinistre" model="ir.sequence">
+            <field name="name">Sinistres</field>
+            <field name="code">coproerp.sinistre</field>
+            <field name="prefix">SIN/%(year)s/</field>
+            <field name="padding">5</field>
+        </record>
+        <record id="seq_paiement_groupe" model="ir.sequence">
+            <field name="name">Paiements groupés de factures</field>
+            <field name="code">coproerp.paiement.groupe</field>
+            <field name="prefix">PG/%(year)s/</field>
+            <field name="padding">5</field>
+        </record>
+        <record id="seq_releve_bancaire" model="ir.sequence">
+            <field name="name">Relevés bancaires</field>
+            <field name="code">coproerp.releve.bancaire</field>
+            <field name="prefix">RB/%(year)s/</field>
+            <field name="padding">5</field>
+        </record>
+    </data>
+</odoo>
