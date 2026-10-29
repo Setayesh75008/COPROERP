@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_contrat_user,contrat.user,model_coproerp_contrat,base.group_user,1,1,1,1
+access_carnet_travaux_user,carnet.travaux.user,model_coproerp_carnet_travaux,base.group_user,1,1,1,1
+access_diagnostic_user,diagnostic.user,model_coproerp_diagnostic,base.group_user,1,1,1,1

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_report_carnet" model="ir.actions.report">
+        <field name="name">Carnet d'entretien de l'immeuble</field>
+        <field name="model">coproerp.copropriete</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">coproerp_carnet_entretien.report_carnet</field>
+        <field name="report_file">coproerp_carnet_entretien.report_carnet</field>
+        <field name="print_report_name">"Carnet d'entretien - %s" % (object.name or '')</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+        <field name="binding_model_id" ref="coproerp_copropriete.model_coproerp_copropriete"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="vide">
+        <tr><td t-att-colspan="colonnes" class="fst-italic">Néant</td></tr>
+    </template>
+
+    <template id="report_carnet">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="c">
+                <t t-set="copro" t-value="c.sudo()"/>
+                <t t-set="d" t-value="copro.carnet_donnees()"/>
+                <t t-call="web.basic_layout">
+                    <div class="page o_fs">
+                        <t t-call="coproerp_fiche_synthetique.style_fiche"/>
+                        <table style="width: 100%; border-collapse: collapse;" class="fs_bandeau">
+                            <tr>
+                                <td class="text-center">
+                                    <div style="font-size: 15pt;"><b>CARNET D'ENTRETIEN DE L'IMMEUBLE</b></div>
+                                    <div style="font-size: 8.5pt;">(article 18 de la loi n° 65-557 du 10 juillet 1965 – décret n° 2001-477 du 30 mai 2001)</div>
+                                    <div class="mt-2" style="font-size: 11pt;"><b>Mis à jour le <t t-out="copro.date_fr(d['date'])"/></b></div>
+                                </td>
+                                <td class="fs_adresse">
+                                    <div t-out="copro.nom_usage or copro.name"/>
+                                    <div t-out="copro.street or ''"/>
+                                    <div><t t-out="copro.zip or ''"/> <t t-out="copro.city or ''"/></div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- 1 -->
+                        <div class="fs_titre">Immeuble et syndic</div>
+                        <div class="fs_bloc">
+                            <table class="fs_table">
+                                <tr><td style="width: 40%;">Adresse de l'immeuble</td>
+                                    <td class="fs_val"><t t-out="copro.street or ''"/> <t t-out="copro.zip or ''"/> <t t-out="copro.city or ''"/></td></tr>
+                                <tr><td>N° d'immatriculation</td><td class="fs_val" t-out="copro.numero_rnc or 'Non renseigné'"/></tr>
+                                <tr><td>Syndic en exercice</td>
+                                    <td class="fs_val"><t t-out="copro.syndic_id.name or 'Non renseigné'"/>
+                                        <t t-if="copro.syndic_id.street"> – <t t-out="copro.syndic_id.street"/> <t t-out="copro.syndic_id.zip or ''"/> <t t-out="copro.syndic_id.city or ''"/></t></td></tr>
+                                <tr t-if="copro.annee_construction"><td>Année de construction</td><td class="fs_val" t-out="copro.annee_construction"/></tr>
+                            </table>
+                        </div>
+
+                        <!-- 2 -->
+                        <div class="fs_titre">Contrats d'assurance de l'immeuble</div>
+                        <div class="fs_bloc">
+                            <table class="fs_table">
+                                <tr class="o_cd_section"><td>Objet</td><td>Assureur</td><td>N° de police</td><td>Échéance</td></tr>
+                                <tr t-foreach="d['assurances']" t-as="a">
+                                    <td t-out="a.name"/><td t-out="a.prestataire_id.name or ''"/>
+                                    <td t-out="a.reference or ''"/><td class="fs_val" t-out="copro.date_fr(a.date_echeance)"/>
+                                </tr>
+                                <t t-if="not d['assurances']" t-call="coproerp_carnet_entretien.vide"><t t-set="colonnes" t-value="4"/></t>
+                            </table>
+                        </div>
+
+                        <!-- 3 -->
+                        <div class="fs_titre">Contrats d'entretien et de maintenance des équipements communs</div>
+                        <div class="fs_bloc">
+                            <table class="fs_table">
+                                <tr class="o_cd_section"><td>Objet / équipement</td><td>Prestataire</td><td>N° de contrat</td><td>Échéance</td></tr>
+                                <tr t-foreach="d['entretien']" t-as="e">
+                                    <td><t t-out="e.name"/><t t-if="e.equipement"> (<t t-out="e.equipement"/>)</t></td>
+                                    <td t-out="e.prestataire_id.name or ''"/><td t-out="e.reference or ''"/>
+                                    <td class="fs_val" t-out="copro.date_fr(e.date_echeance)"/>
+                                </tr>
+                                <t t-if="not d['entretien']" t-call="coproerp_carnet_entretien.vide"><t t-set="colonnes" t-value="4"/></t>
+                            </table>
+                        </div>
+
+                        <!-- 4 -->
+                        <div class="fs_titre">Travaux importants réalisés</div>
+                        <div class="fs_bloc">
+                            <table class="fs_table">
+                                <tr class="o_cd_section"><td style="width: 10%;">Année</td><td>Nature et description</td><td>Entreprise</td><td class="text-end">Montant TTC</td></tr>
+                                <tr t-foreach="d['travaux']" t-as="t">
+                                    <td class="fs_val" t-out="t.annee"/>
+                                    <td><b t-out="copro.libelle_selection(t, 'nature')"/> – <t t-out="t.name"/></td>
+                                    <td t-out="t.entreprise_id.name or ''"/>
+                                    <td class="text-end" t-out="copro.fmt_euros(t.montant) if t.montant else ''"/>
+                                </tr>
+                                <t t-if="not d['travaux']" t-call="coproerp_carnet_entretien.vide"><t t-set="colonnes" t-value="4"/></t>
+                            </table>
+                        </div>
+
+                        <!-- 5 -->
+                        <div class="fs_titre">Assurances dommages-ouvrage en cours</div>
+                        <div class="fs_bloc">
+                            <table class="fs_table">
+                                <tr class="o_cd_section"><td>Travaux garantis</td><td>Assureur</td><td>N° de police</td><td>Fin de la garantie</td></tr>
+                                <tr t-foreach="d['dommages_ouvrage']" t-as="a">
+                                    <td t-out="a.travaux_id.name or a.name"/><td t-out="a.prestataire_id.name or ''"/>
+                                    <td t-out="a.reference or ''"/><td class="fs_val" t-out="copro.date_fr(a.date_fin_garantie)"/>
+                                </tr>
+                                <t t-if="not d['dommages_ouvrage']" t-call="coproerp_carnet_entretien.vide"><t t-set="colonnes" t-value="4"/></t>
+                            </table>
+                        </div>
+
+                        <!-- 6 -->
+                        <div class="fs_titre">Échéancier des travaux votés par l'assemblée générale</div>
+                        <div class="fs_bloc">
+                            <table class="fs_table">
+                                <tr class="o_cd_section"><td>Opération</td><td>Voté le</td><td class="text-end">Montant voté</td><td>Échéances</td></tr>
+                                <tr t-foreach="d['travaux_votes']" t-as="v">
+                                    <td><t t-out="v.reference"/> – <t t-out="v.name"/></td>
+                                    <td t-out="copro.date_fr(v.date_vote)"/>
+                                    <td class="text-end" t-out="copro.fmt_euros(v.montant_vote)"/>
+                                    <td style="font-size: 9.5pt;">
+                                        <t t-foreach="d['echeances'].filtered(lambda e: e.travaux_id == v)" t-as="e">
+                                            <div><t t-out="copro.date_fr(e.date_echeance)"/> : <t t-out="e.pourcentage"/> %</div>
+                                        </t>
+                                    </td>
+                                </tr>
+                                <t t-if="not d['travaux_votes']" t-call="coproerp_carnet_entretien.vide"><t t-set="colonnes" t-value="4"/></t>
+                            </table>
+                            <div class="mt-1" style="font-size: 9.5pt;">Plan pluriannuel de travaux adopté :
+                                <b t-out="'Oui' if copro.ppt_vote else 'Non'"/></div>
+                        </div>
+
+                        <!-- 7 -->
+                        <div class="fs_titre">Diagnostics techniques</div>
+                        <div class="fs_bloc">
+                            <table class="fs_table">
+                                <tr class="o_cd_section"><td>Diagnostic</td><td>Réalisé le</td><td>Par</td><td>Validité / renouvellement</td></tr>
+                                <tr t-foreach="d['diagnostics']" t-as="g">
+                                    <td><t t-out="g.name"/><div t-if="g.conclusion" style="font-size: 9pt;" t-out="g.conclusion"/></td>
+                                    <td t-out="copro.date_fr(g.date_realisation)"/>
+                                    <td t-out="g.prestataire_id.name or ''"/>
+                                    <td class="fs_val" t-out="copro.date_fr(g.date_validite)"/>
+                                </tr>
+                                <t t-if="not d['diagnostics']" t-call="coproerp_carnet_entretien.vide"><t t-set="colonnes" t-value="4"/></t>
+                            </table>
+                        </div>
+
+                        <t t-if="copro.carnet_etudes">
+                            <div class="fs_titre">Informations complémentaires</div>
+                            <div class="fs_bloc" style="white-space: pre-line;" t-out="copro.carnet_etudes"/>
+                        </t>
+
+                        <div class="fs_pied">
+                            Carnet tenu par le syndic <t t-out="copro.syndic_id.name or ''"/> et mis à jour le <t t-out="copro.date_fr(d['date'])"/>.<br/>
+                            Tout copropriétaire peut le consulter ; il est remis à l'acquéreur d'un lot.
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

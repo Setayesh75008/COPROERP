@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Contrats et assurances -->
+    <record id="view_contrat_list" model="ir.ui.view">
+        <field name="name">coproerp.contrat.list</field>
+        <field name="model">coproerp.contrat</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="not actif" decoration-danger="alerte">
+                <field name="copropriete_id"/>
+                <field name="type_contrat"/>
+                <field name="name"/>
+                <field name="prestataire_id"/>
+                <field name="reference"/>
+                <field name="date_echeance"/>
+                <field name="date_limite_resiliation"/>
+                <field name="montant_annuel" sum="Total"/>
+                <field name="actif"/>
+                <field name="alerte" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_contrat_form" model="ir.ui.view">
+        <field name="name">coproerp.contrat.form</field>
+        <field name="model">coproerp.contrat</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="alert alert-warning" role="alert" invisible="not alerte">
+                        Échéance ou date limite de résiliation dans moins de 60 jours.
+                    </div>
+                    <div class="oe_title"><h1><field name="name" placeholder="Ex. : Entretien de l'ascenseur"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="copropriete_id"/>
+                            <field name="type_contrat"/>
+                            <field name="equipement" invisible="type_contrat != 'entretien'"/>
+                            <field name="prestataire_id"/>
+                            <field name="reference"/>
+                            <field name="montant_annuel"/>
+                            <field name="actif"/>
+                        </group>
+                        <group>
+                            <field name="date_debut"/>
+                            <field name="date_echeance"/>
+                            <field name="tacite_reconduction"/>
+                            <field name="preavis_mois"/>
+                            <field name="date_limite_resiliation"/>
+                            <field name="travaux_id" invisible="type_contrat != 'dommages_ouvrage'"/>
+                            <field name="date_fin_garantie" invisible="type_contrat != 'dommages_ouvrage'"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="document" filename="document_nom"/>
+                        <field name="document_nom" invisible="1"/>
+                        <field name="note"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_contrat_search" model="ir.ui.view">
+        <field name="name">coproerp.contrat.search</field>
+        <field name="model">coproerp.contrat</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="copropriete_id"/>
+                <field name="prestataire_id"/>
+                <filter name="en_cours" string="En cours" domain="[('actif', '=', True)]"/>
+                <filter name="assurances" string="Assurances" domain="[('type_contrat', 'in', ('assurance', 'dommages_ouvrage'))]"/>
+                <filter name="entretien" string="Entretien et maintenance" domain="[('type_contrat', '=', 'entretien')]"/>
+                <group>
+                    <filter name="par_copro" string="Copropriété" context="{'group_by': 'copropriete_id'}"/>
+                    <filter name="par_type" string="Type" context="{'group_by': 'type_contrat'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_contrat" model="ir.actions.act_window">
+        <field name="name">Contrats et assurances</field>
+        <field name="res_model">coproerp.contrat</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_en_cours': 1}</field>
+    </record>
+
+    <!-- Travaux réalisés -->
+    <record id="view_carnet_travaux_list" model="ir.ui.view">
+        <field name="name">coproerp.carnet.travaux.list</field>
+        <field name="model">coproerp.carnet.travaux</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="copropriete_id"/>
+                <field name="annee"/>
+                <field name="nature"/>
+                <field name="name"/>
+                <field name="entreprise_id"/>
+                <field name="montant" sum="Total"/>
+                <field name="date_reception" optional="show"/>
+                <field name="travaux_id" optional="hide"/>
+                <field name="assurance_do_id" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_carnet_travaux" model="ir.actions.act_window">
+        <field name="name">Travaux réalisés</field>
+        <field name="res_model">coproerp.carnet.travaux</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- Diagnostics -->
+    <record id="view_diagnostic_list" model="ir.ui.view">
+        <field name="name">coproerp.diagnostic.list</field>
+        <field name="model">coproerp.diagnostic</field>
+        <field name="arch" type="xml">
+            <list decoration-warning="a_renouveler">
+                <field name="copropriete_id"/>
+                <field name="type_diagnostic"/>
+                <field name="name"/>
+                <field name="date_realisation"/>
+                <field name="prestataire_id"/>
+                <field name="date_validite"/>
+                <field name="a_renouveler" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_diagnostic_form" model="ir.ui.view">
+        <field name="name">coproerp.diagnostic.form</field>
+        <field name="model">coproerp.diagnostic</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="copropriete_id"/>
+                            <field name="type_diagnostic"/>
+                            <field name="name"/>
+                        </group>
+                        <group>
+                            <field name="date_realisation"/>
+                            <field name="prestataire_id"/>
+                            <field name="date_validite"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="conclusion"/>
+                        <field name="document" filename="document_nom"/>
+                        <field name="document_nom" invisible="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_diagnostic" model="ir.actions.act_window">
+        <field name="name">Diagnostics techniques</field>
+        <field name="res_model">coproerp.diagnostic</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_carnet" name="Carnet d'entretien" parent="coproerp_fiche_synthetique.menu_obligations" sequence="20"/>
+    <menuitem id="menu_contrats" name="Contrats et assurances" parent="menu_carnet" action="action_contrat" sequence="10"/>
+    <menuitem id="menu_carnet_travaux" name="Travaux réalisés" parent="menu_carnet" action="action_carnet_travaux" sequence="20"/>
+    <menuitem id="menu_diagnostics" name="Diagnostics techniques" parent="menu_carnet" action="action_diagnostic" sequence="30"/>
+
+    <!-- Fiche de la copropriété : onglet Carnet d'entretien -->
+    <record id="view_copropriete_form_carnet" model="ir.ui.view">
+        <field name="name">coproerp.copropriete.form.carnet</field>
+        <field name="model">coproerp.copropriete</field>
+        <field name="inherit_id" ref="coproerp_copropriete.view_copropriete_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Carnet d'entretien" name="carnet_entretien">
+                    <div class="mb-2">
+                        <button name="action_imprimer_carnet" type="object" string="Imprimer le carnet" class="btn-primary me-2"/>
+                        <button name="action_publier_carnet" type="object" string="Mettre à disposition sur l'extranet"
+                                class="btn-secondary me-2"
+                                confirm="Le carnet à jour sera publié pour tous les copropriétaires. Continuer ?"/>
+                        <button name="action_reprendre_travaux_termines" type="object"
+                                string="Ajouter les opérations de travaux terminées" class="btn-secondary"/>
+                        <field name="carnet_document_id" invisible="not carnet_document_id" class="ms-2"/>
+                    </div>
+                    <separator string="Contrats d'assurance et d'entretien"/>
+                    <field name="contrat_ids" context="{'default_copropriete_id': id}">
+                        <list decoration-muted="not actif" decoration-danger="alerte">
+                            <field name="type_contrat"/>
+                            <field name="name"/>
+                            <field name="prestataire_id"/>
+                            <field name="reference"/>
+                            <field name="date_echeance"/>
+                            <field name="actif"/>
+                            <field name="alerte" column_invisible="True"/>
+                        </list>
+                    </field>
+                    <separator string="Travaux importants réalisés"/>
+                    <field name="carnet_travaux_ids" context="{'default_copropriete_id': id}">
+                        <list editable="bottom">
+                            <field name="annee"/>
+                            <field name="nature"/>
+                            <field name="name"/>
+                            <field name="entreprise_id"/>
+                            <field name="montant"/>
+                            <field name="assurance_do_id" optional="hide"/>
+                        </list>
+                    </field>
+                    <separator string="Diagnostics techniques"/>
+                    <field name="diagnostic_ids" context="{'default_copropriete_id': id}">
+                        <list decoration-warning="a_renouveler">
+                            <field name="type_diagnostic"/>
+                            <field name="date_realisation"/>
+                            <field name="prestataire_id"/>
+                            <field name="date_validite"/>
+                            <field name="a_renouveler" column_invisible="True"/>
+                        </list>
+                    </field>
+                    <group>
+                        <field name="carnet_etudes"/>
+                    </group>
+                    <div class="text-muted">
+                        Le carnet d'entretien (art. 18 de la loi, décret n° 2001-477) mentionne les assurances de l'immeuble,
+                        les contrats d'entretien des équipements communs, les travaux importants réalisés, les assurances
+                        dommages-ouvrage en cours, l'échéancier des travaux votés et les diagnostics techniques. Les travaux votés
+                        et leurs échéances sont repris automatiquement des opérations de travaux.
+                    </div>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>
