@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_import_excel_list" model="ir.ui.view">
+        <field name="name">coproerp.import.excel.list</field>
+        <field name="model">coproerp.import.excel</field>
+        <field name="arch" type="xml">
+            <list decoration-success="etat == 'importe'" decoration-danger="nombre_anomalies > 0">
+                <field name="create_date" string="Date"/>
+                <field name="copropriete_id"/>
+                <field name="fichier_nom"/>
+                <field name="nombre_anomalies"/>
+                <field name="etat" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_import_excel_form" model="ir.ui.view">
+        <field name="name">coproerp.import.excel.form</field>
+        <field name="model">coproerp.import.excel</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_analyser" type="object" string="Analyser le fichier" class="oe_highlight"
+                            invisible="not fichier or etat != 'brouillon'"/>
+                    <button name="action_analyser" type="object" string="Analyser à nouveau"
+                            invisible="not fichier or etat == 'brouillon'"/>
+                    <button name="action_importer" type="object" string="Importer" class="oe_highlight"
+                            invisible="etat != 'analyse' or nombre_anomalies > 0"
+                            confirm="Les lots, copropriétaires, tantièmes et soldes du fichier vont être enregistrés dans la copropriété. Continuer ?"/>
+                    <button name="action_voir_reprise" type="object" string="Ouvrir la reprise des soldes"
+                            invisible="not reprise_id"/>
+                    <button name="action_remettre_a_analyser" type="object" string="Importer un fichier corrigé"
+                            invisible="etat != 'importe'"/>
+                    <button name="action_telecharger_modele" type="object" string="Télécharger le modèle Excel"/>
+                    <field name="etat" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group string="Fichier">
+                            <field name="copropriete_id" readonly="etat == 'importe'"/>
+                            <field name="fichier" filename="fichier_nom" readonly="etat == 'importe'"/>
+                            <field name="fichier_nom" invisible="1"/>
+                        </group>
+                        <group string="Soldes (si le fichier contient une feuille de soldes)">
+                            <field name="sens_solde" widget="radio" readonly="etat == 'importe'"/>
+                            <field name="date_reprise" readonly="etat == 'importe'"/>
+                            <field name="reprise_id" invisible="not reprise_id"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-danger" role="alert" invisible="nombre_anomalies == 0">
+                        <field name="nombre_anomalies" readonly="1" class="oe_inline"/> anomalie(s) à corriger dans le
+                        fichier avant l'import : voir la liste ci-dessous.
+                    </div>
+                    <notebook>
+                        <page string="Analyse" name="analyse">
+                            <field name="rapport" nolabel="1" style="white-space: pre-wrap;"
+                                   placeholder="Joignez le fichier puis cliquez sur « Analyser le fichier » : rien n'est enregistré à cette étape."/>
+                        </page>
+                        <page string="Compte rendu de l'import" name="journal" invisible="not journal">
+                            <field name="journal" nolabel="1" style="white-space: pre-wrap;"/>
+                        </page>
+                        <page string="Mode d'emploi" name="aide">
+                            <div style="max-width: 900px;">
+                                <p>Le classeur peut contenir une ou plusieurs des feuilles suivantes, dans n'importe quel ordre
+                                    et sous n'importe quel nom : chacune est reconnue par sa ligne d'en-tête. Le bouton
+                                    « Télécharger le modèle Excel » fournit un classeur prêt à remplir.</p>
+                                <ul>
+                                    <li><b>Lots</b> : N° de lot (obligatoire), Bâtiment, Escalier, Désignation, Usage
+                                        (appartement, parking, cave, local commercial…), Nature (principal / secondaire),
+                                        Étage, Surface. Une colonne « Tantièmes » facultative crée la clé des charges générales.</li>
+                                    <li><b>Copropriétaires</b> : N° de compte, Nom (obligatoire), Prénom, Adresse, Code postal,
+                                        Ville, E-mail, Téléphone, Lots détenus (ex. « 1, 101 », obligatoire), Type de droit
+                                        (propriétaire par défaut, usufruitier, nu-propriétaire, indivisaire, locataire),
+                                        Quote-part, Date d'entrée, Mandataire commun (« Oui »).</li>
+                                    <li><b>Tantièmes</b> : N° de lot, puis une colonne par clé de répartition, intitulée du nom
+                                        de la clé (Charges générales, Ascenseur bâtiment A, Chauffage…).</li>
+                                    <li><b>Soldes</b> : N° de compte, Nom, Solde, et facultativement Fonds de travaux et Avance.
+                                        C'est le format des exports des anciens syndics : le n° de compte doit être le même que
+                                        dans la feuille des copropriétaires. Les soldes alimentent la reprise des soldes, qui
+                                        reste en brouillon pour être complétée (banque, factures) puis comptabilisée.</li>
+                                </ul>
+                                <p>L'analyse ne crée rien : elle liste ce qui sera importé et les anomalies à corriger. Un
+                                    nouvel import du même fichier met les fiches à jour, sans doublon.</p>
+                            </div>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_import_excel" model="ir.actions.act_window">
+        <field name="name">Import Excel</field>
+        <field name="res_model">coproerp.import.excel</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <menuitem id="menu_import_excel" name="Import Excel (lots, copropriétaires, tantièmes, soldes)"
+              parent="coproerp_reprise.menu_demarrage" action="action_import_excel" sequence="5"/>
+</odoo>
