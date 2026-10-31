@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="cron_actualiser_lre" model="ir.cron">
+            <field name="name">LRE AR24 : suivi des lettres recommandées électroniques</field>
+            <field name="model_id" ref="model_coproerp_lre_envoi"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_actualiser()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">hours</field>
+        </record>
+    </data>
+</odoo>

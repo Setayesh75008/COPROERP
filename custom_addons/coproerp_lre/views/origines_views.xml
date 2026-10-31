@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_relance_form_lre" model="ir.ui.view">
+        <field name="name">coproerp.relance.form.lre</field>
+        <field name="model">coproerp.relance</field>
+        <field name="inherit_id" ref="coproerp_recouvrement.view_relance_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_annuler']" position="before">
+                <button name="action_envoyer_lre" type="object" string="Envoyer par LRE (AR24)" class="oe_highlight"
+                        invisible="etat != 'envoyee' or mode_envoi != 'lre' or lre_etat in ('a_valider', 'envoye', 'recu', 'refuse', 'negligence')"
+                        confirm="La lettre va être transmise à AR24 pour être notifiée par lettre recommandée électronique. Continuer ?"/>
+            </xpath>
+            <xpath expr="//field[@name='numero_envoi']" position="after">
+                <field name="lre_envoi_id" invisible="not lre_envoi_id"/>
+                <field name="lre_etat" invisible="not lre_envoi_id"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_ag_form_lre" model="ir.ui.view">
+        <field name="name">coproerp.ag.form.lre</field>
+        <field name="model">coproerp.ag</field>
+        <field name="inherit_id" ref="coproerp_ag.view_ag_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_marquer_convoquee']" position="before">
+                <button name="action_envoyer_convocations_lre" type="object" string="Envoyer les convocations par LRE (AR24)"
+                        invisible="etat != 'preparation' or not nombre_convocations"
+                        confirm="Les convocations à notifier par voie électronique vont être transmises à AR24. Continuer ?"/>
+            </xpath>
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_voir_lre" type="object" class="oe_stat_button" icon="fa-envelope"
+                        invisible="not lre_nombre">
+                    <field name="lre_nombre" widget="statinfo" string="LRE AR24"/>
+                </button>
+            </xpath>
+            <xpath expr="//button[@name='action_suivi_notifications_pv']" position="after">
+                <button name="action_notifier_pv_lre" type="object" string="Notifier le PV par LRE (AR24)"
+                        class="btn-primary mb-2 ms-2"
+                        confirm="Le procès-verbal va être notifié par lettre recommandée électronique aux opposants et défaillants ayant accepté la voie électronique. Continuer ?"/>
+            </xpath>
+            <xpath expr="//field[@name='convocation_ids']/list/field[@name='etat']" position="after">
+                <field name="lre_etat" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_ag_convocation_list_lre" model="ir.ui.view">
+        <field name="name">coproerp.ag.convocation.list.lre</field>
+        <field name="model">coproerp.ag.convocation</field>
+        <field name="inherit_id" ref="coproerp_ag.view_ag_convocation_list"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='etat']" position="after">
+                <field name="lre_etat" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_ag_presence_notification_list_lre" model="ir.ui.view">
+        <field name="name">coproerp.ag.presence.notification.list.lre</field>
+        <field name="model">coproerp.ag.presence</field>
+        <field name="inherit_id" ref="coproerp_ag.view_ag_presence_notification_list"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='pv_date_limite_recours']" position="after">
+                <field name="lre_etat" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

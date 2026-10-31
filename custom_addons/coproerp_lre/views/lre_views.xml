@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Compte AR24 -->
+    <record id="view_lre_compte_form" model="ir.ui.view">
+        <field name="name">coproerp.lre.compte.form</field>
+        <field name="model">coproerp.lre.compte</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_tester" type="object" string="Tester la connexion" class="oe_highlight"/>
+                </header>
+                <sheet>
+                    <div class="alert alert-warning" role="alert" invisible="not bac_a_sable">
+                        Plateforme de test AR24 : les lettres ne sont pas réellement remises. Remplacez l'adresse de l'API
+                        par celle de production communiquée par AR24 pour les envois réels.
+                    </div>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group string="Accès à l'API">
+                            <field name="url_api"/>
+                            <field name="token" password="True"/>
+                            <field name="cle_privee" password="True"/>
+                            <field name="bac_a_sable" invisible="1"/>
+                        </group>
+                        <group string="Expéditeur">
+                            <field name="id_user"/>
+                            <field name="nom_expediteur"/>
+                            <field name="eidas"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <div class="text-muted">
+                        Le token et la clé privée sont fournis par AR24 lors de l'ouverture de l'accès API (espace
+                        développeur). La clé privée n'est jamais transmise : elle sert à signer les demandes et à
+                        déchiffrer les réponses. Seuls les administrateurs voient ces informations.
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="view_lre_compte_list" model="ir.ui.view">
+        <field name="name">coproerp.lre.compte.list</field>
+        <field name="model">coproerp.lre.compte</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="url_api"/>
+                <field name="id_user"/>
+                <field name="eidas"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_lre_compte" model="ir.actions.act_window">
+        <field name="name">Compte AR24</field>
+        <field name="res_model">coproerp.lre.compte</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Envois -->
+    <record id="view_lre_envoi_list" model="ir.ui.view">
+        <field name="name">coproerp.lre.envoi.list</field>
+        <field name="model">coproerp.lre.envoi</field>
+        <field name="arch" type="xml">
+            <list create="0" decoration-danger="etat in ('erreur', 'rebond', 'refuse')"
+                  decoration-warning="etat in ('a_valider', 'negligence')" decoration-success="etat == 'recu'">
+                <field name="create_date" string="Créée le"/>
+                <field name="copropriete_id"/>
+                <field name="personne_id"/>
+                <field name="name"/>
+                <field name="ar24_id"/>
+                <field name="date_depot"/>
+                <field name="date_reception"/>
+                <field name="etat" widget="badge"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_lre_envoi_form" model="ir.ui.view">
+        <field name="name">coproerp.lre.envoi.form</field>
+        <field name="model">coproerp.lre.envoi</field>
+        <field name="arch" type="xml">
+            <form create="0">
+                <header>
+                    <button name="action_envoyer" type="object" string="Envoyer" class="oe_highlight"
+                            invisible="etat not in ('brouillon', 'erreur') or ar24_id"/>
+                    <button name="action_actualiser" type="object" string="Actualiser le suivi" invisible="not ar24_id"/>
+                    <button name="action_ouvrir_origine" type="object" string="Document d'origine" invisible="not res_model"/>
+                    <field name="etat" widget="statusbar" statusbar_visible="brouillon,envoye,recu"/>
+                </header>
+                <sheet>
+                    <div class="alert alert-warning" role="alert" invisible="etat != 'a_valider'">
+                        Lettre en attente de validation : connectez-vous à votre espace AR24 et validez-la depuis la liste
+                        d'attente dans les 7 jours (authentification de l'expéditeur exigée pour la LRE qualifiée eIDAS).
+                    </div>
+                    <div class="alert alert-danger" role="alert" invisible="not erreur">
+                        <field name="erreur"/>
+                    </div>
+                    <div class="oe_title"><h1><field name="name" readonly="ar24_id"/></h1></div>
+                    <group>
+                        <group string="Destinataire">
+                            <field name="personne_id" readonly="1"/>
+                            <field name="email" readonly="ar24_id"/>
+                            <field name="professionnel" readonly="ar24_id"/>
+                            <field name="nom" readonly="ar24_id"/>
+                            <field name="prenom" readonly="ar24_id" invisible="professionnel"/>
+                            <field name="societe" readonly="ar24_id" invisible="not professionnel"/>
+                            <field name="copropriete_id" readonly="1"/>
+                        </group>
+                        <group string="Suivi AR24">
+                            <field name="ar24_id"/>
+                            <field name="statut_ar24"/>
+                            <field name="date_depot"/>
+                            <field name="date_reception"/>
+                            <field name="date_refus" invisible="not date_refus"/>
+                            <field name="date_negligence" invisible="not date_negligence"/>
+                            <field name="preuve_depot_url" widget="url" invisible="not preuve_depot_url"/>
+                            <field name="preuve_reception_url" widget="url" invisible="not preuve_reception_url"/>
+                            <field name="preuve_refus_url" widget="url" invisible="not preuve_refus_url"/>
+                            <field name="preuve_negligence_url" widget="url" invisible="not preuve_negligence_url"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="document" filename="document_nom" readonly="1"/>
+                        <field name="document_nom" invisible="1"/>
+                        <field name="res_model" invisible="1"/>
+                        <field name="contenu" readonly="ar24_id"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="view_lre_envoi_search" model="ir.ui.view">
+        <field name="name">coproerp.lre.envoi.search</field>
+        <field name="model">coproerp.lre.envoi</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="personne_id"/>
+                <field name="copropriete_id"/>
+                <field name="ar24_id"/>
+                <filter name="en_cours" string="En cours" domain="[('etat', 'in', ('a_valider', 'envoye'))]"/>
+                <filter name="probleme" string="À traiter"
+                        domain="[('etat', 'in', ('erreur', 'rebond', 'refuse', 'negligence', 'a_valider'))]"/>
+                <filter name="group_etat" string="État" context="{'group_by': 'etat'}"/>
+            </search>
+        </field>
+    </record>
+    <record id="action_lre_envoi" model="ir.actions.act_window">
+        <field name="name">Lettres recommandées électroniques</field>
+        <field name="res_model">coproerp.lre.envoi</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_lre" name="Lettres recommandées électroniques"
+              parent="coproerp_copropriete.menu_coproerp_root" sequence="80"/>
+    <menuitem id="menu_lre_envois" name="Envois" parent="menu_lre" action="action_lre_envoi" sequence="10"/>
+    <menuitem id="menu_lre_compte" name="Compte AR24" parent="menu_lre" action="action_lre_compte" sequence="20"
+              groups="base.group_system"/>
+</odoo>

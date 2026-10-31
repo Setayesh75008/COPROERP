@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_lre_compte_user,lre.compte.user,model_coproerp_lre_compte,base.group_user,1,0,0,0
+access_lre_compte_admin,lre.compte.admin,model_coproerp_lre_compte,base.group_system,1,1,1,1
+access_lre_envoi_user,lre.envoi.user,model_coproerp_lre_envoi,base.group_user,1,1,1,0
+access_lre_envoi_admin,lre.envoi.admin,model_coproerp_lre_envoi,base.group_system,1,1,1,1
