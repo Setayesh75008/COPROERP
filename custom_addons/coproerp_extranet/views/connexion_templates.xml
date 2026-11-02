@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Page d'accueil de l'extranet : logo du cabinet à gauche, connexion à droite -->
+    <template id="page_connexion" name="Extranet : page d'accueil et connexion">
+        <t t-call="web.frontend_layout">
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+            <t t-set="body_classname" t-value="'o_ext_connexion_body'"/>
+            <t t-set="title">Extranet copropriétaires</t>
+            <div class="o_ext_connexion">
+                <div class="o_ext_cnx_carte row g-0">
+                    <!-- Cabinet -->
+                    <div class="col-12 col-md-6 o_ext_cnx_cabinet">
+                        <img t-att-src="'/web/binary/company_logo?company=%s' % cabinet.id" t-att-alt="cabinet.name"
+                             class="o_ext_cnx_logo"/>
+                        <div class="o_ext_cnx_nom" t-out="cabinet.name"/>
+                        <div class="o_ext_cnx_adresse" t-if="cabinet_adresse" t-out="cabinet_adresse"/>
+                        <div class="o_ext_cnx_contact">
+                            <span t-if="cabinet.phone" t-out="cabinet.phone"/>
+                            <span t-if="cabinet.phone and cabinet.email"> · </span>
+                            <span t-if="cabinet.email" t-out="cabinet.email"/>
+                        </div>
+                        <div class="o_ext_cnx_accroche">
+                            <div class="o_ext_cnx_titre">Espace copropriétaires</div>
+                            <p>Consultez votre compte, vos appels de fonds, les documents de votre immeuble et les
+                                informations de votre copropriété, à tout moment.</p>
+                        </div>
+                    </div>
+                    <!-- Connexion -->
+                    <div class="col-12 col-md-6 o_ext_cnx_formulaire">
+                        <h1 class="o_ext_cnx_h1">Connexion</h1>
+                        <p class="text-muted mb-4">Accès réservé aux copropriétaires et aux membres du conseil syndical.</p>
+                        <form method="post" action="/web/login" class="o_ext_cnx_form">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <input type="hidden" name="redirect" t-att-value="redirect"/>
+                            <input type="hidden" name="extranet_connexion" value="1"/>
+                            <div class="mb-3">
+                                <label for="login" class="form-label">Identifiant (adresse électronique)</label>
+                                <input type="text" name="login" id="login" class="form-control form-control-lg"
+                                       t-att-value="login" required="required" autofocus="autofocus"
+                                       autocapitalize="off" autocomplete="username"/>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Mot de passe</label>
+                                <input type="password" name="password" id="password" class="form-control form-control-lg"
+                                       required="required" autocomplete="current-password" maxlength="4096"/>
+                            </div>
+                            <div class="alert alert-danger" role="alert" t-if="error">
+                                Identifiant ou mot de passe incorrect.
+                            </div>
+                            <div class="alert alert-success" role="alert" t-if="message" t-out="message"/>
+                            <button type="submit" class="btn btn-primary btn-lg w-100 o_ext_cnx_bouton">Se connecter</button>
+                            <div class="mt-3 text-center" t-if="reinitialisation">
+                                <a t-att-href="'/web/reset_password?redirect=%s' % redirect">Mot de passe oublié ?</a>
+                            </div>
+                        </form>
+                        <p class="o_ext_cnx_aide">
+                            Première connexion : utilisez le lien d'invitation reçu par courriel pour choisir votre mot de
+                            passe. En cas de difficulté, contactez votre gestionnaire.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

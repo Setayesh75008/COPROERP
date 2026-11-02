@@ -315,3 +315,50 @@ class TestExtranetPages(HttpCase, ExtranetCommon):
         reponse = self.url_open("/extranet/documents/%s/telecharger" % self.doc_pv_a.id)
         self.assertEqual(reponse.status_code, 200)
         self.assertTrue(self.doc_pv_a.lecture_ids.filtered(lambda l: l.personne_id == self.alice))
+
+
+@tagged("post_install", "-at_install", "coproerp_extranet")
+class TestExtranetConnexion(HttpCase, ExtranetCommon):
+    """Page d'accueil de l'extranet : logo du cabinet et formulaire de connexion."""
+
+    def _jeton(self, html):
+        import re
+        return re.search(r'name="csrf_token" value="([^"]+)"', html).group(1)
+
+    def test_page_accueil_publique(self):
+        reponse = self.url_open("/extranet/connexion")
+        self.assertEqual(reponse.status_code, 200)
+        for texte in ("Espace copropriétaires", "Se connecter", 'name="extranet_connexion"', "/web/binary/company_logo"):
+            self.assertIn(texte, reponse.text)
+
+    def test_redirection_vers_la_page_d_accueil(self):
+        reponse = self.url_open("/extranet/documents")
+        self.assertIn("/extranet/connexion", reponse.url)
+        self.assertIn("Espace copropriétaires", reponse.text)
+        # L'écran de connexion d'Odoo reste inchangé pour le cabinet
+        reponse = self.url_open("/web/login")
+        self.assertNotIn("Espace copropriétaires", reponse.text)
+
+    def test_connexion_erreur_puis_succes(self):
+        self.u_alice.password = "Extranet-Alice-2026"
+        page = self.url_open("/extranet/connexion").text
+        reponse = self.url_open("/web/login", data={
+            "login": "alice", "password": "mauvais", "redirect": "/extranet", "extranet_connexion": "1",
+            "csrf_token": self._jeton(page)})
+        self.assertIn("Identifiant ou mot de passe incorrect", reponse.text)
+        self.assertIn("Espace copropriétaires", reponse.text)
+        reponse = self.url_open("/web/login", data={
+            "login": "alice", "password": "Extranet-Alice-2026", "redirect": "/extranet", "extranet_connexion": "1",
+            "csrf_token": self._jeton(reponse.text)})
+        self.assertTrue(reponse.url.rstrip("/").endswith("/extranet"), reponse.url)
+        # Déjà connectée : la page d'accueil renvoie au tableau de bord
+        reponse = self.url_open("/extranet/connexion", allow_redirects=False)
+        self.assertIn(reponse.status_code, (302, 303))
+        self.assertTrue(reponse.headers["Location"].rstrip("/").endswith("/extranet"))
+
+    def test_deconnexion_par_tous_les_liens(self):
+        for lien in ("/web/session/logout", "/web/session/logout?redirect=/"):
+            self.authenticate("alice", "alice")
+            reponse = self.url_open(lien)
+            self.assertIn("/extranet/connexion", reponse.url, lien)
+            self.assertIn("Espace copropriétaires", reponse.text)

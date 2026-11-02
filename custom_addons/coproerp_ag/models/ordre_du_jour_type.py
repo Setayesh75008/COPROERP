@@ -42,6 +42,12 @@ class AssembleeGenerale(models.Model):
               "Conformément à l'article 15 du décret du 17 mars 1967, le secrétariat de la séance est "
               "assuré par le syndic, sauf décision contraire de l'assemblée générale, qui désigne : %s." % TROU)
 
+        if self.type_ag == "extraordinaire":
+            # Assemblée extraordinaire : le bureau, puis les points propres à cette
+            # assemblée (travaux, honoraires…), à ajouter à la main.
+            rubrique("DÉCISIONS SOUMISES À L'ASSEMBLÉE")
+            return points
+
         rubrique("COMPTES ET BUDGETS")
         if annexes:
             charges = annexes["annexe2"]["courant"]["total_charges"]["n"]
@@ -131,6 +137,8 @@ class AssembleeGenerale(models.Model):
             points = ag._points_ordinaires()
             ag.write({"resolution_ids": [
                 Command.create(dict(p, sequence=(i + 1) * 10)) for i, p in enumerate(points)]})
+            if not ag.documents_joints and ag.type_ag == "extraordinaire":
+                ag.documents_joints = "Formulaire de vote par correspondance\nPouvoir"
             if not ag.documents_joints:
                 docs = ["Projet de résolutions", "Formulaire de vote par correspondance", "Pouvoir"]
                 if ag.cloture_id:

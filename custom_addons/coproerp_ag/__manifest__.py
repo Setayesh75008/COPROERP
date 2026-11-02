@@ -30,7 +30,7 @@ Préparation de l'assemblée générale des copropriétaires :
     "author": "SSB AVOCAT",
     "website": "https://www.ssb-avocat.fr",
     "category": "Real Estate",
-    "version": "19.0.2.0.2",
+    "version": "19.0.2.0.3",
     "license": "LGPL-3",
     "depends": [
         "coproerp_cloture",

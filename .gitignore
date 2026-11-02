@@ -18,3 +18,8 @@ sauvegardes/
 *.dump
 *.zip
 *.bak
+*.pdf
+*.xlsx
+*.log
+demo_*.py
+diagnostic_*.py

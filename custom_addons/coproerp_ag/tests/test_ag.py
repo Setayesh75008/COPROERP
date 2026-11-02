@@ -111,6 +111,13 @@ class TestAssembleeGenerale(TransactionCase):
         with self.assertRaises(UserError):
             ag.action_ordre_du_jour_type()
 
+    def test_ordre_du_jour_type_extraordinaire(self):
+        ag = self._ag(type_ag="extraordinaire", urgence=True)
+        ag.action_ordre_du_jour_type()
+        self.assertEqual(len(ag.resolutions_votees()), 3)  # président, scrutateurs, secrétaire
+        self.assertIn("AGE du 28/04/2027", ag.name)
+        self.assertEqual(ag.documents_liste(), ["Formulaire de vote par correspondance", "Pouvoir"])
+
     def test_convocations_et_voix(self):
         self.env["coproerp.notification.mode"].create({
             "personne_id": self.alice.id, "objet": "adresse", "email": "alice@example.com", "origine": "syndic"})

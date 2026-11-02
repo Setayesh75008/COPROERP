@@ -172,3 +172,112 @@ $ext-fond: #f3f5f8;
         border-top: 1px solid $ext-fond;
     }
 }
+
+// ------------------------------------------------------------------
+// Page d'accueil / connexion de l'extranet
+// ------------------------------------------------------------------
+.o_ext_connexion_body {
+    background: $ext-fond;
+}
+
+.o_ext_connexion {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+
+    .o_ext_cnx_carte {
+        width: 100%;
+        max-width: 980px;
+        background: #fff;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(31, 45, 61, 0.15);
+    }
+
+    .o_ext_cnx_cabinet {
+        background: $ext-nuit;
+        color: #e8edf3;
+        padding: 3rem 2.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .o_ext_cnx_logo {
+        max-width: 240px;
+        max-height: 140px;
+        background: #fff;
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1.5rem;
+        object-fit: contain;
+    }
+
+    .o_ext_cnx_nom {
+        font-size: 1.35rem;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+    }
+
+    .o_ext_cnx_adresse,
+    .o_ext_cnx_contact {
+        opacity: 0.8;
+        font-size: 0.9rem;
+        margin-top: 0.35rem;
+    }
+
+    .o_ext_cnx_accroche {
+        margin-top: 2.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.15);
+
+        .o_ext_cnx_titre {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        p {
+            opacity: 0.85;
+            margin: 0;
+        }
+    }
+
+    .o_ext_cnx_formulaire {
+        padding: 3rem 2.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .o_ext_cnx_h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: $ext-nuit;
+    }
+
+    .o_ext_cnx_bouton {
+        background: $ext-accent;
+        border-color: $ext-accent;
+    }
+
+    .o_ext_cnx_aide {
+        margin-top: 2rem;
+        font-size: 0.85rem;
+        color: #6b7785;
+    }
+
+    @media (max-width: 767.98px) {
+        .o_ext_cnx_cabinet,
+        .o_ext_cnx_formulaire {
+            padding: 2rem 1.5rem;
+        }
+        .o_ext_cnx_accroche {
+            display: none;
+        }
+    }
+}

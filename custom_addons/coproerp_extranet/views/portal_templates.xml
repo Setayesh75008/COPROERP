@@ -67,7 +67,7 @@
                             <i class="fa fa-credit-card fa-fw"/> Modes de règlement</a>
                         <a href="/extranet/compte" t-attf-class="#{'active' if ext_page == 'compte' else ''}">
                             <i class="fa fa-cog fa-fw"/> Mon compte</a>
-                        <a href="/web/session/logout?redirect=/web/login">
+                        <a href="/web/session/logout?redirect=/extranet/connexion">
                             <i class="fa fa-sign-out fa-fw"/> Déconnexion</a>
                     </nav>
                 </aside>
