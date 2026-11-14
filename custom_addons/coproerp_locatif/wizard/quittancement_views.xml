@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_quittancement_form" model="ir.ui.view">
+        <field name="name">coproerp.locatif.quittancement.form</field>
+        <field name="model">coproerp.locatif.quittancement</field>
+        <field name="arch" type="xml">
+            <form string="Quittancement des loyers">
+                <group>
+                    <field name="date_limite"/>
+                    <field name="bail_ids" widget="many2many_tags"/>
+                </group>
+                <div class="text-muted">
+                    Émet, pour chaque bail en cours, les avis d'échéance exigibles jusqu'à la date choisie qui n'ont pas
+                    encore été émis. Un avis n'est jamais émis deux fois.
+                </div>
+                <footer>
+                    <button name="action_emettre" type="object" string="Émettre les avis" class="oe_highlight"/>
+                    <button special="cancel" string="Fermer"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="action_quittancement" model="ir.actions.act_window">
+        <field name="name">Émettre les avis d'échéance</field>
+        <field name="res_model">coproerp.locatif.quittancement</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_partner_form_locatif" model="ir.ui.view">
+        <field name="name">res.partner.form.locatif</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="coproerp_personne.view_partner_form_coproerp"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='role_locataire']" position="after">
+                <field name="role_bailleur"/>
+                <field name="role_garant"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_locataires" model="ir.actions.act_window">
+        <field name="name">Locataires</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('role_locataire', '=', True)]</field>
+        <field name="context">{'default_role_locataire': True}</field>
+    </record>
+    <record id="action_bailleurs" model="ir.actions.act_window">
+        <field name="name">Propriétaires bailleurs</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('role_bailleur', '=', True)]</field>
+        <field name="context">{'default_role_bailleur': True}</field>
+    </record>
+    <record id="action_garants" model="ir.actions.act_window">
+        <field name="name">Garants</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('role_garant', '=', True)]</field>
+        <field name="context">{'default_role_garant': True}</field>
+    </record>
+</odoo>

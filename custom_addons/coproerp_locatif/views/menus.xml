@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <menuitem id="menu_locatif_root" name="Gestion locative" sequence="12" web_icon="coproerp_locatif,static/description/icon.png"/>
+
+    <menuitem id="menu_locatif_mandats" name="Propriétaires et biens" parent="menu_locatif_root" sequence="10"/>
+    <menuitem id="menu_locatif_mandat" name="Mandats de gestion (registre)" parent="menu_locatif_mandats"
+              action="action_mandat" sequence="10"/>
+    <menuitem id="menu_locatif_bien" name="Biens" parent="menu_locatif_mandats" action="action_bien" sequence="20"/>
+    <menuitem id="menu_locatif_bailleurs" name="Propriétaires bailleurs" parent="menu_locatif_mandats"
+              action="action_bailleurs" sequence="30"/>
+
+    <menuitem id="menu_locatif_baux" name="Locataires et baux" parent="menu_locatif_root" sequence="20"/>
+    <menuitem id="menu_locatif_bail" name="Baux" parent="menu_locatif_baux" action="action_bail" sequence="10"/>
+    <menuitem id="menu_locatif_locataires" name="Locataires" parent="menu_locatif_baux" action="action_locataires"
+              sequence="20"/>
+    <menuitem id="menu_locatif_garants" name="Garants" parent="menu_locatif_baux" action="action_garants" sequence="30"/>
+
+    <menuitem id="menu_locatif_loyers" name="Loyers" parent="menu_locatif_root" sequence="30"/>
+    <menuitem id="menu_locatif_quittancement" name="Émettre les avis d'échéance" parent="menu_locatif_loyers"
+              action="action_quittancement" sequence="10"/>
+    <menuitem id="menu_locatif_echeance" name="Avis d'échéance et quittances" parent="menu_locatif_loyers"
+              action="action_echeance" sequence="20"/>
+    <menuitem id="menu_locatif_encaissement" name="Encaissements" parent="menu_locatif_loyers"
+              action="action_encaissement" sequence="30"/>
+
+    <menuitem id="menu_locatif_impayes_root" name="Impayés" parent="menu_locatif_root" sequence="40"/>
+    <menuitem id="menu_locatif_impayes" name="Locataires en retard" parent="menu_locatif_impayes_root"
+              action="action_impayes" sequence="10"/>
+    <menuitem id="menu_locatif_relances" name="Relances et mises en demeure" parent="menu_locatif_impayes_root"
+              action="action_relance_locataire" sequence="20"/>
+
+    <menuitem id="menu_locatif_config" name="Configuration" parent="menu_locatif_root" sequence="90"/>
+    <menuitem id="menu_locatif_dossier" name="Dossier des mandants" parent="menu_locatif_config"
+              action="action_dossier" sequence="10"/>
+</odoo>

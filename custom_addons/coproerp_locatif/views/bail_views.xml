@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_bail_list" model="ir.ui.view">
+        <field name="name">coproerp.locatif.bail.list</field>
+        <field name="model">coproerp.locatif.bail</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="etat == 'termine'" decoration-info="etat == 'brouillon'">
+                <field name="name"/>
+                <field name="bien_id"/>
+                <field name="locataire_id"/>
+                <field name="proprietaire_id"/>
+                <field name="type_bail" optional="show"/>
+                <field name="date_debut"/>
+                <field name="loyer_hc" sum="Total"/>
+                <field name="charges" sum="Total"/>
+                <field name="solde" optional="show"/>
+                <field name="etat" widget="badge"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_bail_search" model="ir.ui.view">
+        <field name="name">coproerp.locatif.bail.search</field>
+        <field name="model">coproerp.locatif.bail</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="locataire_id"/>
+                <field name="proprietaire_id"/>
+                <field name="bien_id"/>
+                <filter name="en_cours" string="En cours" domain="[('etat', '=', 'en_cours')]"/>
+                <filter name="termines" string="Terminés" domain="[('etat', '=', 'termine')]"/>
+                <separator/>
+                <filter name="group_type" string="Type de bail" context="{'group_by': 'type_bail'}"/>
+                <filter name="group_proprietaire" string="Propriétaire" context="{'group_by': 'proprietaire_id'}"/>
+            </search>
+        </field>
+    </record>
+    <record id="view_bail_form" model="ir.ui.view">
+        <field name="name">coproerp.locatif.bail.form</field>
+        <field name="model">coproerp.locatif.bail</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_activer" type="object" string="Bail signé : mettre en vigueur"
+                            class="oe_highlight" invisible="etat != 'brouillon'"
+                            confirm="Le bail entre en vigueur ; l'avis du dépôt de garantie est émis. Continuer ?"/>
+                    <button name="action_generer_echeances" type="object" string="Émettre les avis à venir"
+                            invisible="etat != 'en_cours'"/>
+                    <button name="action_preparer_relance" type="object" string="Préparer une relance"
+                            invisible="etat == 'brouillon' or solde &lt;= 0"/>
+                    <button name="action_terminer" type="object" string="Clore le bail (sortie du locataire)"
+                            invisible="etat != 'en_cours'"
+                            confirm="Le dernier avis sera émis au prorata jusqu'à la date de sortie et le bail clos. Continuer ?"/>
+                    <field name="etat" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="alert alert-warning" role="alert" invisible="solde &lt;= 0 or jours_retard == 0">
+                        Impayé de <field name="solde" readonly="1" class="oe_inline"/> €, échéance la plus ancienne au
+                        <field name="plus_ancienne_impayee" readonly="1" class="oe_inline"/>
+                        (<field name="jours_retard" readonly="1" class="oe_inline"/> jours de retard).
+                    </div>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group string="Bail">
+                            <field name="type_bail" readonly="etat != 'brouillon'"/>
+                            <field name="bien_id" readonly="etat != 'brouillon'"/>
+                            <field name="mandat_id" readonly="1"/>
+                            <field name="proprietaire_id"/>
+                            <field name="date_signature"/>
+                            <field name="date_debut" readonly="etat != 'brouillon'"/>
+                            <field name="duree_mois" readonly="etat != 'brouillon'"/>
+                            <field name="date_fin"/>
+                            <field name="preavis_mois"/>
+                            <field name="date_sortie" invisible="etat == 'brouillon'"/>
+                        </group>
+                        <group string="Locataires">
+                            <field name="locataire_id" readonly="etat != 'brouillon'"/>
+                            <field name="locataire_ids" widget="many2many_tags"/>
+                            <field name="garant_ids" widget="many2many_tags"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Loyer">
+                            <field name="loyer_hc"/>
+                            <field name="charges"/>
+                            <field name="mode_charges"/>
+                            <field name="tva"/>
+                            <field name="taux_tva" invisible="not tva"/>
+                            <field name="depot_garantie" readonly="etat != 'brouillon'"/>
+                            <field name="depot_maximum" invisible="depot_maximum &lt; 0"/>
+                        </group>
+                        <group string="Paiement et révision">
+                            <field name="periodicite"/>
+                            <field name="terme"/>
+                            <field name="jour_paiement" invisible="terme != 'echoir'"/>
+                            <field name="quittancement_auto"/>
+                            <field name="indice"/>
+                            <field name="trimestre_reference" invisible="indice == 'aucun'"/>
+                            <field name="valeur_indice" invisible="indice == 'aucun'"/>
+                            <field name="solde"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Avis d'échéance" name="echeances">
+                            <field name="echeance_ids" readonly="1">
+                                <list decoration-success="etat == 'payee'" decoration-warning="etat == 'partielle'"
+                                      decoration-muted="etat == 'annulee'">
+                                    <field name="name"/>
+                                    <field name="type_echeance"/>
+                                    <field name="periode_debut"/>
+                                    <field name="periode_fin"/>
+                                    <field name="date_echeance"/>
+                                    <field name="montant_total" sum="Total"/>
+                                    <field name="montant_restant" sum="Reste dû"/>
+                                    <field name="etat" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Encaissements" name="encaissements">
+                            <field name="encaissement_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="date"/>
+                                    <field name="mode"/>
+                                    <field name="montant" sum="Total"/>
+                                    <field name="etat" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Relances" name="relances">
+                            <field name="relance_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="date"/>
+                                    <field name="type_relance"/>
+                                    <field name="destinataire_id"/>
+                                    <field name="montant_du"/>
+                                    <field name="etat" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Clauses particulières" name="note">
+                            <field name="note"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="action_bail" model="ir.actions.act_window">
+        <field name="name">Baux</field>
+        <field name="res_model">coproerp.locatif.bail</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_en_cours': 1}</field>
+    </record>
+    <record id="action_impayes" model="ir.actions.act_window">
+        <field name="name">Impayés</field>
+        <field name="res_model">coproerp.locatif.bail</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('etat', '!=', 'brouillon'), ('echeance_ids.etat', 'in', ('emise', 'partielle')), ('echeance_ids.date_echeance', '&lt;=', context_today().strftime('%Y-%m-%d'))]</field>
+    </record>
+</odoo>

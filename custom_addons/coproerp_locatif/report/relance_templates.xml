@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="report_relance_locataire">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="r">
+                <t t-set="bail" t-value="r.bail_id.sudo()"/>
+                <t t-set="impayes" t-value="r.echeance_ids if r.etat == 'envoyee' else r._impayes()"/>
+                <t t-set="total" t-value="r.montant_du if r.etat == 'envoyee' else sum(impayes.mapped('montant_restant'))"/>
+                <t t-call="web.external_layout">
+                    <div class="page o_loc">
+                        <t t-call="coproerp_locatif.style_locatif"/>
+                        <t t-call="coproerp_locatif.entete_locataire">
+                            <t t-set="titre" t-value="{'relance': 'RELANCE', 'mise_en_demeure': 'MISE EN DEMEURE', 'information_garant': 'INFORMATION DE LA CAUTION'}[r.type_relance]"/>
+                            <t t-set="destinataire" t-value="r.destinataire_id"/>
+                            <t t-set="date_doc" t-value="r.date"/>
+                        </t>
+                        <p class="mt-4" t-if="r.mode_envoi == 'lrar'"><b>Lettre recommandée avec demande d'avis de réception</b></p>
+                        <p>Madame, Monsieur,</p>
+                        <t t-if="r.type_relance == 'relance'">
+                            <p>Sauf erreur de notre part, les sommes suivantes, dues au titre du bail désigné ci-dessus,
+                                restent impayées à ce jour.</p>
+                        </t>
+                        <t t-if="r.type_relance == 'mise_en_demeure'">
+                            <p>Malgré nos précédents rappels, les sommes suivantes, dues au titre du bail désigné
+                                ci-dessus, restent impayées. Nous vous mettons en demeure de les régler dans un délai de
+                                <b t-out="r.delai_jours"/> jours à compter de la présentation de cette lettre.</p>
+                        </t>
+                        <t t-if="r.type_relance == 'information_garant'">
+                            <p>En votre qualité de caution de <b t-out="bail.locataire_id.name"/> pour le bail désigné
+                                ci-dessus, nous vous informons que les sommes suivantes restent impayées par le
+                                locataire.</p>
+                        </t>
+                        <table class="o_loc_detail">
+                            <tr><th>Échéance</th><th>Période</th><th class="text-end">Reste dû</th></tr>
+                            <tr t-foreach="impayes" t-as="e">
+                                <td t-out="bail.date_fr(e.date_echeance)"/>
+                                <td t-out="e.libelle_periode()"/>
+                                <td class="text-end" t-out="bail.euros(e.montant_restant)"/>
+                            </tr>
+                            <tr class="o_loc_total"><td colspan="2">Total</td><td class="text-end" t-out="bail.euros(total)"/></tr>
+                        </table>
+                        <p class="mt-3" t-if="r.type_relance == 'relance'">Nous vous remercions de bien vouloir régulariser
+                            cette situation sous <b t-out="r.delai_jours"/> jours. Si votre règlement a croisé ce courrier,
+                            veuillez ne pas en tenir compte.</p>
+                        <p class="mt-3" t-if="r.type_relance == 'mise_en_demeure'">À défaut de règlement dans ce délai, le
+                            bailleur pourra faire délivrer un commandement de payer par commissaire de justice et
+                            engager les poursuites prévues par la loi, y compris la mise en œuvre de la clause
+                            résolutoire du bail. Les frais en résultant resteront à votre charge dans les conditions
+                            de la loi.</p>
+                        <p class="mt-3" t-if="r.type_relance == 'information_garant'">Nous vous invitons à vous rapprocher du
+                            locataire. À défaut de régularisation, le bailleur pourra vous demander le paiement de ces
+                            sommes dans les limites de votre engagement de caution.</p>
+                        <p>Nous vous prions d'agréer, Madame, Monsieur, l'expression de nos salutations distinguées.</p>
+                        <div class="mt-4" style="margin-left: 55%;">
+                            <div>Pour le bailleur, le gestionnaire,</div>
+                            <div><b t-out="env.company.name"/></div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

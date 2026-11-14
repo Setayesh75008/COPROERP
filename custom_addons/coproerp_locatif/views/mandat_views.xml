@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_mandat_list" model="ir.ui.view">
+        <field name="name">coproerp.locatif.mandat.list</field>
+        <field name="model">coproerp.locatif.mandat</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="etat == 'resilie'" decoration-info="etat == 'brouillon'">
+                <field name="name"/>
+                <field name="proprietaire_id"/>
+                <field name="date_signature"/>
+                <field name="date_effet"/>
+                <field name="taux_honoraires"/>
+                <field name="date_resiliation" optional="show"/>
+                <field name="etat" widget="badge"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_mandat_form" model="ir.ui.view">
+        <field name="name">coproerp.locatif.mandat.form</field>
+        <field name="model">coproerp.locatif.mandat</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_activer" type="object" string="Inscrire au registre (mandat signé)"
+                            class="oe_highlight" invisible="etat != 'brouillon'"/>
+                    <button name="action_resilier" type="object" string="Résilier" invisible="etat != 'actif'"
+                            confirm="Le mandat sera résilié. Continuer ?"/>
+                    <field name="etat" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_voir_baux" type="object" class="oe_stat_button" icon="fa-file-text-o">
+                            <field name="nombre_baux" widget="statinfo" string="Baux"/>
+                        </button>
+                    </div>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group string="Mandant">
+                            <field name="proprietaire_id" readonly="etat != 'brouillon'"/>
+                            <field name="iban_proprietaire"/>
+                            <field name="reversement"/>
+                        </group>
+                        <group string="Mandat">
+                            <field name="date_signature" readonly="etat != 'brouillon'"/>
+                            <field name="date_effet" readonly="etat != 'brouillon'"/>
+                            <field name="duree_annees"/>
+                            <field name="date_echeance"/>
+                            <field name="taux_honoraires"/>
+                            <field name="depot_conserve"/>
+                            <field name="date_resiliation" invisible="etat != 'resilie'"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Biens confiés" name="biens">
+                            <field name="bien_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="type_bien"/>
+                                    <field name="city"/>
+                                    <field name="occupe"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Clauses particulières" name="note">
+                            <field name="note"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="action_mandat" model="ir.actions.act_window">
+        <field name="name">Mandats de gestion (registre)</field>
+        <field name="res_model">coproerp.locatif.mandat</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

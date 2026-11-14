@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_report_avis_echeance" model="ir.actions.report">
+        <field name="name">Avis d'échéance</field>
+        <field name="model">coproerp.locatif.echeance</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">coproerp_locatif.report_avis_echeance</field>
+        <field name="report_file">coproerp_locatif.report_avis_echeance</field>
+        <field name="print_report_name">'Avis echeance %s' % (object.name or '').replace('/', '-')</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+        <field name="binding_model_id" ref="model_coproerp_locatif_echeance"/>
+        <field name="binding_type">report</field>
+    </record>
+    <record id="action_report_quittance" model="ir.actions.report">
+        <field name="name">Quittance de loyer</field>
+        <field name="model">coproerp.locatif.echeance</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">coproerp_locatif.report_quittance</field>
+        <field name="report_file">coproerp_locatif.report_quittance</field>
+        <field name="print_report_name">'Quittance %s' % (object.name or '').replace('/', '-')</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+        <field name="binding_model_id" ref="model_coproerp_locatif_echeance"/>
+        <field name="binding_type">report</field>
+    </record>
+    <record id="action_report_relance_locataire" model="ir.actions.report">
+        <field name="name">Lettre de relance (locataire)</field>
+        <field name="model">coproerp.locatif.relance</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">coproerp_locatif.report_relance_locataire</field>
+        <field name="report_file">coproerp_locatif.report_relance_locataire</field>
+        <field name="print_report_name">'Relance %s' % (object.name or '').replace('/', '-')</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+        <field name="binding_model_id" ref="model_coproerp_locatif_relance"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

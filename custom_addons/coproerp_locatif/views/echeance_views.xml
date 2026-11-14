@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_echeance_list" model="ir.ui.view">
+        <field name="name">coproerp.locatif.echeance.list</field>
+        <field name="model">coproerp.locatif.echeance</field>
+        <field name="arch" type="xml">
+            <list create="0" decoration-success="etat == 'payee'" decoration-warning="etat == 'partielle'"
+                  decoration-muted="etat == 'annulee'">
+                <field name="name"/>
+                <field name="bail_id"/>
+                <field name="locataire_id"/>
+                <field name="proprietaire_id" optional="show"/>
+                <field name="type_echeance" optional="hide"/>
+                <field name="periode_debut"/>
+                <field name="periode_fin"/>
+                <field name="date_echeance"/>
+                <field name="montant_total" sum="Total"/>
+                <field name="montant_restant" sum="Reste dû"/>
+                <field name="etat" widget="badge"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_echeance_search" model="ir.ui.view">
+        <field name="name">coproerp.locatif.echeance.search</field>
+        <field name="model">coproerp.locatif.echeance</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="locataire_id"/>
+                <field name="proprietaire_id"/>
+                <field name="bail_id"/>
+                <filter name="a_payer" string="À payer" domain="[('etat', 'in', ('emise', 'partielle'))]"/>
+                <filter name="payees" string="Payées" domain="[('etat', '=', 'payee')]"/>
+                <filter name="group_mois" string="Mois d'échéance" context="{'group_by': 'date_echeance:month'}"/>
+            </search>
+        </field>
+    </record>
+    <record id="view_echeance_form" model="ir.ui.view">
+        <field name="name">coproerp.locatif.echeance.form</field>
+        <field name="model">coproerp.locatif.echeance</field>
+        <field name="arch" type="xml">
+            <form create="0">
+                <header>
+                    <button name="action_imprimer" type="object" string="Avis d'échéance" class="oe_highlight"/>
+                    <button name="action_imprimer_quittance" type="object" string="Quittance" invisible="etat != 'payee'"/>
+                    <button name="action_annuler" type="object" string="Annuler l'avis"
+                            invisible="etat in ('annulee', 'payee', 'partielle')"
+                            confirm="L'avis sera annulé par une écriture inverse. Continuer ?"/>
+                    <field name="etat" widget="statusbar" statusbar_visible="emise,partielle,payee"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="bail_id" readonly="1"/>
+                            <field name="locataire_id"/>
+                            <field name="proprietaire_id"/>
+                            <field name="bien_id"/>
+                        </group>
+                        <group>
+                            <field name="type_echeance" readonly="1"/>
+                            <field name="periode_debut" readonly="1"/>
+                            <field name="periode_fin" readonly="1"/>
+                            <field name="date_echeance" readonly="1"/>
+                            <field name="prorata" invisible="prorata == 1"/>
+                            <field name="montant_paye"/>
+                            <field name="montant_restant"/>
+                            <field name="move_id"/>
+                        </group>
+                    </group>
+                    <field name="ligne_ids" readonly="1">
+                        <list>
+                            <field name="type_ligne"/>
+                            <field name="libelle"/>
+                            <field name="montant" sum="Total"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_echeance" model="ir.actions.act_window">
+        <field name="name">Avis d'échéance et quittances</field>
+        <field name="res_model">coproerp.locatif.echeance</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

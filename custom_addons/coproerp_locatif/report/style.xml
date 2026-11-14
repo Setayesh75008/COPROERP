@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="style_locatif">
+        <style>
+            .o_loc { color: #000; font-size: 11pt; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .o_loc h3 { letter-spacing: 1px; font-weight: bold; margin-bottom: 4mm; }
+            .o_loc .o_loc_refs td { padding: 1px 6px 1px 0; }
+            .o_loc table.o_loc_detail { width: 100%; border-collapse: collapse; margin-top: 4mm; }
+            .o_loc table.o_loc_detail th { background-color: #3c3c3c !important; color: #fff !important; padding: 4px 6px; }
+            .o_loc table.o_loc_detail td { border-bottom: 1px solid #ccc; padding: 4px 6px; }
+            .o_loc table.o_loc_detail tr.o_loc_total td { background-color: #e4e4e4 !important; font-weight: bold; }
+            .o_loc .o_loc_cadre { border: 1px solid #999; padding: 3mm 4mm; margin-top: 5mm; }
+            .o_loc .o_loc_petit { font-size: 9pt; color: #444; }
+        </style>
+    </template>
+
+    <!-- Bloc commun : références à gauche, destinataire à droite -->
+    <template id="entete_locataire">
+        <div class="row">
+            <div class="col-6">
+                <h3 t-out="titre"/>
+                <table class="o_loc_refs">
+                    <tr><td>Bail :</td><td t-out="bail.name"/></tr>
+                    <tr><td>Bien loué :</td><td><t t-out="bail.bien_id.name"/><br/><t t-out="bail.bien_id.adresse_complete()"/></td></tr>
+                    <tr><td>Bailleur :</td><td t-out="bail.proprietaire_id.name"/></tr>
+                    <tr t-if="date_doc"><td>Date :</td><td t-out="bail.date_fr(date_doc)"/></tr>
+                </table>
+            </div>
+            <div class="col-5 offset-1" style="margin-top: 14mm;">
+                <div><b t-out="destinataire.name"/></div>
+                <div t-if="destinataire.street" t-out="destinataire.street"/>
+                <div t-if="destinataire.street2" t-out="destinataire.street2"/>
+                <div><t t-out="destinataire.zip or ''"/> <t t-out="destinataire.city or ''"/></div>
+            </div>
+        </div>
+    </template>
+</odoo>

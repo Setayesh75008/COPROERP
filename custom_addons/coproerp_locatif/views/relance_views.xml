@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_relance_locataire_list" model="ir.ui.view">
+        <field name="name">coproerp.locatif.relance.list</field>
+        <field name="model">coproerp.locatif.relance</field>
+        <field name="arch" type="xml">
+            <list decoration-info="etat == 'brouillon'" decoration-muted="etat == 'annulee'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="bail_id"/>
+                <field name="type_relance"/>
+                <field name="destinataire_id"/>
+                <field name="montant_du" sum="Total"/>
+                <field name="etat" widget="badge"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_relance_locataire_form" model="ir.ui.view">
+        <field name="name">coproerp.locatif.relance.form</field>
+        <field name="model">coproerp.locatif.relance</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_imprimer" type="object" string="Aperçu / imprimer"/>
+                    <button name="action_envoyer" type="object" string="Valider l'envoi" class="oe_highlight"
+                            invisible="etat != 'brouillon'"/>
+                    <button name="action_annuler" type="object" string="Annuler" invisible="etat == 'annulee'"/>
+                    <field name="etat" widget="statusbar" statusbar_visible="brouillon,envoyee"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="bail_id" readonly="etat != 'brouillon'"/>
+                            <field name="type_relance" readonly="etat != 'brouillon'"/>
+                            <field name="destinataire_id" readonly="etat != 'brouillon'"/>
+                            <field name="date" readonly="etat != 'brouillon'"/>
+                            <field name="delai_jours" readonly="etat != 'brouillon'"/>
+                        </group>
+                        <group>
+                            <field name="montant_du"/>
+                            <field name="mode_envoi"/>
+                            <field name="numero_envoi" invisible="mode_envoi != 'lrar'"/>
+                            <field name="date_presentation" invisible="mode_envoi != 'lrar'"/>
+                        </group>
+                    </group>
+                    <field name="echeance_ids" readonly="1">
+                        <list>
+                            <field name="name"/>
+                            <field name="periode_debut"/>
+                            <field name="periode_fin"/>
+                            <field name="date_echeance"/>
+                            <field name="montant_restant" sum="Total"/>
+                        </list>
+                    </field>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="action_relance_locataire" model="ir.actions.act_window">
+        <field name="name">Relances et mises en demeure</field>
+        <field name="res_model">coproerp.locatif.relance</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

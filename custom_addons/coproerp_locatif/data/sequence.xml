@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="seq_mandat" model="ir.sequence">
+            <field name="name">Registre des mandats de gestion</field>
+            <field name="code">coproerp.locatif.mandat</field>
+            <field name="prefix">MG/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_bail" model="ir.sequence">
+            <field name="name">Baux</field>
+            <field name="code">coproerp.locatif.bail</field>
+            <field name="prefix">BAIL/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_echeance" model="ir.sequence">
+            <field name="name">Avis d'échéance</field>
+            <field name="code">coproerp.locatif.echeance</field>
+            <field name="prefix">AE/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_encaissement" model="ir.sequence">
+            <field name="name">Encaissements des loyers</field>
+            <field name="code">coproerp.locatif.encaissement</field>
+            <field name="prefix">ENC/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_relance" model="ir.sequence">
+            <field name="name">Relances locataires</field>
+            <field name="code">coproerp.locatif.relance</field>
+            <field name="prefix">RL/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

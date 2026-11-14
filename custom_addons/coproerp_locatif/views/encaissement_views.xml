@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_encaissement_list" model="ir.ui.view">
+        <field name="name">coproerp.locatif.encaissement.list</field>
+        <field name="model">coproerp.locatif.encaissement</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="etat == 'annule'" decoration-info="etat == 'brouillon'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="bail_id"/>
+                <field name="locataire_id"/>
+                <field name="mode"/>
+                <field name="montant" sum="Total"/>
+                <field name="etat" widget="badge"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_encaissement_form" model="ir.ui.view">
+        <field name="name">coproerp.locatif.encaissement.form</field>
+        <field name="model">coproerp.locatif.encaissement</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_valider" type="object" string="Valider et imputer" class="oe_highlight"
+                            invisible="etat != 'brouillon'"/>
+                    <button name="action_annuler" type="object" string="Annuler (impayé / erreur)"
+                            invisible="etat != 'valide'"
+                            confirm="L'encaissement sera annulé par une écriture inverse et les avis redeviendront dus. Continuer ?"/>
+                    <field name="etat" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="bail_id" readonly="etat != 'brouillon'"/>
+                            <field name="locataire_id"/>
+                            <field name="proprietaire_id"/>
+                            <field name="payeur_id" readonly="etat != 'brouillon'"/>
+                        </group>
+                        <group>
+                            <field name="date" readonly="etat != 'brouillon'"/>
+                            <field name="montant" readonly="etat != 'brouillon'"/>
+                            <field name="mode" readonly="etat != 'brouillon'"/>
+                            <field name="reference" readonly="etat != 'brouillon'"/>
+                            <field name="move_id"/>
+                        </group>
+                    </group>
+                    <div class="text-muted">
+                        Le paiement est imputé sur les avis d'échéance du bail, du plus ancien au plus récent ; ce qui
+                        dépasse reste au crédit du locataire et viendra en déduction des avis suivants.
+                    </div>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="action_encaissement" model="ir.actions.act_window">
+        <field name="name">Encaissements des loyers</field>
+        <field name="res_model">coproerp.locatif.encaissement</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

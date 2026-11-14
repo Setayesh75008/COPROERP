@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_dossier_form" model="ir.ui.view">
+        <field name="name">coproerp.locatif.dossier.form</field>
+        <field name="model">coproerp.locatif.dossier</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_creer_dossier_comptable" type="object" string="Créer le dossier comptable"
+                            class="oe_highlight" invisible="company_id"
+                            confirm="Le dossier comptable des fonds des mandants va être créé (société dédiée, plan comptable, banque des mandants). Continuer ?"/>
+                    <button name="action_voir_ecritures" type="object" string="Voir les écritures" invisible="not company_id"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group string="Compte bancaire des mandants">
+                            <field name="banque_titulaire"/>
+                            <field name="banque_nom"/>
+                            <field name="banque_iban"/>
+                            <field name="banque_bic"/>
+                            <field name="company_id"/>
+                        </group>
+                        <group string="Cabinet">
+                            <field name="carte_professionnelle"/>
+                            <field name="garant_financier"/>
+                        </group>
+                        <group string="Quittancement et relances">
+                            <field name="delai_emission"/>
+                            <field name="jours_avant_relance"/>
+                            <field name="jours_avant_mise_en_demeure"/>
+                        </group>
+                    </group>
+                    <div class="text-muted">
+                        Toutes les sommes reçues pour le compte des propriétaires passent par ce dossier : un compte
+                        bancaire unique, un sous-compte par propriétaire (467100) et par locataire (411000), les
+                        dépôts de garantie détenus (165000). Il est distinct de la comptabilité du cabinet et de
+                        celle des copropriétés.
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="view_dossier_list" model="ir.ui.view">
+        <field name="name">coproerp.locatif.dossier.list</field>
+        <field name="model">coproerp.locatif.dossier</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="banque_iban"/>
+                <field name="company_id"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_dossier" model="ir.actions.act_window">
+        <field name="name">Dossier des mandants</field>
+        <field name="res_model">coproerp.locatif.dossier</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

@@ -1,0 +1,11 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_locatif_dossier_user,locatif.dossier.user,model_coproerp_locatif_dossier,base.group_user,1,0,0,0
+access_locatif_dossier_admin,locatif.dossier.admin,model_coproerp_locatif_dossier,base.group_system,1,1,1,1
+access_locatif_mandat,locatif.mandat,model_coproerp_locatif_mandat,base.group_user,1,1,1,1
+access_locatif_bien,locatif.bien,model_coproerp_locatif_bien,base.group_user,1,1,1,1
+access_locatif_bail,locatif.bail,model_coproerp_locatif_bail,base.group_user,1,1,1,1
+access_locatif_echeance,locatif.echeance,model_coproerp_locatif_echeance,base.group_user,1,1,1,1
+access_locatif_echeance_ligne,locatif.echeance.ligne,model_coproerp_locatif_echeance_ligne,base.group_user,1,1,1,1
+access_locatif_encaissement,locatif.encaissement,model_coproerp_locatif_encaissement,base.group_user,1,1,1,1
+access_locatif_relance,locatif.relance,model_coproerp_locatif_relance,base.group_user,1,1,1,1
+access_locatif_quittancement,locatif.quittancement,model_coproerp_locatif_quittancement,base.group_user,1,1,1,1

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="report_avis_echeance">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="avis">
+                <t t-set="bail" t-value="avis.bail_id.sudo()"/>
+                <t t-call="web.external_layout">
+                    <div class="page o_loc">
+                        <t t-call="coproerp_locatif.style_locatif"/>
+                        <t t-call="coproerp_locatif.entete_locataire">
+                            <t t-set="titre" t-value="'AVIS D\'ÉCHÉANCE' if avis.type_echeance == 'loyer' else 'APPEL DU DÉPÔT DE GARANTIE'"/>
+                            <t t-set="destinataire" t-value="bail.locataire_id"/>
+                            <t t-set="date_doc" t-value="avis.create_date.date()"/>
+                        </t>
+                        <p class="mt-4">Avis n° <b t-out="avis.name"/> – <t t-out="avis.libelle_periode()"/>.
+                            Somme exigible le <b t-out="bail.date_fr(avis.date_echeance)"/>.</p>
+                        <table class="o_loc_detail">
+                            <tr><th>Désignation</th><th class="text-end">Montant</th></tr>
+                            <tr t-foreach="avis.ligne_ids" t-as="l">
+                                <td><t t-out="l.libelle"/><t t-if="avis.prorata != 1 and l.type_ligne in ('loyer', 'charges', 'forfait')"> (prorata <t t-out="'%d' % round(avis.prorata * 100)"/> %)</t></td>
+                                <td class="text-end" t-out="bail.euros(l.montant)"/>
+                            </tr>
+                            <tr class="o_loc_total"><td>Total</td><td class="text-end" t-out="bail.euros(avis.montant_total)"/></tr>
+                            <tr t-if="avis.montant_paye"><td>Déjà réglé</td><td class="text-end" t-out="bail.euros(-avis.montant_paye)"/></tr>
+                            <tr t-if="avis.montant_paye" class="o_loc_total"><td>Reste à payer</td><td class="text-end" t-out="bail.euros(avis.montant_restant)"/></tr>
+                        </table>
+                        <div class="o_loc_cadre" t-if="avis.etat != 'payee'">
+                            <b>Règlement</b> à l'ordre et sur le compte des mandants du gestionnaire<t t-set="dossier" t-value="env['coproerp.locatif.dossier'].sudo().search([], limit=1)"/><t t-if="dossier.banque_iban"> : IBAN <b t-out="dossier.banque_iban"/><t t-if="dossier.banque_bic"> – BIC <t t-out="dossier.banque_bic"/></t></t>.
+                            Merci de rappeler la référence <b t-out="avis.name"/>.
+                        </div>
+                        <p class="o_loc_petit mt-4">Cet avis n'est pas une quittance. La quittance est délivrée gratuitement une fois
+                            l'échéance entièrement payée (article 21 de la loi n° 89-462 du 6 juillet 1989).</p>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_quittance">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="avis">
+                <t t-set="bail" t-value="avis.bail_id.sudo()"/>
+                <t t-call="web.external_layout">
+                    <div class="page o_loc">
+                        <t t-call="coproerp_locatif.style_locatif"/>
+                        <t t-call="coproerp_locatif.entete_locataire">
+                            <t t-set="titre" t-value="'QUITTANCE DE LOYER' if avis.type_echeance == 'loyer' else 'REÇU DU DÉPÔT DE GARANTIE'"/>
+                            <t t-set="destinataire" t-value="bail.locataire_id"/>
+                            <t t-set="date_doc" t-value="avis.date_paiement() or avis.date_echeance"/>
+                        </t>
+                        <p class="mt-4" t-if="avis.type_echeance == 'loyer'">
+                            Je soussigné, gestionnaire agissant pour le compte de <b t-out="bail.proprietaire_id.name"/>,
+                            bailleur, déclare avoir reçu de <b t-out="', '.join(bail.locataires().mapped('name'))"/>
+                            la somme de <b t-out="bail.euros(avis.montant_total)"/> au titre du loyer et des charges
+                            de la période <b t-out="avis.libelle_periode()"/>, pour le bien désigné ci-dessus, et lui
+                            en donne quittance, sous réserve de tous mes droits.
+                        </p>
+                        <p class="mt-4" t-else="">
+                            Je soussigné, gestionnaire agissant pour le compte de <b t-out="bail.proprietaire_id.name"/>,
+                            déclare avoir reçu de <b t-out="bail.locataire_id.name"/> la somme de
+                            <b t-out="bail.euros(avis.montant_total)"/> au titre du dépôt de garantie prévu au bail.
+                            Cette somme ne porte pas intérêt et sera restituée dans les conditions de la loi.
+                        </p>
+                        <table class="o_loc_detail">
+                            <tr><th>Détail</th><th class="text-end">Montant</th></tr>
+                            <tr t-foreach="avis.ligne_ids" t-as="l">
+                                <td t-out="l.libelle"/>
+                                <td class="text-end" t-out="bail.euros(l.montant)"/>
+                            </tr>
+                            <tr class="o_loc_total"><td>Total reçu</td><td class="text-end" t-out="bail.euros(avis.montant_total)"/></tr>
+                        </table>
+                        <p class="mt-4">Paiement reçu le <t t-out="bail.date_fr(avis.date_paiement() or avis.date_echeance)"/>.</p>
+                        <p class="o_loc_petit mt-4">Quittance délivrée gratuitement (article 21 de la loi n° 89-462 du 6 juillet
+                            1989). Le paiement de cette échéance ne présume pas du paiement des échéances antérieures.</p>
+                        <div class="mt-5" style="margin-left: 55%;">
+                            <div>Le gestionnaire,</div>
+                            <div><b t-out="env.company.name"/></div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>
