@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_indice_list" model="ir.ui.view">
+        <field name="name">coproerp.locatif.indice.list</field>
+        <field name="model">coproerp.locatif.indice</field>
+        <field name="arch" type="xml">
+            <list editable="top">
+                <field name="type_indice"/>
+                <field name="annee"/>
+                <field name="trimestre"/>
+                <field name="valeur"/>
+                <field name="date_publication"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_indice_search" model="ir.ui.view">
+        <field name="name">coproerp.locatif.indice.search</field>
+        <field name="model">coproerp.locatif.indice</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <filter name="irl" string="IRL" domain="[('type_indice', '=', 'irl')]"/>
+                <filter name="ilc" string="ILC" domain="[('type_indice', '=', 'ilc')]"/>
+                <filter name="ilat" string="ILAT" domain="[('type_indice', '=', 'ilat')]"/>
+                <filter name="group_type" string="Indice" context="{'group_by': 'type_indice'}"/>
+            </search>
+        </field>
+    </record>
+    <record id="action_indice" model="ir.actions.act_window">
+        <field name="name">Indices (IRL, ILC, ILAT)</field>
+        <field name="res_model">coproerp.locatif.indice</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'search_default_group_type': 1}</field>
+        <field name="help" type="html">
+            <p>Saisissez chaque trimestre la valeur publiée par l'INSEE (insee.fr ou service-public.gouv.fr).</p>
+        </field>
+    </record>
+</odoo>

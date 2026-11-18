@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_regularisation_list" model="ir.ui.view">
+        <field name="name">coproerp.locatif.regularisation.list</field>
+        <field name="model">coproerp.locatif.regularisation</field>
+        <field name="arch" type="xml">
+            <list decoration-info="etat == 'brouillon'" decoration-muted="etat == 'annulee'">
+                <field name="name"/>
+                <field name="bail_id"/>
+                <field name="locataire_id"/>
+                <field name="date_debut"/>
+                <field name="date_fin"/>
+                <field name="provisions"/>
+                <field name="total_reel"/>
+                <field name="solde"/>
+                <field name="etat" widget="badge"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_regularisation_form" model="ir.ui.view">
+        <field name="name">coproerp.locatif.regularisation.form</field>
+        <field name="model">coproerp.locatif.regularisation</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_calculer_provisions" type="object" string="Recalculer les provisions"
+                            invisible="etat != 'brouillon'"/>
+                    <button name="action_reprendre_copropriete" type="object" string="Reprendre les charges de la copropriété"
+                            invisible="etat != 'brouillon'"/>
+                    <button name="action_imprimer" type="object" string="Décompte"/>
+                    <button name="action_valider" type="object" string="Valider" class="oe_highlight"
+                            invisible="etat != 'brouillon'"
+                            confirm="Le solde sera porté au compte du locataire (complément ou remboursement). Continuer ?"/>
+                    <button name="action_annuler" type="object" string="Annuler" invisible="etat != 'validee'"
+                            confirm="L'avis de régularisation sera annulé. Continuer ?"/>
+                    <field name="etat" widget="statusbar" statusbar_visible="brouillon,validee"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group string="Bail">
+                            <field name="bail_id" readonly="etat != 'brouillon'"/>
+                            <field name="locataire_id"/>
+                            <field name="bien_id"/>
+                            <label for="date_debut" string="Période"/>
+                            <div>du <field name="date_debut" class="oe_inline" readonly="etat != 'brouillon'"/>
+                                au <field name="date_fin" class="oe_inline" readonly="etat != 'brouillon'"/></div>
+                        </group>
+                        <group string="Résultat">
+                            <field name="provisions"/>
+                            <field name="total_reel"/>
+                            <field name="solde" decoration-danger="solde &gt; 0" decoration-success="solde &lt; 0"/>
+                            <field name="nouvelle_provision"/>
+                            <field name="appliquer_provision" readonly="etat != 'brouillon'"/>
+                            <field name="avis_id" invisible="not avis_id"/>
+                        </group>
+                    </group>
+                    <field name="ligne_ids" readonly="etat != 'brouillon'">
+                        <list editable="bottom">
+                            <field name="nature_id"/>
+                            <field name="libelle"/>
+                            <field name="montant" sum="Total"/>
+                            <field name="origine"/>
+                        </list>
+                    </field>
+                    <field name="note" placeholder="Mode de répartition entre locataires, observations…"/>
+                    <div class="text-muted">
+                        Solde positif : complément demandé au locataire ; négatif : trop-perçu porté à son crédit. Le
+                        décompte est adressé au locataire au moins un mois avant la régularisation, et les pièces
+                        justificatives sont tenues à sa disposition pendant six mois (art. 23 de la loi de 1989).
+                    </div>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="action_regularisation" model="ir.actions.act_window">
+        <field name="name">Régularisations des charges</field>
+        <field name="res_model">coproerp.locatif.regularisation</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

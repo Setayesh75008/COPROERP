@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_report_revision" model="ir.actions.report">
+        <field name="name">Lettre de révision du loyer</field>
+        <field name="model">coproerp.locatif.revision</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">coproerp_locatif_charges.report_revision</field>
+        <field name="report_file">coproerp_locatif_charges.report_revision</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+        <field name="binding_model_id" ref="model_coproerp_locatif_revision"/>
+        <field name="binding_type">report</field>
+    </record>
+    <record id="action_report_regularisation" model="ir.actions.report">
+        <field name="name">Décompte de régularisation des charges</field>
+        <field name="model">coproerp.locatif.regularisation</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">coproerp_locatif_charges.report_regularisation</field>
+        <field name="report_file">coproerp_locatif_charges.report_regularisation</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+        <field name="binding_model_id" ref="model_coproerp_locatif_regularisation"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

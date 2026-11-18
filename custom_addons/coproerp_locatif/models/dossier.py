@@ -118,6 +118,9 @@ class DossierMandants(models.Model):
         """
         self.ensure_one()
         company = self.company_id.sudo()
+        # Un montant négatif passe dans l'autre colonne (avoir, trop-perçu à rendre…).
+        lignes = [(cle, partner, max(debit, 0.0) + max(-credit, 0.0), max(credit, 0.0) + max(-debit, 0.0), nom)
+                  for cle, partner, debit, credit, nom in lignes]
         move = self.env["account.move"].sudo().with_company(company).create({
             "move_type": "entry", "journal_id": self.journal(journal).id, "date": date, "ref": libelle,
             "line_ids": [Command.create({

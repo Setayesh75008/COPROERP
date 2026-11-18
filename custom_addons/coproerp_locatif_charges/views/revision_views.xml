@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_revision_list" model="ir.ui.view">
+        <field name="name">coproerp.locatif.revision.list</field>
+        <field name="model">coproerp.locatif.revision</field>
+        <field name="arch" type="xml">
+            <list create="0" decoration-info="etat == 'proposee'" decoration-muted="etat == 'abandonnee'">
+                <field name="date_revision"/>
+                <field name="bail_id"/>
+                <field name="locataire_id"/>
+                <field name="type_indice"/>
+                <field name="loyer_ancien"/>
+                <field name="loyer_nouveau"/>
+                <field name="variation"/>
+                <field name="etat" widget="badge"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_revision_form" model="ir.ui.view">
+        <field name="name">coproerp.locatif.revision.form</field>
+        <field name="model">coproerp.locatif.revision</field>
+        <field name="arch" type="xml">
+            <form create="0">
+                <header>
+                    <button name="action_appliquer" type="object" string="Appliquer la révision" class="oe_highlight"
+                            invisible="etat != 'proposee'"
+                            confirm="Le nouveau loyer sera appliqué au bail. Continuer ?"/>
+                    <button name="action_imprimer" type="object" string="Lettre au locataire"/>
+                    <button name="action_abandonner" type="object" string="Abandonner" invisible="etat != 'proposee'"/>
+                    <field name="etat" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group string="Bail">
+                            <field name="bail_id" readonly="1"/>
+                            <field name="locataire_id"/>
+                            <field name="proprietaire_id"/>
+                            <field name="date_revision" readonly="1"/>
+                            <field name="date_effet" invisible="etat != 'appliquee'"/>
+                            <field name="rappel_id" invisible="not rappel_id"/>
+                        </group>
+                        <group string="Calcul">
+                            <field name="type_indice"/>
+                            <field name="trimestre"/>
+                            <label for="valeur_ancienne"/>
+                            <div><field name="valeur_ancienne" class="oe_inline"/> (<field name="annee_ancienne" class="oe_inline"/>)</div>
+                            <label for="valeur_nouvelle"/>
+                            <div><field name="valeur_nouvelle" class="oe_inline"/> (<field name="annee_nouvelle" class="oe_inline"/>)</div>
+                            <field name="loyer_ancien"/>
+                            <field name="loyer_nouveau"/>
+                            <field name="variation"/>
+                        </group>
+                    </group>
+                    <div class="text-muted">
+                        Nouveau loyer = loyer actuel × nouvel indice ÷ indice de référence du même trimestre. Pour un
+                        logement, la révision n'a pas d'effet rétroactif : le nouveau loyer s'applique à compter de
+                        la demande, qui doit intervenir dans l'année suivant la date de révision (art. 17-1 de la loi
+                        du 6 juillet 1989). Pour les autres baux, les loyers déjà appelés depuis la date de révision
+                        font l'objet d'un avis de rappel.
+                    </div>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="action_revision" model="ir.actions.act_window">
+        <field name="name">Révisions des loyers</field>
+        <field name="res_model">coproerp.locatif.revision</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_preparer_revisions" model="ir.actions.server">
+        <field name="name">Préparer les révisions du mois à venir</field>
+        <field name="model_id" ref="model_coproerp_locatif_revision"/>
+        <field name="state">code</field>
+        <field name="code">
+model.preparer_revisions()
+action = env["ir.actions.act_window"]._for_xml_id("coproerp_locatif_charges.action_revision")
+action["domain"] = [("etat", "=", "proposee")]
+        </field>
+    </record>
+</odoo>

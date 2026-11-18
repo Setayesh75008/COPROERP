@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <menuitem id="menu_locatif_revision_charges" name="Révisions et charges" parent="coproerp_locatif.menu_locatif_root"
+              sequence="35"/>
+    <menuitem id="menu_locatif_preparer_revisions" name="Préparer les révisions du mois à venir"
+              parent="menu_locatif_revision_charges" action="action_preparer_revisions" sequence="10"/>
+    <menuitem id="menu_locatif_revisions" name="Révisions des loyers" parent="menu_locatif_revision_charges"
+              action="action_revision" sequence="20"/>
+    <menuitem id="menu_locatif_regularisations" name="Régularisations des charges"
+              parent="menu_locatif_revision_charges" action="action_regularisation" sequence="30"/>
+    <menuitem id="menu_locatif_indices" name="Indices (IRL, ILC, ILAT)" parent="coproerp_locatif.menu_locatif_config"
+              action="action_indice" sequence="20"/>
+</odoo>

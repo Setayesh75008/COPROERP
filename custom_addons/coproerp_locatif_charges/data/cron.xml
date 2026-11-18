@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="cron_revisions" model="ir.cron">
+            <field name="name">Gestion locative : préparation des révisions de loyer</field>
+            <field name="model_id" ref="model_coproerp_locatif_revision"/>
+            <field name="state">code</field>
+            <field name="code">model.preparer_revisions()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+        </record>
+    </data>
+</odoo>

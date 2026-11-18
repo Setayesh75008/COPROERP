@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_bail_form_charges" model="ir.ui.view">
+        <field name="name">coproerp.locatif.bail.form.charges</field>
+        <field name="model">coproerp.locatif.bail</field>
+        <field name="inherit_id" ref="coproerp_locatif.view_bail_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_terminer']" position="before">
+                <button name="action_preparer_revision" type="object" string="Réviser le loyer"
+                        invisible="etat != 'en_cours' or indice == 'aucun'"/>
+                <button name="action_nouvelle_regularisation" type="object" string="Régulariser les charges"
+                        invisible="etat == 'brouillon' or mode_charges != 'provision'"/>
+            </xpath>
+            <xpath expr="//field[@name='trimestre_reference']" position="replace">
+                <field name="indice_trimestre" invisible="indice == 'aucun'"/>
+                <field name="indice_annee" invisible="indice == 'aucun'" options="{'format': false}"/>
+            </xpath>
+            <xpath expr="//field[@name='valeur_indice']" position="after">
+                <field name="date_prochaine_revision" invisible="indice == 'aucun'"/>
+                <field name="date_derniere_revision" invisible="not date_derniere_revision"/>
+            </xpath>
+            <xpath expr="//page[@name='relances']" position="after">
+                <page string="Révisions" name="revisions">
+                    <field name="revision_ids" readonly="1">
+                        <list>
+                            <field name="date_revision"/>
+                            <field name="loyer_ancien"/>
+                            <field name="loyer_nouveau"/>
+                            <field name="variation"/>
+                            <field name="etat" widget="badge"/>
+                        </list>
+                    </field>
+                </page>
+                <page string="Régularisations des charges" name="regularisations">
+                    <field name="regularisation_ids" readonly="1">
+                        <list>
+                            <field name="date_debut"/>
+                            <field name="date_fin"/>
+                            <field name="provisions"/>
+                            <field name="total_reel"/>
+                            <field name="solde"/>
+                            <field name="etat" widget="badge"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

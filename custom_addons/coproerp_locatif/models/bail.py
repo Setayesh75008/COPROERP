@@ -69,12 +69,12 @@ class Bail(models.Model):
                                   string="Garants (cautions)")
     date_signature = fields.Date(string="Signé le")
     date_debut = fields.Date(string="Prise d'effet", required=True, tracking=True)
-    duree_mois = fields.Integer(string="Durée (mois)", compute="_compute_regles", store=True, readonly=False)
+    duree_mois = fields.Integer(string="Durée (mois)", compute="_compute_duree", store=True, readonly=False)
     date_fin = fields.Date(string="Fin de la période en cours", compute="_compute_date_fin", store=True,
                            readonly=False)
     date_sortie = fields.Date(string="Date de sortie du locataire", tracking=True,
                               help="Les avis d'échéance ne sont plus émis après cette date ; le dernier est proratisé.")
-    preavis_mois = fields.Integer(string="Préavis du locataire (mois)", compute="_compute_regles", store=True,
+    preavis_mois = fields.Integer(string="Préavis du locataire (mois)", compute="_compute_preavis", store=True,
                                   readonly=False)
     loyer_hc = fields.Float(string="Loyer mensuel hors charges", digits=(16, 2), required=True, tracking=True)
     charges = fields.Float(string="Charges mensuelles", digits=(16, 2), tracking=True)
@@ -83,7 +83,7 @@ class Bail(models.Model):
                                     string="Charges", default="provision", required=True,
                                     help="Le forfait n'est possible qu'en meublé, en colocation à bail unique "
                                          "et hors habitation.")
-    tva = fields.Boolean(string="Loyer soumis à TVA", compute="_compute_regles", store=True, readonly=False)
+    tva = fields.Boolean(string="Loyer soumis à TVA", compute="_compute_tva", store=True, readonly=False)
     taux_tva = fields.Float(string="Taux de TVA (%)", default=20.0)
     depot_garantie = fields.Float(string="Dépôt de garantie", digits=(16, 2), tracking=True)
     depot_maximum = fields.Float(string="Plafond légal du dépôt", compute="_compute_depot_maximum")
@@ -93,7 +93,7 @@ class Bail(models.Model):
                              string="Terme", default="echoir", required=True)
     jour_paiement = fields.Integer(string="Jour de paiement", default=1,
                                    help="Pour un terme à échoir : jour du mois où le loyer est exigible.")
-    indice = fields.Selection(INDICES, string="Indice de révision", compute="_compute_regles", store=True,
+    indice = fields.Selection(INDICES, string="Indice de révision", compute="_compute_indice", store=True,
                               readonly=False)
     trimestre_reference = fields.Char(string="Trimestre de référence de l'indice", help="Par exemple « T2 2026 ».")
     valeur_indice = fields.Float(string="Valeur de l'indice de référence", digits=(8, 2))
@@ -116,20 +116,32 @@ class Bail(models.Model):
             if bail.etat == "brouillon" or not bail.mandat_id:
                 bail.mandat_id = bail.bien_id.mandat_id
 
-    @api.depends("type_bail", "bien_id.zone_tendue", "mandat_id.proprietaire_id.is_company")
-    def _compute_regles(self):
+    # Un calcul par champ : une valeur saisie pour l'un n'empêche pas le calcul des autres.
+    @api.depends("type_bail", "mandat_id.proprietaire_id.is_company")
+    def _compute_duree(self):
         for bail in self:
-            regle = TYPES_BAIL[bail.type_bail or "habitation_vide"]
-            duree = regle["duree"]
+            duree = TYPES_BAIL[bail.type_bail or "habitation_vide"]["duree"]
             if bail.type_bail == "habitation_vide" and bail.mandat_id.proprietaire_id.is_company:
                 duree = 72  # 6 ans quand le bailleur est une personne morale (art. 10 de la loi de 1989)
-            preavis = regle["preavis"]
+            bail.duree_mois = duree
+
+    @api.depends("type_bail", "bien_id.zone_tendue")
+    def _compute_preavis(self):
+        for bail in self:
+            preavis = TYPES_BAIL[bail.type_bail or "habitation_vide"]["preavis"]
             if bail.type_bail == "habitation_vide" and bail.bien_id.zone_tendue:
                 preavis = 1
-            bail.duree_mois = duree
             bail.preavis_mois = preavis
-            bail.indice = regle["indice"]
-            bail.tva = regle["tva"]
+
+    @api.depends("type_bail")
+    def _compute_indice(self):
+        for bail in self:
+            bail.indice = TYPES_BAIL[bail.type_bail or "habitation_vide"]["indice"]
+
+    @api.depends("type_bail")
+    def _compute_tva(self):
+        for bail in self:
+            bail.tva = TYPES_BAIL[bail.type_bail or "habitation_vide"]["tva"]
 
     @api.depends("date_debut", "duree_mois", "type_bail")
     def _compute_date_fin(self):

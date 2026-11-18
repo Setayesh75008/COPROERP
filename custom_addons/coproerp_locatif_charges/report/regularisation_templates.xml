@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="report_regularisation">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="reg">
+                <t t-set="bail" t-value="reg.bail_id.sudo()"/>
+                <t t-call="web.external_layout">
+                    <div class="page o_loc">
+                        <t t-call="coproerp_locatif.style_locatif"/>
+                        <t t-call="coproerp_locatif.entete_locataire">
+                            <t t-set="titre" t-value="'RÉGULARISATION DES CHARGES'"/>
+                            <t t-set="destinataire" t-value="bail.locataire_id"/>
+                            <t t-set="date_doc" t-value="reg.write_date.date()"/>
+                        </t>
+                        <p class="mt-4">Décompte des charges locatives de la période du
+                            <b t-out="bail.date_fr(reg.date_debut)"/> au <b t-out="bail.date_fr(reg.date_fin)"/>
+                            (article 23 de la loi n° 89-462 du 6 juillet 1989).</p>
+                        <table class="o_loc_detail">
+                            <tr><th>Nature des charges récupérables</th><th class="text-end">Montant</th></tr>
+                            <tr t-foreach="reg.ligne_ids" t-as="l">
+                                <td t-out="l.libelle"/>
+                                <td class="text-end" t-out="bail.euros(l.montant)"/>
+                            </tr>
+                            <tr class="o_loc_total"><td>Total des charges réelles</td><td class="text-end" t-out="bail.euros(reg.total_reel)"/></tr>
+                            <tr><td>Provisions appelées sur la période</td><td class="text-end" t-out="bail.euros(-reg.provisions)"/></tr>
+                            <tr class="o_loc_total">
+                                <td t-out="'Complément restant dû' if reg.solde &gt; 0 else ('Trop-perçu porté à votre crédit' if reg.solde &lt; 0 else 'Solde')"/>
+                                <td class="text-end" t-out="bail.euros(abs(reg.solde))"/></tr>
+                        </table>
+                        <p class="mt-3" t-if="reg.note" style="white-space: pre-line;"><b>Mode de répartition :</b> <t t-out="reg.note"/></p>
+                        <p class="mt-3" t-if="reg.appliquer_provision and reg.nouvelle_provision">À compter de la prochaine échéance,
+                            la provision mensuelle sur charges est fixée à <b t-out="bail.euros(reg.nouvelle_provision)"/>.</p>
+                        <p class="o_loc_petit mt-4">Les pièces justificatives (factures, contrats de fourniture, décompte de la
+                            copropriété) sont tenues à votre disposition pendant six mois à compter de l'envoi de ce
+                            décompte. Vous pouvez demander l'étalement du complément sur douze mois lorsque la
+                            régularisation n'a pas été faite avant le terme de l'année civile suivant celle de
+                            l'exigibilité des charges.</p>
+                        <div class="mt-4" style="margin-left: 55%;">
+                            <div>Pour le bailleur, le gestionnaire,</div>
+                            <div><b t-out="env.company.name"/></div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

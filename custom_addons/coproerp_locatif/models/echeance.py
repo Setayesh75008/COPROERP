@@ -63,6 +63,12 @@ class Echeance(models.Model):
             if echeance.move_id and compte:
                 lignes = echeance.move_id.sudo().line_ids.filtered(lambda l: l.account_id == compte)
                 restant = round(sum(lignes.mapped("amount_residual")), 2)
+            if echeance.montant_total < 0:
+                # Avis au crédit du locataire (trop-perçu de charges…) : soldé une fois imputé.
+                echeance.write({"etat": "payee" if abs(restant) <= 0.004 else "emise",
+                                "montant_paye": round(echeance.montant_total - restant, 2),
+                                "montant_restant": restant})
+                continue
             paye = round(echeance.montant_total - restant, 2)
             etat = "payee" if restant <= 0.004 else ("partielle" if paye > 0.004 else "emise")
             echeance.write({"etat": etat, "montant_paye": paye, "montant_restant": max(restant, 0.0)})

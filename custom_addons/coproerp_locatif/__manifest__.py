@@ -22,7 +22,7 @@ locataire (dossier comptable « Fonds des mandants »).
     "author": "SSB AVOCAT",
     "website": "https://www.ssb-avocat.fr",
     "category": "Real Estate",
-    "version": "19.0.1.0.0",
+    "version": "19.0.1.0.2",
     "license": "LGPL-3",
     "depends": [
         "mail",

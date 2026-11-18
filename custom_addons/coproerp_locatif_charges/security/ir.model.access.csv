@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_locatif_indice,locatif.indice,model_coproerp_locatif_indice,base.group_user,1,1,1,1
+access_locatif_revision,locatif.revision,model_coproerp_locatif_revision,base.group_user,1,1,1,1
+access_locatif_regularisation,locatif.regularisation,model_coproerp_locatif_regularisation,base.group_user,1,1,1,1
+access_locatif_regularisation_ligne,locatif.regularisation.ligne,model_coproerp_locatif_regularisation_ligne,base.group_user,1,1,1,1
