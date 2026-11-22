@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_reversement_list" model="ir.ui.view">
+        <field name="name">coproerp.locatif.reversement.list</field>
+        <field name="model">coproerp.locatif.reversement</field>
+        <field name="arch" type="xml">
+            <list decoration-info="etat == 'brouillon'" decoration-muted="etat == 'annule'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="type_reversement"/>
+                <field name="proprietaire_id"/>
+                <field name="iban"/>
+                <field name="montant" sum="Total"/>
+                <field name="etat" widget="badge"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_reversement_form" model="ir.ui.view">
+        <field name="name">coproerp.locatif.reversement.form</field>
+        <field name="model">coproerp.locatif.reversement</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_valider" type="object" string="Virement effectué" class="oe_highlight"
+                            invisible="etat != 'brouillon'"
+                            confirm="Confirmez que le virement a été passé à la banque : il sera enregistré au compte des mandants."/>
+                    <button name="action_annuler" type="object" string="Annuler" invisible="etat != 'valide'"
+                            confirm="Le virement sera contre-passé. Continuer ?"/>
+                    <field name="etat" widget="statusbar" statusbar_visible="brouillon,valide"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="type_reversement" readonly="etat != 'brouillon'"/>
+                            <field name="mandat_id" readonly="etat != 'brouillon'"
+                                   invisible="type_reversement != 'proprietaire'"
+                                   required="type_reversement == 'proprietaire'"/>
+                            <field name="proprietaire_id" invisible="type_reversement != 'proprietaire'"/>
+                            <field name="iban" readonly="etat != 'brouillon'"/>
+                            <field name="compte_rendu_id" invisible="not compte_rendu_id"/>
+                        </group>
+                        <group>
+                            <field name="date" readonly="etat != 'brouillon'"/>
+                            <field name="montant" readonly="etat != 'brouillon'"/>
+                            <field name="disponible" invisible="etat != 'brouillon'"/>
+                            <field name="move_id" invisible="not move_id"/>
+                        </group>
+                    </group>
+                    <div class="text-muted">
+                        Passez d'abord le virement depuis la banque des mandants, puis cliquez sur « Virement effectué ».
+                        Un propriétaire ne peut recevoir que les sommes réellement encaissées pour lui, déduction faite
+                        des honoraires et des factures payées.
+                    </div>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="action_reversement" model="ir.actions.act_window">
+        <field name="name">Virements</field>
+        <field name="res_model">coproerp.locatif.reversement</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_a_virer': 1}</field>
+    </record>
+    <record id="view_reversement_search" model="ir.ui.view">
+        <field name="name">coproerp.locatif.reversement.search</field>
+        <field name="model">coproerp.locatif.reversement</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="proprietaire_id"/>
+                <filter name="a_virer" string="À virer" domain="[('etat', '=', 'brouillon')]"/>
+                <filter name="vires" string="Virés" domain="[('etat', '=', 'valide')]"/>
+            </search>
+        </field>
+    </record>
+    <record id="action_preparer_honoraires" model="ir.actions.server">
+        <field name="name">Virer les honoraires au cabinet</field>
+        <field name="model_id" ref="model_coproerp_locatif_reversement"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_preparer_honoraires()</field>
+    </record>
+</odoo>

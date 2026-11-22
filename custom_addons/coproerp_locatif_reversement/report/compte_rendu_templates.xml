@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- En-tête : références à gauche, propriétaire destinataire à droite -->
+    <template id="entete_proprietaire">
+        <div class="row">
+            <div class="col-6">
+                <h3 t-out="titre"/>
+                <table class="o_loc_refs">
+                    <tr t-foreach="refs" t-as="r"><td t-out="r[0]"/><td t-out="r[1]"/></tr>
+                </table>
+            </div>
+            <div class="col-5 offset-1" style="margin-top: 14mm;">
+                <div><b t-out="destinataire.name"/></div>
+                <div t-if="destinataire.street" t-out="destinataire.street"/>
+                <div t-if="destinataire.street2" t-out="destinataire.street2"/>
+                <div><t t-out="destinataire.zip or ''"/> <t t-out="destinataire.city or ''"/></div>
+            </div>
+        </div>
+    </template>
+
+    <template id="report_compte_rendu">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="crg">
+                <t t-set="Bail" t-value="env['coproerp.locatif.bail']"/>
+                <t t-set="dossier" t-value="env['coproerp.locatif.mandat'].dossier_mandants()"/>
+                <t t-call="web.external_layout">
+                    <div class="page o_loc">
+                        <t t-call="coproerp_locatif.style_locatif"/>
+                        <t t-call="coproerp_locatif_reversement.entete_proprietaire">
+                            <t t-set="titre" t-value="'COMPTE RENDU DE GESTION'"/>
+                            <t t-set="destinataire" t-value="crg.proprietaire_id"/>
+                            <t t-set="refs" t-value="[('Numéro :', crg.name), ('Mandat :', crg.mandat_id.name),
+                                ('Période :', 'du %s au %s' % (Bail.date_fr(crg.date_debut), Bail.date_fr(crg.date_fin)))]"/>
+                        </t>
+
+                        <h5 class="mt-4">Vos locataires</h5>
+                        <table class="o_loc_detail">
+                            <tr><th>Bail</th><th>Locataire</th><th class="text-end">Appelé sur la période</th>
+                                <th class="text-end">Encaissé sur la période</th><th class="text-end">Reste dû à ce jour</th></tr>
+                            <tr t-foreach="crg.situation_baux()" t-as="s">
+                                <td><t t-out="s['bail'].name"/><br/><span class="o_loc_petit" t-out="s['bail'].bien_id.name"/></td>
+                                <td t-out="s['bail'].locataire_id.name"/>
+                                <td class="text-end" t-out="Bail.euros(s['appele'])"/>
+                                <td class="text-end" t-out="Bail.euros(s['encaisse'])"/>
+                                <td class="text-end"><b t-if="s['reste'] &gt; 0" t-out="Bail.euros(s['reste'])"/>
+                                    <span t-else="" t-out="Bail.euros(s['reste'])"/></td>
+                            </tr>
+                        </table>
+
+                        <h5 class="mt-4">Relevé de votre compte</h5>
+                        <table class="o_loc_detail">
+                            <tr><th>Date</th><th>Opération</th><th class="text-end">Débit</th><th class="text-end">Crédit</th></tr>
+                            <tr><td/><td>Solde au <t t-out="Bail.date_fr(crg.date_debut)"/></td>
+                                <td class="text-end" t-out="Bail.euros(-crg.solde_debut) if crg.solde_debut &lt; 0 else ''"/>
+                                <td class="text-end" t-out="Bail.euros(crg.solde_debut) if crg.solde_debut &gt;= 0 else ''"/></tr>
+                            <tr t-foreach="crg.lignes_releve()" t-as="l">
+                                <td t-out="Bail.date_fr(l.date)"/>
+                                <td t-out="l.name"/>
+                                <td class="text-end" t-out="Bail.euros(l.debit) if l.debit else ''"/>
+                                <td class="text-end" t-out="Bail.euros(l.credit) if l.credit else ''"/>
+                            </tr>
+                            <tr class="o_loc_total"><td/><td>Solde au <t t-out="Bail.date_fr(crg.date_fin)"/>
+                                <t t-out="'(en votre faveur)' if crg.solde_fin &gt;= 0 else '(à votre charge)'"/></td>
+                                <td class="text-end" t-out="Bail.euros(-crg.solde_fin) if crg.solde_fin &lt; 0 else ''"/>
+                                <td class="text-end" t-out="Bail.euros(crg.solde_fin) if crg.solde_fin &gt;= 0 else ''"/></tr>
+                        </table>
+
+                        <table class="o_loc_detail" style="width: 60%; margin-left: 40%;">
+                            <tr><th colspan="2">Récapitulatif de la période</th></tr>
+                            <tr><td>Loyers, charges et régularisations appelés</td><td class="text-end" t-out="Bail.euros(crg.total_quittancement)"/></tr>
+                            <tr><td>Honoraires de gestion (<t t-out="'%g' % crg.taux_honoraires"/> % TTC de <t t-out="Bail.euros(crg.base_honoraires)"/> encaissés)</td>
+                                <td class="text-end" t-out="Bail.euros(crg.total_honoraires)"/></tr>
+                            <tr t-if="crg.total_depenses"><td>Factures payées pour votre compte</td><td class="text-end" t-out="Bail.euros(crg.total_depenses)"/></tr>
+                            <tr t-if="crg.total_reversements"><td>Virements effectués</td><td class="text-end" t-out="Bail.euros(crg.total_reversements)"/></tr>
+                            <tr t-if="crg.total_autres"><td>Autres opérations</td><td class="text-end" t-out="Bail.euros(crg.total_autres)"/></tr>
+                            <tr><td>Loyers appelés non encore payés par les locataires</td><td class="text-end" t-out="Bail.euros(-crg.impayes)"/></tr>
+                            <tr t-if="crg.reserve"><td>Réserve conservée pour vos dépenses</td><td class="text-end" t-out="Bail.euros(-crg.reserve)"/></tr>
+                            <tr class="o_loc_total"><td>Disponible à vous virer</td><td class="text-end" t-out="Bail.euros(crg.disponible)"/></tr>
+                        </table>
+
+                        <t t-set="virements" t-value="crg.reversement_ids.filtered(lambda r: r.etat != 'annule')"/>
+                        <p class="mt-3" t-foreach="virements" t-as="v">
+                            Virement de <b t-out="Bail.euros(v.montant)"/>
+                            <t t-out="'effectué' if v.etat == 'valide' else 'ordonné'"/> le <t t-out="Bail.date_fr(v.date)"/>
+                            <t t-if="v.iban">sur le compte <t t-out="v.iban"/></t>.
+                        </p>
+                        <p class="mt-3" t-if="crg.note" style="white-space: pre-line;"><b>Observations :</b> <t t-out="crg.note"/></p>
+                        <p class="o_loc_petit mt-4">Débit : sommes portées à votre charge ; crédit : sommes qui vous
+                            reviennent. Les loyers sont portés à votre crédit dès leur appel ; ceux que les locataires
+                            n'ont pas encore payés ne vous sont pas virés. Les dépôts de garantie
+                            <t t-out="'sont conservés par le gestionnaire jusqu’à leur restitution' if crg.mandat_id.depot_conserve else 'vous sont reversés'"/>.
+                            Les pièces justificatives sont à votre disposition au cabinet.</p>
+                        <p class="o_loc_petit" t-if="dossier and (dossier.carte_professionnelle or dossier.garant_financier)">
+                            <t t-if="dossier.carte_professionnelle">Carte professionnelle : <t t-out="dossier.carte_professionnelle"/>. </t>
+                            <t t-if="dossier.garant_financier">Garantie financière : <t t-out="dossier.garant_financier"/>.</t></p>
+                        <div class="mt-4" style="margin-left: 55%;">
+                            <div>Le gestionnaire,</div>
+                            <div><b t-out="env.company.name"/></div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

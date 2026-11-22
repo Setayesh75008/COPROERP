@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_recap_fiscal_form" model="ir.ui.view">
+        <field name="name">coproerp.locatif.recap.fiscal.form</field>
+        <field name="model">coproerp.locatif.recap.fiscal</field>
+        <field name="arch" type="xml">
+            <form string="Récapitulatif des revenus fonciers">
+                <group>
+                    <field name="annee" options="{'format': false}"/>
+                    <field name="proprietaire_ids" widget="many2many_tags"/>
+                </group>
+                <div class="text-muted">
+                    Un récapitulatif par propriétaire : loyers encaissés dans l'année, charges, honoraires et factures
+                    payées par le cabinet, pour l'aider à remplir sa déclaration de revenus fonciers.
+                </div>
+                <footer>
+                    <button name="action_imprimer" type="object" string="Imprimer" class="oe_highlight"/>
+                    <button special="cancel" string="Fermer"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="action_recap_fiscal" model="ir.actions.act_window">
+        <field name="name">Récapitulatif annuel des revenus fonciers</field>
+        <field name="res_model">coproerp.locatif.recap.fiscal</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

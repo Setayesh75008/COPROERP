@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <menuitem id="menu_locatif_proprietaires_comptes" name="Comptes des propriétaires"
+              parent="coproerp_locatif.menu_locatif_root" sequence="37"/>
+    <menuitem id="menu_locatif_preparation_crg" name="Établir les comptes rendus de gestion"
+              parent="menu_locatif_proprietaires_comptes" action="action_preparation_crg" sequence="10"/>
+    <menuitem id="menu_locatif_compte_rendu" name="Comptes rendus de gestion" parent="menu_locatif_proprietaires_comptes"
+              action="action_compte_rendu" sequence="20"/>
+    <menuitem id="menu_locatif_depense" name="Factures payées pour les propriétaires"
+              parent="menu_locatif_proprietaires_comptes" action="action_depense" sequence="30"/>
+    <menuitem id="menu_locatif_reversement" name="Virements" parent="menu_locatif_proprietaires_comptes"
+              action="action_reversement" sequence="40"/>
+    <menuitem id="menu_locatif_honoraires_cabinet" name="Virer les honoraires au cabinet"
+              parent="menu_locatif_proprietaires_comptes" action="action_preparer_honoraires" sequence="50"/>
+    <menuitem id="menu_locatif_recap_fiscal" name="Récapitulatif annuel des revenus fonciers"
+              parent="menu_locatif_proprietaires_comptes" action="action_recap_fiscal" sequence="60"/>
+</odoo>

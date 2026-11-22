@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_preparation_crg_form" model="ir.ui.view">
+        <field name="name">coproerp.locatif.preparation.crg.form</field>
+        <field name="model">coproerp.locatif.preparation.crg</field>
+        <field name="arch" type="xml">
+            <form string="Comptes rendus de gestion">
+                <group>
+                    <field name="date_fin"/>
+                    <field name="mandat_ids" widget="many2many_tags"/>
+                    <field name="preparer_virements"/>
+                </group>
+                <div class="text-muted">
+                    Pour chaque mandat en cours, établit le compte rendu depuis le précédent jusqu'à la date choisie,
+                    prélève les honoraires sur les loyers encaissés et, si demandé, prépare le virement de la somme
+                    disponible. Les mandats à reversement trimestriel ne sont traités qu'en fin de trimestre (mars,
+                    juin, septembre, décembre). Les virements préparés restent « à virer » jusqu'à ce que vous les
+                    passiez à la banque.
+                </div>
+                <footer>
+                    <button name="action_preparer" type="object" string="Établir les comptes rendus" class="oe_highlight"/>
+                    <button special="cancel" string="Fermer"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="action_preparation_crg" model="ir.actions.act_window">
+        <field name="name">Établir les comptes rendus de gestion</field>
+        <field name="res_model">coproerp.locatif.preparation.crg</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

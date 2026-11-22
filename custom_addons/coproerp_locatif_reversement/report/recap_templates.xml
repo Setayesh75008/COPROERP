@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="report_recap_fiscal">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="proprietaire">
+                <t t-set="r" t-value="recaps[proprietaire.id]"/>
+                <t t-call="web.external_layout">
+                    <div class="page o_loc">
+                        <t t-call="coproerp_locatif.style_locatif"/>
+                        <t t-call="coproerp_locatif_reversement.entete_proprietaire">
+                            <t t-set="titre" t-value="'REVENUS FONCIERS %s' % annee"/>
+                            <t t-set="destinataire" t-value="proprietaire"/>
+                            <t t-set="refs" t-value="[('Objet :', 'récapitulatif annuel de gestion'), ('Année :', str(annee))]"/>
+                        </t>
+                        <p class="mt-4">Voici les sommes encaissées et payées pour votre compte du 1er janvier au
+                            31 décembre <t t-out="annee"/>, pour vous aider à remplir votre déclaration de revenus fonciers.</p>
+
+                        <h5 class="mt-3">Sommes encaissées</h5>
+                        <table class="o_loc_detail">
+                            <tr><th>Bail</th><th class="text-end">Loyers</th><th class="text-end">Provisions sur charges</th>
+                                <th class="text-end" t-if="r['commercial']">TVA</th><th class="text-end">Paiements d'avance</th></tr>
+                            <tr t-foreach="r['par_bail']" t-as="b">
+                                <td><t t-out="b['bail'].name"/> – <t t-out="b['bail'].bien_id.name"/><br/>
+                                    <span class="o_loc_petit" t-out="b['bail'].locataire_id.name"/></td>
+                                <td class="text-end" t-out="euros(b['loyers'])"/>
+                                <td class="text-end" t-out="euros(b['charges'])"/>
+                                <td class="text-end" t-if="r['commercial']" t-out="euros(b['tva'])"/>
+                                <td class="text-end" t-out="euros(b['avances'])"/>
+                            </tr>
+                            <tr class="o_loc_total"><td>Total</td>
+                                <td class="text-end" t-out="euros(r['totaux']['loyers'])"/>
+                                <td class="text-end" t-out="euros(r['totaux']['charges'])"/>
+                                <td class="text-end" t-if="r['commercial']" t-out="euros(r['totaux']['tva'])"/>
+                                <td class="text-end" t-out="euros(r['totaux']['avances'])"/></tr>
+                        </table>
+                        <p class="o_loc_petit">Loyers : loyers hors charges encaissés dans l'année, rappels de révision et
+                            forfaits de charges compris (un forfait de charges est un complément de loyer). Les provisions
+                            sur charges et les dépôts de garantie ne sont pas des loyers. Paiements d'avance : sommes reçues
+                            et pas encore affectées à une échéance.</p>
+
+                        <h5 class="mt-3">Sommes payées pour votre compte</h5>
+                        <table class="o_loc_detail">
+                            <tr><th>Nature</th><th class="text-end">Montant</th></tr>
+                            <tr><td>Honoraires de gestion du cabinet</td><td class="text-end" t-out="euros(r['honoraires'])"/></tr>
+                            <t t-foreach="r['depenses']" t-as="d">
+                                <tr><td><t t-out="d['libelle']"/>
+                                    <div class="o_loc_petit" t-foreach="d['detail']" t-as="f">
+                                        <t t-out="f.date_paiement.strftime('%d/%m/%Y')"/> – <t t-out="f.fournisseur_id.name"/> – <t t-out="f.libelle"/>
+                                        (<t t-out="euros(f.montant)"/>)</div></td>
+                                    <td class="text-end" t-out="euros(d['montant'])"/></tr>
+                            </t>
+                            <tr class="o_loc_total"><td>Total</td><td class="text-end" t-out="euros(r['honoraires'] + r['total_depenses'])"/></tr>
+                        </table>
+
+                        <div class="o_loc_cadre o_loc_petit">
+                            <b>Pour votre déclaration</b> (à vérifier sur la notice de l'année, votre situation pouvant
+                            appeler d'autres éléments : intérêts d'emprunt, dépenses payées par vous-même, régimes de
+                            défiscalisation…) :
+                            <ul class="mb-0">
+                                <li>au micro-foncier, seules comptent les recettes brutes (loyers), si elles ne dépassent pas
+                                    15 000 € dans l'année ;</li>
+                                <li>au régime réel (déclaration n° 2044), les honoraires de gestion sont des frais de gestion
+                                    déductibles, auxquels s'ajoute un forfait de 20 € par local
+                                    (<t t-out="r['nombre_locaux']"/> local(aux) géré(s) dans l'année) ; les travaux
+                                    d'agrandissement ou de construction ne sont pas déductibles ;</li>
+                                <li>les charges de copropriété ne sont déductibles que pour leur part non récupérable sur le
+                                    locataire ; la taxe d'enlèvement des ordures ménagères est récupérable sur lui ;</li>
+                                <li t-if="r['commercial']">la TVA collectée sur les loyers commerciaux relève de votre
+                                    déclaration de TVA, pas des revenus fonciers.</li>
+                            </ul>
+                        </div>
+                        <div class="mt-4" style="margin-left: 55%;">
+                            <div>Le gestionnaire,</div>
+                            <div><b t-out="env.company.name"/></div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

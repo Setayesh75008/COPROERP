@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_compte_rendu_list" model="ir.ui.view">
+        <field name="name">coproerp.locatif.compte_rendu.list</field>
+        <field name="model">coproerp.locatif.compte_rendu</field>
+        <field name="arch" type="xml">
+            <list decoration-info="etat == 'brouillon'" decoration-muted="etat == 'annule'">
+                <field name="name"/>
+                <field name="proprietaire_id"/>
+                <field name="mandat_id" optional="hide"/>
+                <field name="date_debut"/>
+                <field name="date_fin"/>
+                <field name="total_quittancement" optional="show"/>
+                <field name="honoraires" sum="Total"/>
+                <field name="solde_fin"/>
+                <field name="disponible"/>
+                <field name="etat" widget="badge"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_compte_rendu_form" model="ir.ui.view">
+        <field name="name">coproerp.locatif.compte_rendu.form</field>
+        <field name="model">coproerp.locatif.compte_rendu</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_calculer" type="object" string="Calculer" invisible="etat != 'brouillon'"/>
+                    <button name="action_valider" type="object" string="Valider et prélever les honoraires"
+                            class="oe_highlight" invisible="etat != 'brouillon'"
+                            confirm="Les honoraires de la période seront prélevés sur le compte du propriétaire. Continuer ?"/>
+                    <button name="action_preparer_virement" type="object" string="Préparer le virement"
+                            invisible="etat != 'valide'"/>
+                    <button name="action_imprimer" type="object" string="Compte rendu"/>
+                    <button name="action_annuler" type="object" string="Annuler" invisible="etat != 'valide'"
+                            confirm="Les honoraires prélevés seront rendus au propriétaire. Continuer ?"/>
+                    <field name="etat" widget="statusbar" statusbar_visible="brouillon,valide"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group string="Mandat">
+                            <field name="mandat_id" readonly="etat != 'brouillon'"/>
+                            <field name="proprietaire_id"/>
+                            <label for="date_debut" string="Période"/>
+                            <div>du <field name="date_debut" class="oe_inline" readonly="etat != 'brouillon'"/>
+                                au <field name="date_fin" class="oe_inline" readonly="etat != 'brouillon'"/></div>
+                        </group>
+                        <group string="Honoraires">
+                            <field name="base_honoraires"/>
+                            <field name="taux_honoraires"/>
+                            <field name="honoraires"/>
+                            <field name="move_honoraires_id" invisible="not move_honoraires_id"/>
+                        </group>
+                        <group string="Compte du propriétaire">
+                            <field name="solde_debut"/>
+                            <field name="total_quittancement"/>
+                            <field name="total_honoraires"/>
+                            <field name="total_depenses"/>
+                            <field name="total_reversements"/>
+                            <field name="total_autres" invisible="not total_autres"/>
+                            <field name="solde_fin"/>
+                        </group>
+                        <group string="À virer">
+                            <field name="impayes"/>
+                            <field name="reserve"/>
+                            <field name="disponible"/>
+                        </group>
+                    </group>
+                    <field name="reversement_ids" readonly="1">
+                        <list>
+                            <field name="name"/>
+                            <field name="date"/>
+                            <field name="iban"/>
+                            <field name="montant"/>
+                            <field name="etat" widget="badge"/>
+                        </list>
+                    </field>
+                    <field name="note" placeholder="Observations portées sur le compte rendu (travaux, congé reçu, retard d'un locataire…)"/>
+                    <div class="text-muted">
+                        Montants du compte du propriétaire : positifs au crédit (sommes qui lui reviennent), négatifs
+                        au débit. Les honoraires sont calculés sur les paiements reçus des locataires pendant la
+                        période, dépôts de garantie exclus.
+                    </div>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="action_compte_rendu" model="ir.actions.act_window">
+        <field name="name">Comptes rendus de gestion</field>
+        <field name="res_model">coproerp.locatif.compte_rendu</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

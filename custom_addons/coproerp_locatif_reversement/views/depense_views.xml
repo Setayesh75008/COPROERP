@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_depense_list" model="ir.ui.view">
+        <field name="name">coproerp.locatif.depense.list</field>
+        <field name="model">coproerp.locatif.depense</field>
+        <field name="arch" type="xml">
+            <list decoration-info="etat == 'brouillon'" decoration-muted="etat == 'annulee'">
+                <field name="name"/>
+                <field name="date_facture"/>
+                <field name="proprietaire_id"/>
+                <field name="bien_id" optional="show"/>
+                <field name="fournisseur_id"/>
+                <field name="categorie"/>
+                <field name="libelle"/>
+                <field name="montant" sum="Total"/>
+                <field name="date_paiement" optional="show"/>
+                <field name="etat" widget="badge"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_depense_form" model="ir.ui.view">
+        <field name="name">coproerp.locatif.depense.form</field>
+        <field name="model">coproerp.locatif.depense</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_payer" type="object" string="Payer sur les fonds du propriétaire"
+                            class="oe_highlight" invisible="etat != 'brouillon'"
+                            confirm="La facture sera réglée depuis le compte des mandants et imputée au compte du propriétaire. Continuer ?"/>
+                    <button name="action_annuler" type="object" string="Annuler le paiement" invisible="etat != 'payee'"
+                            confirm="Le paiement sera contre-passé et le compte du propriétaire recrédité. Continuer ?"/>
+                    <field name="etat" widget="statusbar" statusbar_visible="brouillon,payee"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group string="Pour le compte de">
+                            <field name="mandat_id" readonly="etat != 'brouillon'"/>
+                            <field name="proprietaire_id"/>
+                            <field name="bien_id" readonly="etat != 'brouillon'"/>
+                        </group>
+                        <group string="Facture">
+                            <field name="fournisseur_id" readonly="etat != 'brouillon'"/>
+                            <field name="categorie" readonly="etat != 'brouillon'"/>
+                            <field name="libelle" readonly="etat != 'brouillon'"/>
+                            <field name="reference_facture" readonly="etat != 'brouillon'"/>
+                            <field name="date_facture" readonly="etat != 'brouillon'"/>
+                            <field name="montant" readonly="etat != 'brouillon'"/>
+                            <field name="date_paiement" invisible="not date_paiement"/>
+                            <field name="piece" filename="piece_nom"/>
+                            <field name="piece_nom" invisible="1"/>
+                        </group>
+                    </group>
+                    <group invisible="not move_id">
+                        <field name="move_id"/>
+                        <field name="move_paiement_id"/>
+                    </group>
+                    <div class="text-muted">
+                        La facture n'est payée que si le propriétaire dispose des fonds nécessaires, loyers réellement
+                        encaissés : le compte d'un mandant ne peut jamais devenir débiteur. Elle figure sur son
+                        compte rendu de gestion et sur son récapitulatif annuel des revenus fonciers.
+                    </div>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="view_depense_search" model="ir.ui.view">
+        <field name="name">coproerp.locatif.depense.search</field>
+        <field name="model">coproerp.locatif.depense</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="proprietaire_id"/>
+                <field name="fournisseur_id"/>
+                <field name="bien_id"/>
+                <filter name="a_payer" string="À payer" domain="[('etat', '=', 'brouillon')]"/>
+                <filter name="payees" string="Payées" domain="[('etat', '=', 'payee')]"/>
+                <group>
+                    <filter name="par_proprietaire" string="Propriétaire" context="{'group_by': 'proprietaire_id'}"/>
+                    <filter name="par_categorie" string="Nature" context="{'group_by': 'categorie'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="action_depense" model="ir.actions.act_window">
+        <field name="name">Factures payées pour les propriétaires</field>
+        <field name="res_model">coproerp.locatif.depense</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

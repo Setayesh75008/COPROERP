@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_locatif_depense,locatif.depense,model_coproerp_locatif_depense,base.group_user,1,1,1,1
+access_locatif_compte_rendu,locatif.compte_rendu,model_coproerp_locatif_compte_rendu,base.group_user,1,1,1,1
+access_locatif_reversement,locatif.reversement,model_coproerp_locatif_reversement,base.group_user,1,1,1,1
+access_locatif_preparation_crg,locatif.preparation.crg,model_coproerp_locatif_preparation_crg,base.group_user,1,1,1,1
+access_locatif_recap_fiscal,locatif.recap.fiscal,model_coproerp_locatif_recap_fiscal,base.group_user,1,1,1,1
