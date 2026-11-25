@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="seq_etat_lieux" model="ir.sequence">
+            <field name="name">États des lieux</field>
+            <field name="code">coproerp.locatif.etat_lieux</field>
+            <field name="prefix">EDL/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_sortie" model="ir.sequence">
+            <field name="name">Décomptes de sortie</field>
+            <field name="code">coproerp.locatif.sortie</field>
+            <field name="prefix">SOR/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

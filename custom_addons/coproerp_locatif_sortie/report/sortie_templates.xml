@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="report_sortie">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="sortie">
+                <t t-set="bail" t-value="sortie.bail_id.sudo()"/>
+                <t t-call="web.external_layout">
+                    <div class="page o_loc">
+                        <t t-call="coproerp_locatif.style_locatif"/>
+                        <div class="row">
+                            <div class="col-6">
+                                <h3>DÉCOMPTE DE SORTIE</h3>
+                                <table class="o_loc_refs">
+                                    <tr><td>Bail :</td><td t-out="bail.name"/></tr>
+                                    <tr><td>Bien loué :</td><td><t t-out="bail.bien_id.name"/><br/><t t-out="bail.bien_id.adresse_complete()"/></td></tr>
+                                    <tr><td>Bailleur :</td><td t-out="bail.proprietaire_id.name"/></tr>
+                                    <tr><td>Clés remises le :</td><td t-out="bail.date_fr(sortie.date_remise_cles)"/></tr>
+                                </table>
+                            </div>
+                            <div class="col-5 offset-1" style="margin-top: 14mm;">
+                                <div><b t-out="bail.locataire_id.name"/></div>
+                                <div t-if="sortie.nouvelle_adresse" style="white-space: pre-line;" t-out="sortie.nouvelle_adresse"/>
+                                <t t-else="">
+                                    <div t-if="bail.locataire_id.street" t-out="bail.locataire_id.street"/>
+                                    <div><t t-out="bail.locataire_id.zip or ''"/> <t t-out="bail.locataire_id.city or ''"/></div>
+                                </t>
+                            </div>
+                        </div>
+                        <p class="mt-4">
+                            <t t-if="sortie.etat_lieux_id and sortie.etat_lieux_id.etat == 'signe'">
+                                L'état des lieux de sortie du <t t-out="bail.date_fr(sortie.etat_lieux_id.date)"/>
+                                <t t-out="'est conforme à' if sortie.conforme else 'n’est pas conforme à'"/> l'état des lieux d'entrée.
+                            </t>
+                            <t t-if="sortie.date_limite">Le dépôt de garantie est à restituer au plus tard le
+                                <b t-out="bail.date_fr(sortie.date_limite)"/>.</t>
+                        </p>
+                        <table class="o_loc_detail">
+                            <tr><th>Décompte</th><th class="text-end">Montant</th></tr>
+                            <tr><td>Dépôt de garantie versé</td><td class="text-end" t-out="bail.euros(sortie.depot_verse)"/></tr>
+                            <tr t-if="sortie.impayes"><td>Loyers et charges restant dus à la sortie</td>
+                                <td class="text-end" t-out="bail.euros(-sortie.impayes)"/></tr>
+                            <tr t-foreach="sortie.retenue_ids" t-as="r">
+                                <td><t t-out="r.libelle"/><br/><span class="o_loc_petit">Justificatif : <t t-out="r.justificatif or ''"/></span></td>
+                                <td class="text-end" t-out="bail.euros(-r.montant)"/></tr>
+                            <tr t-if="sortie.reserve"><td>Provision pour charges conservée jusqu'à l'approbation des
+                                comptes de la copropriété (20 % au plus du dépôt)</td>
+                                <td class="text-end" t-out="bail.euros(-sortie.reserve)"/></tr>
+                            <tr t-if="sortie.majoration"><td>Majoration pour restitution tardive
+                                (10 % du loyer × <t t-out="sortie.mois_retard"/> mois)</td>
+                                <td class="text-end" t-out="bail.euros(sortie.majoration)"/></tr>
+                            <tr class="o_loc_total" t-if="sortie.etat == 'restitue'">
+                                <td t-out="'Montant restitué le %s' % bail.date_fr(sortie.date_restitution) if sortie.montant_restitue else 'Montant restitué'"/>
+                                <td class="text-end" t-out="bail.euros(sortie.montant_restitue)"/></tr>
+                            <tr class="o_loc_total" t-elif="sortie.solde_final &gt;= 0">
+                                <td>Montant à vous restituer</td><td class="text-end" t-out="bail.euros(sortie.solde_final)"/></tr>
+                            <tr class="o_loc_total" t-if="sortie.solde_final &lt; 0">
+                                <td>Reste dû par le locataire</td><td class="text-end" t-out="bail.euros(-sortie.solde_final)"/></tr>
+                            <tr t-if="sortie.reserve_soldee and sortie.reserve"><td>Solde de la provision, après charges
+                                définitives de <t t-out="bail.euros(sortie.charges_definitives)"/></td>
+                                <td class="text-end" t-out="bail.euros(sortie.montant_restitue_reserve)"/></tr>
+                        </table>
+                        <p class="mt-3" t-if="sortie.solde_final &lt; 0">Nous vous remercions de bien vouloir régler
+                            cette somme dans les meilleurs délais.</p>
+                        <p class="o_loc_petit mt-4">Article 22 de la loi n° 89-462 du 6 juillet 1989 : le dépôt de garantie
+                            est restitué dans un délai d'un mois à compter de la remise des clés lorsque l'état des lieux de
+                            sortie est conforme à l'état des lieux d'entrée, de deux mois dans le cas contraire, déduction
+                            faite des sommes restant dues au bailleur et des sommes dont celui-ci pourrait être tenu en lieu et
+                            place du locataire, sous réserve qu'elles soient dûment justifiées. À défaut, le dépôt restant dû
+                            est majoré d'une somme égale à 10 % du loyer mensuel en principal pour chaque période mensuelle
+                            commencée en retard, sauf si le locataire n'a pas transmis l'adresse de son nouveau domicile.</p>
+                        <div class="mt-4" style="margin-left: 55%;">
+                            <div>Pour le bailleur, le gestionnaire,</div>
+                            <div><b t-out="env.company.name"/></div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

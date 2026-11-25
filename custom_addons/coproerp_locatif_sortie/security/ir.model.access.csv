@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_locatif_etat_lieux,locatif.etat_lieux,model_coproerp_locatif_etat_lieux,base.group_user,1,1,1,1
+access_locatif_etat_lieux_ligne,locatif.etat_lieux.ligne,model_coproerp_locatif_etat_lieux_ligne,base.group_user,1,1,1,1
+access_locatif_sortie,locatif.sortie,model_coproerp_locatif_sortie,base.group_user,1,1,1,1
+access_locatif_sortie_retenue,locatif.sortie.retenue,model_coproerp_locatif_sortie_retenue,base.group_user,1,1,1,1

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_bail_form_sortie" model="ir.ui.view">
+        <field name="name">coproerp.locatif.bail.form.sortie</field>
+        <field name="model">coproerp.locatif.bail</field>
+        <field name="inherit_id" ref="coproerp_locatif.view_bail_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/field[@name='etat']" position="before">
+                <button name="action_etat_des_lieux" type="object" string="États des lieux"
+                        invisible="etat == 'brouillon'"/>
+                <button name="action_sortie" type="object" string="Sortie du locataire"
+                        invisible="etat == 'brouillon'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

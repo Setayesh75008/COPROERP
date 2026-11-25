@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <menuitem id="menu_locatif_entrees_sorties" name="Entrées et sorties" parent="coproerp_locatif.menu_locatif_root"
+              sequence="25"/>
+    <menuitem id="menu_locatif_etat_lieux" name="États des lieux" parent="menu_locatif_entrees_sorties"
+              action="action_etat_lieux" sequence="10"/>
+    <menuitem id="menu_locatif_sortie" name="Sorties et dépôts de garantie" parent="menu_locatif_entrees_sorties"
+              action="action_sortie" sequence="20"/>
+</odoo>

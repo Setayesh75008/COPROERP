@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="report_etat_lieux">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="edl">
+                <t t-set="bail" t-value="edl.bail_id.sudo()"/>
+                <t t-set="sortie" t-value="edl.type_edl == 'sortie'"/>
+                <t t-call="web.external_layout">
+                    <div class="page o_loc">
+                        <t t-call="coproerp_locatif.style_locatif"/>
+                        <t t-call="coproerp_locatif.entete_locataire">
+                            <t t-set="titre" t-value="'ÉTAT DES LIEUX DE SORTIE' if sortie else 'ÉTAT DES LIEUX D’ENTRÉE'"/>
+                            <t t-set="destinataire" t-value="bail.locataire_id"/>
+                            <t t-set="date_doc" t-value="edl.date"/>
+                        </t>
+                        <p class="mt-3">Établi contradictoirement le <b t-out="bail.date_fr(edl.date)"/> entre
+                            <b t-out="edl.representant or ''"/>, pour le bailleur <t t-out="bail.proprietaire_id.name"/>, et
+                            <b t-out="edl.presents or ', '.join(bail.locataires().mapped('name'))"/>, locataire(s)
+                            (article 3-2 de la loi n° 89-462 du 6 juillet 1989).</p>
+
+                        <table class="o_loc_detail">
+                            <tr><th>Relevés</th><th>Eau froide</th><th>Eau chaude</th><th>Électricité</th><th>Gaz</th></tr>
+                            <tr><td>Index</td><td t-out="edl.eau_froide or '–'"/><td t-out="edl.eau_chaude or '–'"/>
+                                <td t-out="edl.electricite or '–'"/><td t-out="edl.gaz or '–'"/></tr>
+                        </table>
+                        <p class="mt-2" t-if="edl.chauffage"><b>Chauffage et eau chaude :</b> <t t-out="edl.chauffage"/></p>
+                        <p t-if="edl.cles" style="white-space: pre-line;"><b>Clés remises :</b> <t t-out="edl.cles"/></p>
+
+                        <t t-foreach="edl.pieces()" t-as="groupe">
+                            <table class="o_loc_detail" style="page-break-inside: avoid;">
+                                <tr><th style="width: 30%;" t-out="groupe[0]"/>
+                                    <th t-if="sortie">À l'entrée</th>
+                                    <th t-out="'À la sortie' if sortie else 'État'"/><th>Observations</th></tr>
+                                <tr t-foreach="groupe[1]" t-as="l">
+                                    <td t-out="l.element"/>
+                                    <td t-if="sortie"><t t-out="l.libelle(l.etat_entree)"/>
+                                        <span t-if="l.observations_entree" class="o_loc_petit"> – <t t-out="l.observations_entree"/></span></td>
+                                    <td><b t-if="l.degradation" t-out="l.libelle(l.etat)"/>
+                                        <span t-else="" t-out="l.libelle(l.etat)"/></td>
+                                    <td t-out="l.observations or ''"/>
+                                </tr>
+                            </table>
+                        </t>
+                        <p class="mt-3" t-if="edl.observations" style="white-space: pre-line;"><b>Observations :</b>
+                            <t t-out="edl.observations"/></p>
+                        <p class="mt-3" t-if="sortie">
+                            <t t-if="edl.nombre_degradations">Éléments en moins bon état qu'à l'entrée :
+                                <b t-out="edl.nombre_degradations"/>. L'usure normale due au temps n'est pas à la charge
+                                du locataire.</t>
+                            <t t-else="">Aucun élément n'est en moins bon état qu'à l'entrée.</t>
+                        </p>
+                        <p class="o_loc_petit mt-3" t-if="not sortie">Le locataire peut demander au bailleur de compléter
+                            le présent état des lieux dans un délai de dix jours à compter de son établissement, et, pour
+                            les éléments de chauffage, pendant le premier mois de la période de chauffe.</p>
+                        <div class="row mt-4" style="page-break-inside: avoid;">
+                            <div class="col-6">Pour le bailleur,<br/><t t-out="edl.representant or ''"/><br/><br/><br/>Signature</div>
+                            <div class="col-6">Le(s) locataire(s),<br/><t t-out="edl.presents or bail.locataire_id.name"/><br/><br/><br/>Signature</div>
+                        </div>
+                        <p class="o_loc_petit mt-3">Fait en autant d'exemplaires que de parties.</p>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

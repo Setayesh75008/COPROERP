@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_sortie_list" model="ir.ui.view">
+        <field name="name">coproerp.locatif.sortie.list</field>
+        <field name="model">coproerp.locatif.sortie</field>
+        <field name="arch" type="xml">
+            <list decoration-info="etat == 'brouillon'" decoration-danger="en_retard"
+                  decoration-muted="etat == 'annule'">
+                <field name="en_retard" column_invisible="1"/>
+                <field name="name"/>
+                <field name="bail_id"/>
+                <field name="locataire_id"/>
+                <field name="date_remise_cles"/>
+                <field name="date_limite"/>
+                <field name="solde_final"/>
+                <field name="date_restitution" optional="show"/>
+                <field name="etat" widget="badge"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_sortie_form" model="ir.ui.view">
+        <field name="name">coproerp.locatif.sortie.form</field>
+        <field name="model">coproerp.locatif.sortie</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_arreter" type="object" string="Arrêter le décompte" class="oe_highlight"
+                            invisible="etat != 'brouillon'"
+                            confirm="Le bail sera clos, les retenues portées au compte du locataire et le dépôt de garantie imputé sur ce qu'il doit. Continuer ?"/>
+                    <button name="action_restituer" type="object" string="Restitution effectuée" class="oe_highlight"
+                            invisible="etat != 'arrete'"
+                            confirm="Confirmez que le virement au locataire a été passé à la banque aujourd'hui. La majoration éventuelle pour retard sera calculée à cette date."/>
+                    <button name="action_solder_reserve" type="object" string="Solder la provision pour charges"
+                            invisible="etat != 'restitue' or reserve == 0 or reserve_soldee"
+                            confirm="Les charges définitives seront portées au compte du locataire et le solde de la provision lui sera restitué. Continuer ?"/>
+                    <button name="action_imprimer" type="object" string="Décompte"/>
+                    <button name="action_annuler" type="object" string="Annuler" invisible="etat != 'arrete'"
+                            confirm="Les écritures du décompte seront contre-passées. Continuer ?"/>
+                    <field name="etat" widget="statusbar" statusbar_visible="brouillon,arrete,restitue"/>
+                </header>
+                <sheet>
+                    <div class="alert alert-danger" role="alert"
+                         invisible="not en_retard">
+                        Le délai légal de restitution est dépassé : une majoration de 10 % du loyer mensuel est due par
+                        mois commencé de retard, si le locataire a donné sa nouvelle adresse.
+                    </div>
+                    <field name="en_retard" invisible="1"/>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group string="Départ">
+                            <field name="bail_id" readonly="etat != 'brouillon'"/>
+                            <field name="locataire_id"/>
+                            <field name="bien_id"/>
+                            <field name="date_conge" readonly="etat != 'brouillon'"/>
+                            <field name="date_fin_preavis" invisible="not date_conge"/>
+                            <field name="date_remise_cles" readonly="etat != 'brouillon'"/>
+                            <field name="nouvelle_adresse" readonly="etat == 'annule'"/>
+                        </group>
+                        <group string="Délai de restitution">
+                            <field name="etat_lieux_id" readonly="etat != 'brouillon'"/>
+                            <field name="conforme"/>
+                            <field name="regime_legal" invisible="1"/>
+                            <field name="delai_mois" readonly="regime_legal or etat != 'brouillon'"/>
+                            <field name="date_limite"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Dépôt de garantie">
+                            <field name="depot_conserve"/>
+                            <field name="depot_verse"/>
+                            <field name="immeuble_copropriete" readonly="etat != 'brouillon'"/>
+                            <field name="reserve" invisible="not immeuble_copropriete" readonly="etat != 'brouillon'"/>
+                        </group>
+                        <group string="Décompte" invisible="etat == 'brouillon'">
+                            <field name="impayes"/>
+                            <field name="total_retenues"/>
+                            <field name="solde_final" decoration-success="solde_final &gt; 0" decoration-danger="solde_final &lt; 0"/>
+                            <field name="avis_retenues_id" invisible="not avis_retenues_id"/>
+                            <field name="date_restitution" invisible="not date_restitution"/>
+                            <field name="mois_retard" invisible="not mois_retard"/>
+                            <field name="majoration" invisible="not majoration"/>
+                            <field name="montant_restitue" invisible="etat != 'restitue'"/>
+                        </group>
+                    </group>
+                    <group string="Provision pour charges" invisible="etat != 'restitue' or reserve == 0">
+                        <field name="date_approbation" readonly="reserve_soldee"/>
+                        <field name="charges_definitives" readonly="reserve_soldee"/>
+                        <field name="reserve_soldee"/>
+                        <field name="montant_restitue_reserve" invisible="not reserve_soldee"/>
+                    </group>
+                    <field name="retenue_ids" readonly="etat != 'brouillon'">
+                        <list editable="bottom">
+                            <field name="nature"/>
+                            <field name="libelle"/>
+                            <field name="justificatif"/>
+                            <field name="montant" sum="Total"/>
+                        </list>
+                    </field>
+                    <div class="text-muted">
+                        Le dépôt de garantie est restitué dans le mois de la remise des clés si l'état des lieux de sortie
+                        est conforme à celui d'entrée, dans les deux mois sinon, déduction faite des sommes restant dues et
+                        des retenues justifiées ; l'usure normale n'est pas retenue. En copropriété, 20 % au plus peuvent
+                        être conservés jusqu'à l'approbation des comptes de l'immeuble, le solde étant restitué dans le
+                        mois qui suit (art. 22 de la loi du 6 juillet 1989).
+                    </div>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="action_sortie" model="ir.actions.act_window">
+        <field name="name">Sorties et dépôts de garantie</field>
+        <field name="res_model">coproerp.locatif.sortie</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

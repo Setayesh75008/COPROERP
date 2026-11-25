@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_etat_lieux_list" model="ir.ui.view">
+        <field name="name">coproerp.locatif.etat_lieux.list</field>
+        <field name="model">coproerp.locatif.etat_lieux</field>
+        <field name="arch" type="xml">
+            <list decoration-info="etat == 'brouillon'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="type_edl"/>
+                <field name="bail_id"/>
+                <field name="bien_id"/>
+                <field name="locataire_id"/>
+                <field name="nombre_degradations" optional="show"/>
+                <field name="etat" widget="badge"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_etat_lieux_form" model="ir.ui.view">
+        <field name="name">coproerp.locatif.etat_lieux.form</field>
+        <field name="model">coproerp.locatif.etat_lieux</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_pieces_types" type="object" string="Ajouter les pièces types"
+                            invisible="etat != 'brouillon' or type_edl != 'entree' or ligne_ids"/>
+                    <button name="action_reprendre_entree" type="object" string="Reprendre l'état des lieux d'entrée"
+                            invisible="etat != 'brouillon' or type_edl != 'sortie'"
+                            confirm="Les pièces saisies seront remplacées par celles de l'état des lieux d'entrée. Continuer ?"/>
+                    <button name="action_imprimer" type="object" string="Imprimer"/>
+                    <button name="action_signer" type="object" string="Signé par les parties" class="oe_highlight"
+                            invisible="etat != 'brouillon'"/>
+                    <button name="action_remettre_brouillon" type="object" string="Corriger" invisible="etat != 'signe'"/>
+                    <field name="etat" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="alert alert-warning" role="alert" invisible="type_edl != 'sortie' or nombre_degradations == 0">
+                        <field name="nombre_degradations" class="oe_inline"/> élément(s) en moins bon état qu'à l'entrée :
+                        le dépôt de garantie doit être restitué dans les deux mois.
+                    </div>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="type_edl" readonly="etat != 'brouillon'"/>
+                            <field name="bail_id" readonly="etat != 'brouillon'"/>
+                            <field name="bien_id"/>
+                            <field name="locataire_id"/>
+                            <field name="entree_id" invisible="type_edl != 'sortie'"/>
+                        </group>
+                        <group>
+                            <field name="date" readonly="etat != 'brouillon'"/>
+                            <field name="representant" readonly="etat != 'brouillon'"/>
+                            <field name="presents" readonly="etat != 'brouillon'"/>
+                            <field name="conforme" invisible="type_edl != 'sortie'"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Pièces" name="pieces">
+                            <field name="ligne_ids" readonly="etat != 'brouillon'">
+                                <list editable="bottom" decoration-danger="degradation">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="piece"/>
+                                    <field name="element"/>
+                                    <field name="etat_entree" column_invisible="parent.type_edl != 'sortie'"/>
+                                    <field name="etat"/>
+                                    <field name="observations"/>
+                                    <field name="degradation" column_invisible="parent.type_edl != 'sortie'"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Compteurs et clés" name="compteurs">
+                            <group>
+                                <group string="Relevés">
+                                    <field name="eau_froide" readonly="etat != 'brouillon'"/>
+                                    <field name="eau_chaude" readonly="etat != 'brouillon'"/>
+                                    <field name="electricite" readonly="etat != 'brouillon'"/>
+                                    <field name="gaz" readonly="etat != 'brouillon'"/>
+                                    <field name="chauffage" readonly="etat != 'brouillon'"/>
+                                </group>
+                                <group string="Clés">
+                                    <field name="cles" nolabel="1" colspan="2" readonly="etat != 'brouillon'"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Observations" name="observations">
+                            <field name="observations" readonly="etat != 'brouillon'"/>
+                        </page>
+                    </notebook>
+                    <div class="text-muted">
+                        L'état des lieux est établi contradictoirement et signé par les deux parties, chacune en gardant
+                        un exemplaire. À l'entrée, le locataire peut demander à le compléter dans les dix jours (et pour
+                        le chauffage, pendant le premier mois de la période de chauffe). L'usure normale (vétusté) n'est
+                        pas à la charge du locataire.
+                    </div>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="action_etat_lieux" model="ir.actions.act_window">
+        <field name="name">États des lieux</field>
+        <field name="res_model">coproerp.locatif.etat_lieux</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>
